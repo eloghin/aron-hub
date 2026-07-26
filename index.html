@@ -101,6 +101,9 @@ h1,h2,h3{margin:0}
 .opt.correct .lt{background:var(--good);color:#fff}
 .opt.wrong .lt{background:var(--bad);color:#fff}
 .opt:disabled{cursor:default}
+.hint{color:var(--muted);font-size:.86rem;text-align:center}
+.opt.sel{border-color:var(--mate);background:#eef3ff}
+.opt.sel .lt{background:var(--mate);color:#fff}
 .numin{width:100%;padding:16px;border-radius:14px;border:2px solid var(--line);font-size:20px;
   font-weight:700;text-align:center;outline:none}
 .numin:focus{border-color:var(--mate)}
@@ -223,6 +226,14 @@ h1,h2,h3{margin:0}
       </div>
       <div class="stat streak"><div class="big" id="aStreak">0🔥</div><div class="lab">ZILE LA RÂND</div></div>
     </div>
+    <div class="card" style="padding:14px 16px;margin-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <b style="font-size:.95rem">Recapitulare de vară</b>
+        <span class="small" id="aCovLab">0 din 0</span>
+      </div>
+      <div class="xpbar" style="margin-top:8px"><i id="aCovBar" style="width:0%"></i></div>
+      <div class="small" id="aCovSub" style="margin-top:6px"></div>
+    </div>
     <div class="section-h">De rezolvat</div>
     <div id="aronTodo"></div>
     <div class="section-h">Antrenament liber</div>
@@ -271,6 +282,8 @@ h1,h2,h3{margin:0}
     <div class="card" style="padding:8px 16px" id="pTopics"></div>
     <div class="section-h">Activitate recentă</div>
     <div class="card" style="padding:8px 16px" id="pRecent"></div>
+    <div style="margin-top:16px"><button class="btn" id="pExport" onclick="copyReport()">📋 Copiază raportul pentru Claude</button></div>
+    <div class="hint" style="margin-top:6px">Lipește-l în conversație ca să primești analiza și testele următoare.</div>
   </div>
 
   <div id="fatal" class="hidden"></div>
@@ -294,11 +307,16 @@ var HubLogic=(function(){
   function unlockedCount(s,c,t){var d=daysBetween(s,t);if(d<0)return 0;return Math.floor(d/c)+1;}
   function isUnlocked(test,uc){return test.release_order<=uc;}
   function normalizeNum(s){return String(s==null?"":s).replace(/\s/g,"").replace(",",".").trim().toLowerCase();}
+  function seqOK(g,n){if(!g||g.length!==n)return false;for(var i=0;i<n;i++){if(Number(g[i])!==i)return false;}return true;}
   function gradeQuestion(q,g){if(q.type==="choice")return Number(g)===Number(q.correct);
     if(q.type==="truefalse")return Boolean(g)===Boolean(q.answer);
-    if(q.type==="number")return normalizeNum(g)===normalizeNum(q.answer);return false;}
+    if(q.type==="number")return normalizeNum(g)===normalizeNum(q.answer);
+    if(q.type==="flash")return g===true;
+    if(q.type==="match")return seqOK(g,(q.pairs||[]).length);
+    if(q.type==="order")return seqOK(g,(q.items||[]).length);return false;}
   function scoreAttempt(test,answers){var qs=test.questions,c=0;for(var i=0;i<qs.length;i++){if(gradeQuestion(qs[i],answers[i]))c++;}
-    var max=qs.length;return{score:c,max:max,xp:c*XP_PER_CORRECT+(c===max?XP_PERFECT_BONUS:0)};}
+    var max=qs.length,m=Number(test.xp_mult)||1;
+    return{score:c,max:max,xp:(c*XP_PER_CORRECT+(c===max?XP_PERFECT_BONUS:0))*m};}
   function firstAttempts(a){var b={};a.slice().sort(function(x,y){return new Date(x.created_at)-new Date(y.created_at);})
     .forEach(function(x){if(!b[x.test_id])b[x.test_id]=x;});return b;}
   function totalXP(a){var f=firstAttempts(a),s=0;Object.keys(f).forEach(function(k){s+=(f[k].xp||0);});return s;}
@@ -389,7 +407,11 @@ function renderPin(){$("pinDisplay").textContent=pin.val.replace(/./g,"●");}
 function pinPress(d){
   if(pin.val.length>=6)return; pin.val+=d; renderPin();
   if(pin.val.length===String(pin.need).length){
-    if(pin.val===String(pin.need)){ session.role=pin.role; pin.role==="aron"?showAron():showParent(); }
+    if(pin.val===String(pin.need)){ session.role=pin.role;
+      try{ pin.role==="aron"?showAron():showParent(); }
+      catch(e){ // o eroare de afișare nu trebuie să pară „PIN greșit”
+        $("pinMsg").innerHTML='<span style="color:var(--bad);font-weight:700">PIN corect, dar ecranul nu s-a putut încărca.</span><br><span class="small">'+esc(e.message||e)+'</span>';
+        pin.val=""; setTimeout(renderPin,120); } }
     else{ $("pinMsg").innerHTML='<span style="color:var(--bad);font-weight:700">PIN greșit, mai încearcă</span>';
       pin.val=""; setTimeout(renderPin,120); }
   }
@@ -415,12 +437,30 @@ function showAron(){
   // teste deblocate nerezolvate primele, apoi cele blocate
   $("aronTodo").innerHTML=todo.join("")||'<div class="notice small">Nimic de rezolvat acum — bravo! 🎉</div>';
   $("aronDone").innerHTML=done.join("")||'<div class="notice small">Aici apar testele deja rezolvate, pentru antrenament.</div>';
+  // progres pe termen lung: raportat la ÎNTREG planul (până la plan_end), nu la câte teste
+  // sunt încărcate momentan în bază — altfel ținta ar tot crește și l-ar induce în eroare.
+  var totalUnits = S.settings.plan_end
+    ? HubLogic.unlockedCount(S.settings.start_date, S.settings.cadence_days, S.settings.plan_end)
+    : S.tests.length;
+  var doneUnits=Object.keys(doneIds).length;
+  if(doneUnits>totalUnits)totalUnits=doneUnits;
+  var covPct=totalUnits?Math.round(doneUnits/totalUnits*100):0;
+  $("aCovLab").textContent=doneUnits+" din "+totalUnits;
+  $("aCovBar").style.width=covPct+"%";
+  $("aCovSub").textContent=doneUnits>=totalUnits?"Ai terminat toată recapitularea. 🏆"
+    :("Mai ai "+(totalUnits-doneUnits)+" până pe "+roDate(S.settings.plan_end||todayStr())+", când începe școala.");
   var nextDate=HubLogic.addDays(S.settings.start_date, uc*S.settings.cadence_days);
   var remaining=S.tests.length-uc;
   $("aronLockInfo").textContent = remaining>0 ? ("Următorul test se deblochează pe "+roDate(nextDate)) : "Ai deblocat toate testele disponibile.";
   show("screenAron");
 }
 function roDate(d){var m=["ian","feb","mar","apr","mai","iun","iul","aug","sep","oct","nov","dec"];
+  if(!(d instanceof Date)){ // acceptă și text „2026-09-06” venit din baza de date
+    var p=String(d).slice(0,10).split("-");
+    if(p.length!==3)return String(d);
+    d=new Date(Number(p[0]),Number(p[1])-1,Number(p[2]));
+    if(isNaN(d.getTime()))return "";
+  }
   return d.getDate()+" "+m[d.getMonth()];}
 function renderTestCard(t,best){
   var cls=t.subject==="mate"?"mate":"rom", ico=t.subject==="mate"?"🔢":"✏️";
@@ -441,20 +481,45 @@ function renderLockedCard(t,uc){
 /* ---- QUIZ ---- */
 function startQuiz(testId){
   var t=S.tests.find(function(x){return x.id===testId;});if(!t)return;
-  quiz={test:t,i:0,answers:[],given:null,answered:false};
+  var qu=[];for(var k=0;k<t.questions.length;k++)qu.push(k);
+  quiz={test:t,queue:qu,pos:0,answers:[],given:null,answered:false,requeued:{},sel:null,picked:[]};
   renderQuestion(); show("screenQuiz");
 }
+function curIdx(){return quiz.queue[quiz.pos];}
+function shuffled(n,seed){var a=[],i;for(i=0;i<n;i++)a.push(i);
+  for(i=n-1;i>0;i--){seed=(seed*1103515245+12345)%2147483648;var j=seed%(i+1);var t=a[i];a[i]=a[j];a[j]=t;}return a;}
 function renderQuestion(){
-  var t=quiz.test,q=t.questions[quiz.i],cls=t.subject==="mate"?"mate":"rom";
+  var t=quiz.test,q=t.questions[curIdx()],cls=t.subject==="mate"?"mate":"rom";
   $("qProg").className="qprog"+(cls==="rom"?" rom":"");
-  $("qProg").firstElementChild.style.width=Math.round((quiz.i)/t.questions.length*100)+"%";
-  $("qCount").textContent=(quiz.i+1)+"/"+t.questions.length;
+  $("qProg").firstElementChild.style.width=Math.round((quiz.pos)/quiz.queue.length*100)+"%";
+  $("qCount").textContent=(quiz.pos+1)+"/"+quiz.queue.length;
   $("qTopic").className="pill "+cls; $("qTopic").textContent=(t.subject==="mate"?"🔢 ":"✏️ ")+t.topic;
   $("qText").textContent=q.q;
-  quiz.answered=false; quiz.given=null;
+  quiz.answered=false; quiz.given=null; quiz.sel=null; quiz.picked=[];
   $("qFeedback").classList.add("hidden"); $("qNext").classList.add("hidden");
   var body="";
-  if(q.type==="choice"){
+  if(q.type==="flash"){
+    body='<div class="opts"><button class="opt" id="flashReveal" onclick="flashReveal()">'+
+      '<span>👀 Arată răspunsul</span></button></div>'+
+      '<div id="flashBack" class="hidden"><div class="feedback ok" style="margin-top:10px"><b>Răspuns</b>'+esc(q.answer||"")+'</div>'+
+      '<div class="opts" style="margin-top:10px">'+
+      '<button class="opt" onclick="flashAnswer(true)"><span class="lt">✓</span><span>Am știut</span></button>'+
+      '<button class="opt" onclick="flashAnswer(false)"><span class="lt">✗</span><span>N-am știut</span></button></div></div>';
+  }else if(q.type==="match"){
+    var ordR=shuffled(q.pairs.length,curIdx()+7);
+    quiz.rmap=ordR;
+    body='<div class="opts" id="matchL">'+q.pairs.map(function(p,idx){
+      return '<button class="opt" id="ml'+idx+'" onclick="matchPickL('+idx+')"><span class="lt">'+(idx+1)+'</span><span>'+esc(p[0])+'</span></button>';
+    }).join("")+'</div><div style="height:8px"></div><div class="opts" id="matchR">'+ordR.map(function(orig,pos){
+      return '<button class="opt" id="mr'+pos+'" onclick="matchPickR('+pos+')"><span class="lt">'+String.fromCharCode(65+pos)+'</span><span>'+esc(q.pairs[orig][1])+'</span></button>';
+    }).join("")+'</div>';
+  }else if(q.type==="order"){
+    var ordO=shuffled(q.items.length,curIdx()+13);
+    quiz.omap=ordO;
+    body='<div class="opts" id="orderList">'+ordO.map(function(orig,pos){
+      return '<button class="opt" id="oi'+pos+'" onclick="orderPick('+pos+')"><span class="lt">·</span><span>'+esc(q.items[orig])+'</span></button>';
+    }).join("")+'</div><div style="margin-top:12px"><button class="btn '+(cls==="rom"?"rom":"")+'" id="orderGo" onclick="orderSubmit()" disabled>Verifică</button></div>';
+  }else if(q.type==="choice"){
     body='<div class="opts">'+q.options.map(function(o,idx){
       return '<button class="opt" id="opt'+idx+'" onclick="answerChoice('+idx+')">'+
         '<span class="lt">'+String.fromCharCode(65+idx)+'</span><span>'+esc(o)+'</span></button>';
@@ -471,33 +536,67 @@ function renderQuestion(){
   if(q.type==="number")setTimeout(function(){var e=$("numIn");if(e)e.focus();},60);
 }
 function lockChoiceButtons(){var b=$("qBody").querySelectorAll(".opt");b.forEach(function(x){x.disabled=true;});}
+/* --- flashcards --- */
+function flashReveal(){$("flashReveal").classList.add("hidden");$("flashBack").classList.remove("hidden");}
+function flashAnswer(knew){
+  if(quiz.answered)return; var i=curIdx(),q=quiz.test.questions[i];
+  quiz.given=knew; grade(q,knew); lockChoiceButtons();
+  if(!knew&&!quiz.requeued[i]){quiz.requeued[i]=true;quiz.queue.push(i);
+    $("qFeedback").innerHTML+="<br><i>Cardul revine la finalul rundei.</i>";}
+}
+/* --- potrivire perechi --- */
+function matchPickL(idx){ if(quiz.answered)return; quiz.sel=idx;
+  quiz.test.questions[curIdx()].pairs.forEach(function(_,k){var e=$("ml"+k);if(e)e.classList.toggle("sel",k===idx);}); }
+function matchPickR(pos){
+  if(quiz.answered||quiz.sel===null)return; var q=quiz.test.questions[curIdx()];
+  quiz.picked[quiz.sel]=quiz.rmap[pos];
+  var l=$("ml"+quiz.sel); if(l)l.querySelector(".lt").textContent=String.fromCharCode(65+pos);
+  $("ml"+quiz.sel).classList.remove("sel"); quiz.sel=null;
+  var done=true;for(var k=0;k<q.pairs.length;k++){if(quiz.picked[k]===undefined)done=false;}
+  if(done){var g=quiz.picked.slice(); grade(q,g); lockChoiceButtons();
+    if(!HubLogic.gradeQuestion(q,g)){var s=q.pairs.map(function(p,k){return (k+1)+" → "+p[1];}).join("; ");
+      $("qFeedback").innerHTML+="<br><i>Corect: "+esc(s)+"</i>";}}
+}
+/* --- ordonare --- */
+function orderPick(pos){
+  if(quiz.answered)return; var e=$("oi"+pos); if(!e||e.classList.contains("sel"))return;
+  quiz.picked.push(quiz.omap[pos]); e.classList.add("sel"); e.querySelector(".lt").textContent=quiz.picked.length;
+  if(quiz.picked.length===quiz.omap.length)$("orderGo").disabled=false;
+}
+function orderSubmit(){
+  if(quiz.answered)return; var q=quiz.test.questions[curIdx()],g=quiz.picked.slice();
+  grade(q,g); lockChoiceButtons(); $("orderGo").disabled=true;
+  if(!HubLogic.gradeQuestion(q,g))$("qFeedback").innerHTML+="<br><i>Ordinea corectă: "+esc(q.items.join(" → "))+"</i>";
+}
 function answerChoice(idx){
-  if(quiz.answered)return; var q=quiz.test.questions[quiz.i];
+  if(quiz.answered)return; var q=quiz.test.questions[curIdx()];
   quiz.given=idx; grade(q,idx);
   lockChoiceButtons();
   $("opt"+idx).classList.add(HubLogic.gradeQuestion(q,idx)?"correct":"wrong");
   if(!HubLogic.gradeQuestion(q,idx)) $("opt"+q.correct).classList.add("correct");
 }
 function answerTF(v){
-  if(quiz.answered)return; var q=quiz.test.questions[quiz.i];
+  if(quiz.answered)return; var q=quiz.test.questions[curIdx()];
   quiz.given=v; grade(q,v); lockChoiceButtons();
 }
 function submitNum(){
-  if(quiz.answered)return; var q=quiz.test.questions[quiz.i],e=$("numIn"); if(!e||e.value.trim()==="")return;
+  if(quiz.answered)return; var q=quiz.test.questions[curIdx()],e=$("numIn"); if(!e||e.value.trim()==="")return;
   quiz.given=e.value; e.disabled=true; grade(q,e.value);
 }
 function grade(q,given){
-  quiz.answered=true; quiz.answers[quiz.i]=given;
+  var i=curIdx();
+  quiz.answered=true;
+  if(quiz.answers[i]===undefined)quiz.answers[i]=given; // se păstrează primul răspuns (statistici oneste)
   var ok=HubLogic.gradeQuestion(q,given);
   var fb=$("qFeedback"); fb.className="feedback "+(ok?"ok":"no");
   fb.innerHTML="<b>"+(ok?"Corect! ✓":"Aproape… ✗")+"</b>"+esc(q.explain||"");
   fb.classList.remove("hidden");
   $("qNext").classList.remove("hidden");
-  $("qNext").textContent=(quiz.i+1<quiz.test.questions.length)?"Continuă →":"Vezi rezultatul 🎉";
-  if(quiz.test.subject==="rom")$("qNext").classList.add("rom");else $("qNext").classList.remove("rom");
+  $("qNext").textContent=(quiz.pos+1<quiz.queue.length)?"Continuă →":"Vezi rezultatul 🎉";
+  if(quiz.test.subject!=="mate")$("qNext").classList.add("rom");else $("qNext").classList.remove("rom");
 }
 function nextQuestion(){
-  if(quiz.i+1<quiz.test.questions.length){quiz.i++;renderQuestion();}
+  if(quiz.pos+1<quiz.queue.length){quiz.pos++;renderQuestion();}
   else finishQuiz();
 }
 function confirmQuit(){ if(confirm("Ieși din test? Progresul acestui test nu se salvează."))showAron(); }
@@ -520,6 +619,32 @@ async function finishQuiz(){
   if(xpEarned>0){$("rXp").textContent="+"+xpEarned+" XP";$("rXp").classList.remove("hidden");}
   else{$("rXp").classList.add("hidden");}
   show("screenResult");
+}
+
+/* ---- RAPORT PENTRU CLAUDE ---- */
+function buildReport(){
+  var bid={}; S.tests.forEach(function(t){bid[t.id]=t;});
+  var fa={}; S.attempts.slice().sort(function(a,b){return new Date(a.created_at)-new Date(b.created_at);})
+    .forEach(function(a){if(!fa[a.test_id])fa[a.test_id]=a;});
+  var rows=Object.keys(fa).map(function(k){
+    var a=fa[k],t=bid[k]; if(!t)return null;
+    var wrong=[];
+    (t.questions||[]).forEach(function(q,i){
+      if(!HubLogic.gradeQuestion(q,(a.answers||[])[i])) wrong.push(i+1);
+    });
+    return {test:k,topic:t.topic,subject:t.subject,data:String(a.created_at).slice(0,10),
+      scor:a.score+"/"+a.max_score,gresite:wrong};
+  }).filter(Boolean);
+  return {generat:todayStr(),xp:HubLogic.totalXP(S.attempts),
+    serie:HubLogic.streakDays(S.attempts,new Date()),
+    deblocate:HubLogic.unlockedCount(S.settings.start_date,S.settings.cadence_days,new Date()),
+    total_teste:S.tests.length, pe_teme:HubLogic.topicStats(S.attempts,S.tests), incercari:rows};
+}
+function copyReport(){
+  var txt="RAPORT HUB ARON\n"+JSON.stringify(buildReport(),null,1);
+  function done(){var b=$("pExport");b.textContent="✓ Copiat!";setTimeout(function(){b.textContent="📋 Copiază raportul pentru Claude";},1800);}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,function(){prompt("Copiază manual:",txt);});}
+  else{prompt("Copiază manual:",txt);}
 }
 
 /* ---- PĂRINTE ---- */
