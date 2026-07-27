@@ -264,6 +264,22 @@ h1,h2,h3{margin:0}
     <div class="foot"><span class="small" id="aronLockInfo"></span></div>
   </div>
 
+  <!-- INTRO TEST: îi spune la ce să se aștepte și îi lasă o alegere -->
+  <div id="screenIntro" class="hidden">
+    <div class="topbar">
+      <div class="hi" id="iTopic">Test</div>
+      <button class="link" onclick="showAron()">înapoi</button>
+    </div>
+    <div class="card" style="padding:20px;margin-top:10px">
+      <div style="font-weight:700;font-size:17px" id="iTitle"></div>
+      <div class="small" id="iMeta" style="margin-top:8px"></div>
+      <div class="feedback ok" style="margin-top:14px">Timpul petrecut aici nu intră în cele 50 de minute de telefon.</div>
+      <div style="margin-top:16px"><button class="btn" id="iFull" onclick="startQuiz(introId,'full')">Începem</button></div>
+      <div style="margin-top:10px"><button class="btn ghost" id="iShort" onclick="startQuiz(introId,'short')"></button></div>
+      <div class="hint" style="margin-top:8px" id="iHint"></div>
+    </div>
+  </div>
+
   <!-- QUIZ -->
   <div id="screenQuiz" class="hidden">
     <div class="qhead">
@@ -291,7 +307,8 @@ h1,h2,h3{margin:0}
       <div class="softnote hidden" id="rNote"></div>
     </div>
     <div id="rMistakes"></div>
-    <div style="margin-top:18px"><button class="btn" onclick="showAron()">Înapoi la hub</button></div>
+    <div style="margin-top:18px"><button class="btn hidden" id="rRetry" onclick="openTest(introId)">Reia testul acum</button></div>
+    <div style="margin-top:10px"><button class="btn ghost" onclick="showAron()">Înapoi la hub</button></div>
   </div>
 
   <!-- PARENT DASHBOARD -->
@@ -328,7 +345,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-07-27c";
+var APP_VERSION="2026-07-27d";
 
 /* ---- LOGICĂ PURĂ (testată în Node — vezi smoke_test.js) ---- */
 var HubLogic=(function(){
@@ -383,6 +400,53 @@ var HubLogic=(function(){
       if(fz[k]){continue;}
       break;}
     return st;}
+  /* --- Sesiuni scurte: se servesc întrebările la care n-a ajuns încă, deci
+     două sesiuni scurte parcurg tot testul. „Doar 4 azi” e o ieșire cinstită,
+     nu o scurtătură. --- */
+  function seenIndices(attempts,testId){
+    var s={};(attempts||[]).forEach(function(a){
+      if(a.test_id!==testId)return;
+      if(a.meta&&a.meta.random)return;           // o sesiune la nimereală nu contează ca „văzut”
+      var ans=a.answers||[];
+      for(var i=0;i<ans.length;i++){if(ans[i]!==undefined)s[i]=true;}});
+    return s;}
+  function nextIndices(test,attempts,n){
+    var seen=seenIndices(attempts,test.id),out=[],i;
+    for(i=0;i<test.questions.length&&out.length<n;i++){if(!seen[i])out.push(i);}
+    if(!out.length){for(i=0;i<test.questions.length&&out.length<n;i++)out.push(i);} // totul văzut → reluare
+    return out;}
+  function mergeAnswers(attempts,test,cur){
+    var out=[],i;
+    for(i=0;i<test.questions.length;i++)out[i]=undefined;
+    (attempts||[]).slice().sort(function(x,y){return new Date(x.created_at)-new Date(y.created_at);})
+      .forEach(function(a){
+        if(a.test_id!==test.id)return;
+        if(a.meta&&a.meta.random)return;
+        (a.answers||[]).forEach(function(v,i){if(v!==undefined)out[i]=v;});});
+    (cur||[]).forEach(function(v,i){if(v!==undefined)out[i]=v;});
+    return out;}
+  function answeredCountOf(answers,test){var n=0;
+    for(var i=0;i<test.questions.length;i++){if((answers||[])[i]!==undefined)n++;}return n;}
+  /* --- Sesiune trecută la nimereală ---
+     Două semnale simultane: a mers repede prin majoritatea întrebărilor ȘI a luat
+     sub jumătate. Nu se acuză nimic pe ecran — sesiunea pur și simplu nu contează
+     la progres, seria rămâne, testul revine. Așa, un fals pozitiv nu doare. */
+  var RANDOM_MIN_Q=4, RANDOM_FAST_FRAC=0.6, RANDOM_ACC=0.5, FAST_MS=2500;
+  function isFastAnswer(q,ms){return !!ms&&(ms<FAST_MS||isRushed(q,ms));}
+  function randomSignals(test,answers,times){
+    var idx=[],i;times=times||[];
+    for(i=0;i<test.questions.length;i++){if((answers||[])[i]!==undefined)idx.push(i);}
+    var fast=0,correct=0;
+    idx.forEach(function(i){var q=test.questions[i];
+      if(isFastAnswer(q,times[i]))fast++;
+      if(gradeQuestion(q,answers[i]))correct++;});
+    return {n:idx.length,rapide:fast,corecte:correct,
+      fractie_rapide:idx.length?Math.round(fast/idx.length*100)/100:0,
+      acuratete:idx.length?Math.round(correct/idx.length*100)/100:0};}
+  function looksRandom(test,answers,times){
+    var s=randomSignals(test,answers,times);
+    if(s.n<RANDOM_MIN_Q)return false;
+    return s.fractie_rapide>=RANDOM_FAST_FRAC && s.acuratete<RANDOM_ACC;}
   function stemLen(q){return String((q&&q.q)||"").length;}
   /* Graba se măsoară, nu se arată. Prag conservator: sub o treime din timpul
      necesar unei citiri normale la 11 ani (~66ms/caracter). */
@@ -395,7 +459,9 @@ var HubLogic=(function(){
       .sort(function(a,b){return a.pct-b.pct;});}
   return{unlockedCount:unlockedCount,isUnlocked:isUnlocked,gradeQuestion:gradeQuestion,scoreAttempt:scoreAttempt,
     totalXP:totalXP,xpAlready:xpAlready,levelFromXP:levelFromXP,streakDays:streakDays,topicStats:topicStats,
-    isPartial:isPartial,isRushed:isRushed,firstAttempts:firstAttempts,fmt:fmt,addDays:addDays,WALL_LIMIT:WALL_LIMIT};
+    isPartial:isPartial,isRushed:isRushed,firstAttempts:firstAttempts,fmt:fmt,addDays:addDays,WALL_LIMIT:WALL_LIMIT,
+    seenIndices:seenIndices,nextIndices:nextIndices,mergeAnswers:mergeAnswers,answeredCountOf:answeredCountOf,
+    looksRandom:looksRandom,randomSignals:randomSignals,isFastAnswer:isFastAnswer,SHORT_N:4};
 })();
 
 /* ---- STARE APLICAȚIE ---- */
@@ -403,7 +469,7 @@ var sb=null, S={settings:null,tests:[],attempts:[]}, session={role:null};
 var pin={role:null,val:"",need:""};
 var quiz=null;
 function $(id){return document.getElementById(id);}
-function show(id){["screenSetup","loading","screenProfiles","screenPin","screenAron","screenQuiz","screenResult","screenParent"]
+function show(id){["screenSetup","loading","screenProfiles","screenPin","screenAron","screenIntro","screenQuiz","screenResult","screenParent"]
   .forEach(function(s){$(s).classList.add("hidden");});$(id).classList.remove("hidden");}
 function todayStr(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function esc(s){return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
@@ -542,7 +608,7 @@ function renderTestCard(t,best){
   var cls=t.subject==="mate"?"mate":"rom", ico=t.subject==="mate"?"🔢":"✏️";
   var badge=best?('<span class="badge done">'+best.score+"/"+best.max_score+"</span>"):
     ('<span class="pill '+cls+'">nou</span>');
-  return '<button class="card test '+cls+'" onclick="startQuiz(\''+t.id+'\')">'+
+  return '<button class="card test '+cls+'" onclick="openTest(\''+t.id+'\')">'+
     '<div class="ico">'+ico+'</div><div class="body"><div class="tt">'+esc(t.topic)+'</div>'+
     '<div class="mt">'+esc(t.title)+'</div></div>'+badge+'<div class="go">›</div></button>';
 }
@@ -554,12 +620,42 @@ function renderLockedCard(t,uc){
     '<span class="badge lock">🔒</span></div>';
 }
 
-/* ---- QUIZ ---- */
-function startQuiz(testId){
+/* ---- INTRO: predictibilitate + o alegere reală ----
+   Aron „preferă să știe la ce să se aștepte” și nu are, în rest, nicio alegere
+   în aplicație. „Doar 4 azi” e ieșirea cinstită în locul celei pe care și-o
+   ia singur (răspunsuri la nimereală). Cele 4 sunt întrebările nevăzute,
+   deci două sesiuni scurte parcurg tot testul. */
+var introId=null;
+function openTest(testId){
   var t=S.tests.find(function(x){return x.id===testId;});if(!t)return;
-  var qu=[];for(var k=0;k<t.questions.length;k++)qu.push(k);
-  quiz={test:t,queue:qu,pos:0,answers:[],given:null,answered:false,requeued:{},sel:null,picked:[],
-    times:[],rushed:0,wrongRun:0,t0:0};
+  introId=testId;
+  var rest=HubLogic.nextIndices(t,S.attempts,t.questions.length).length;
+  var total=t.questions.length;
+  $("iTopic").textContent=t.topic;
+  $("iTitle").textContent=t.title;
+  $("iMeta").textContent=(rest<total)
+    ? (rest+" întrebări rămase din "+total+" · vreo "+Math.max(1,Math.round(rest*0.8))+" minute")
+    : (total+" întrebări · vreo "+Math.max(1,Math.round(total*0.8))+" minute");
+  var shortN=Math.min(HubLogic.SHORT_N,rest);
+  if(rest<=HubLogic.SHORT_N){
+    $("iShort").classList.add("hidden"); $("iHint").textContent="";
+  }else{
+    $("iShort").classList.remove("hidden");
+    $("iShort").textContent="Doar "+shortN+" întrebări azi";
+    $("iHint").textContent="Restul rămân pe mâine. Patru făcute cu cap valorează mai mult decât opt pe fugă.";
+  }
+  show("screenIntro");
+}
+
+/* ---- QUIZ ---- */
+function startQuiz(testId,mode){
+  var t=S.tests.find(function(x){return x.id===testId;});if(!t)return;
+  var qu;
+  if(mode==="short"){ qu=HubLogic.nextIndices(t,S.attempts,HubLogic.SHORT_N); }
+  else { qu=HubLogic.nextIndices(t,S.attempts,t.questions.length); }
+  if(!qu.length){qu=[];for(var k=0;k<t.questions.length;k++)qu.push(k);}
+  quiz={test:t,queue:qu,base:qu.length,pos:0,answers:[],given:null,answered:false,requeued:{},sel:null,picked:[],
+    times:[],rushed:0,wrongRun:0,t0:0,mode:(mode==="short"?"short":"full")};
   renderQuestion(); show("screenQuiz");
 }
 function curIdx(){return quiz.queue[quiz.pos];}
@@ -568,8 +664,8 @@ function shuffled(n,seed){var a=[],i;for(i=0;i<n;i++)a.push(i);
 function renderQuestion(){
   var t=quiz.test,q=t.questions[curIdx()],cls=t.subject==="mate"?"mate":"rom";
   $("qProg").className="qprog"+(cls==="rom"?" rom":"");
-  // bara și numărătoarea se raportează la testul de bază; cardurile revenite nu-l fac să pară mai lung
-  var base=t.questions.length;
+  // bara și numărătoarea se raportează la sesiunea de azi; cardurile revenite nu o fac să pară mai lungă
+  var base=quiz.base||t.questions.length;
   $("qProg").firstElementChild.style.width=Math.round(Math.min(quiz.pos,base)/base*100)+"%";
   $("qCount").textContent=(quiz.pos<base)?((quiz.pos+1)+"/"+base):"revenire";
   $("qTopic").className="pill "+cls; $("qTopic").textContent=(t.subject==="mate"?"🔢 ":"✏️ ")+t.topic;
@@ -727,13 +823,27 @@ function renderMistakes(t,answers){
     ? '<div class="section-h">De reținut</div><div class="card" style="padding:6px 16px">'+rows.join("")+'</div>'
     : "";
 }
-async function finishQuiz(partial){
+async function finishQuiz(stoppedEarly){
   var t=quiz.test;
-  var answered=0; for(var i=0;i<t.questions.length;i++){if(quiz.answers[i]!==undefined)answered++;}
-  var res=HubLogic.scoreAttempt(t,quiz.answers,partial?answered:null);
-  var xpEarned=Math.max(0,res.xp-HubLogic.xpAlready(S.attempts,t.id)); // o singură dată pe test
-  var row={test_id:t.id,student:"aron",answers:quiz.answers,score:res.score,max_score:res.max,xp:xpEarned,
-    meta:{partial:!!partial,times:quiz.times,rushed:quiz.rushed,v:APP_VERSION}};
+  var sig=HubLogic.randomSignals(t,quiz.answers,quiz.times);
+  var random=HubLogic.looksRandom(t,quiz.answers,quiz.times);
+  var saveAnswers,answeredCount,partial;
+  if(random){
+    // nu se amestecă în istoric și nu se pune la socoteală
+    saveAnswers=quiz.answers;
+    answeredCount=HubLogic.answeredCountOf(saveAnswers,t);
+    partial=true;
+  }else{
+    // sesiunile scurte se adună: răspunsurile de azi se lipesc peste cele de dinainte
+    saveAnswers=HubLogic.mergeAnswers(S.attempts,t,quiz.answers);
+    answeredCount=HubLogic.answeredCountOf(saveAnswers,t);
+    partial=stoppedEarly?true:(answeredCount<t.questions.length);
+  }
+  var res=HubLogic.scoreAttempt(t,saveAnswers,partial?answeredCount:null);
+  var xpEarned=random?0:Math.max(0,res.xp-HubLogic.xpAlready(S.attempts,t.id)); // o singură dată pe test
+  var row={test_id:t.id,student:"aron",answers:saveAnswers,score:res.score,max_score:res.max,xp:xpEarned,
+    meta:{partial:partial,random:random,mode:quiz.mode,stopped:!!stoppedEarly,
+      times:quiz.times,rushed:quiz.rushed,semnale:sig,v:APP_VERSION}};
   var saved=true;
   try{
     var r=await sb.from("attempts").insert([row]);
@@ -746,14 +856,24 @@ async function finishQuiz(partial){
     S.attempts=S.attempts.concat([local]); // ca hub-ul să arate corect până la retrimitere
   }
   var pct=res.max?Math.round(res.score/res.max*100):0;
-  $("rEmoji").textContent=partial?"🌱":pct===100?"🏆":pct>=70?"🎉":pct>=40?"💪":"📚";
-  $("rTitle").textContent=partial?"Ne oprim aici":
-    pct===100?"Perfect!":pct>=70?"Bravo!":pct>=40?"Bun început!":"Ai dus-o până la capăt";
-  $("rScore").textContent=partial
-    ? ("Din "+res.max+" întrebări văzute, "+res.score+" corecte. Testul te așteaptă mâine.")
-    : ("Ai răspuns corect la "+res.score+" din "+res.max+" întrebări.");
+  if(random){
+    // fără acuzație, fără blocare: pur și simplu nu se pune la socoteală, iar seria rămâne
+    $("rEmoji").textContent="⏭️";
+    $("rTitle").textContent="Nu o punem la socoteală";
+    $("rScore").textContent="A mers prea repede ca să conteze la progres. Seria ta rămâne — ai venit azi. "+
+      "Testul revine mâine, sau îl poți relua acum, dacă ai chef.";
+  }else{
+    $("rEmoji").textContent=partial?"🌱":pct===100?"🏆":pct>=70?"🎉":pct>=40?"💪":"📚";
+    $("rTitle").textContent=partial?"Ne oprim aici":
+      pct===100?"Perfect!":pct>=70?"Bravo!":pct>=40?"Bun început!":"Ai dus-o până la capăt";
+    $("rScore").textContent=partial
+      ? ("Din "+res.max+" întrebări, "+res.score+" corecte. Restul te așteaptă mâine.")
+      : ("Ai răspuns corect la "+res.score+" din "+res.max+" întrebări.");
+  }
   if(xpEarned>0){$("rXp").textContent="+"+xpEarned+" XP";$("rXp").classList.remove("hidden");}
   else{$("rXp").classList.add("hidden");}
+  introId=t.id;
+  if(random)$("rRetry").classList.remove("hidden"); else $("rRetry").classList.add("hidden");
   if(saved){$("rNote").classList.add("hidden");$("rNote").textContent="";}
   else{$("rNote").textContent="Salvat pe telefon — se trimite singur când revine internetul.";
     $("rNote").classList.remove("hidden");}
@@ -783,14 +903,19 @@ function buildReport(){
     if(mediu!=null)o.sec_pe_intrebare=mediu;
     return o;
   }).filter(Boolean);
-  var partiale=S.attempts.filter(HubLogic.isPartial).map(function(a){
-    return {test:a.test_id,data:String(a.created_at).slice(0,10),vazute:a.max_score,corecte:a.score};});
+  var partiale=S.attempts.filter(function(a){return HubLogic.isPartial(a)&&!(a.meta&&a.meta.random);}).map(function(a){
+    return {test:a.test_id,data:String(a.created_at).slice(0,10),mod:(a.meta&&a.meta.mode)||"full",
+      oprit_devreme:!!(a.meta&&a.meta.stopped),vazute:a.max_score,corecte:a.score};});
+  var laNimereala=S.attempts.filter(function(a){return a.meta&&a.meta.random;}).map(function(a){
+    return {test:a.test_id,data:String(a.created_at).slice(0,10),ora:String(a.created_at).slice(11,16),
+      semnale:a.meta.semnale};});
   var out={generat:todayStr(),versiune:APP_VERSION,xp:HubLogic.totalXP(S.attempts),
     serie:HubLogic.streakDays(S.attempts,new Date(),S.settings.freeze_days||[]),
     zile_libere:S.settings.freeze_days||[],
     deblocate:HubLogic.unlockedCount(S.settings.start_date,S.settings.cadence_days,new Date()),
     total_teste:S.tests.length, pe_teme:HubLogic.topicStats(S.attempts,S.tests), incercari:rows};
-  if(partiale.length)out.sesiuni_inchise_devreme=partiale;
+  if(partiale.length)out.sesiuni_neterminate=partiale;
+  if(laNimereala.length)out.sesiuni_la_nimereala=laNimereala;
   if(queueLen())out.netrimise=queueLen();
   return out;
 }
@@ -871,7 +996,10 @@ function showParent(){
     var pct=a.max_score?Math.round(a.score/a.max_score*100):0;
     var col=pct>=80?"var(--good)":pct>=60?"var(--gold)":"var(--bad)";
     var d=new Date(a.created_at);
-    var lbl=HubLogic.isPartial(a)?" · oprit devreme":"";
+    var m=a.meta||{};
+    var lbl=m.random?" · trecut pe fugă, necontorizat":
+      m.stopped?" · oprit devreme":
+      (m.mode==="short"?" · sesiune scurtă":(HubLogic.isPartial(a)?" · neterminat":""));
     return '<button class="trow tap" onclick="toggleAttempt('+ix+')">'+
       '<div><div style="font-weight:600;font-size:14px">'+esc(t.topic)+'</div>'+
       '<div class="small">'+d.getDate()+" "+roDate(d).split(" ")[1]+", "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+esc(lbl)+'</div></div>'+
