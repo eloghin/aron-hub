@@ -142,6 +142,21 @@ h1,h2,h3{margin:0}
 .mist .mq{font-size:14px;font-weight:700;line-height:1.35}
 .mist .mx{font-size:13px;color:var(--muted);margin-top:4px}
 .softnote{margin-top:10px;font-size:13px;color:var(--muted);line-height:1.4}
+
+/* Detaliul unei încercări, în ecranul de părinte */
+.trow.tap{cursor:pointer;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);font-family:inherit}
+.det{padding:2px 0 14px}
+.det .dq{padding:10px 0;border-top:1px dashed var(--line)}
+.det .dq:first-child{border-top:0}
+.det .dqt{font-size:13.5px;font-weight:700;line-height:1.35}
+.det .dl{font-size:12.5px;margin-top:5px;line-height:1.5}
+.det .dl b{font-weight:700}
+.det .bad{color:var(--bad)}
+.det .good{color:var(--good)}
+.det .why{color:var(--muted);font-size:12.5px;margin-top:4px}
+.flag{display:inline-block;font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;
+  background:#fff3e0;color:#b45309;margin-left:6px;vertical-align:middle}
+.det .none{color:var(--good);font-size:13px;padding:8px 0}
 .ver{text-align:center;color:var(--muted);font-size:11px;margin-top:18px}
 </style>
 </head>
@@ -294,6 +309,7 @@ h1,h2,h3{margin:0}
     <div class="section-h">Pe teme (procent corect)</div>
     <div class="card" style="padding:8px 16px" id="pTopics"></div>
     <div class="section-h">Activitate recentă</div>
+    <div class="hint" style="text-align:left;margin:-4px 4px 8px">Atinge un test ca să vezi exact ce a greșit.</div>
     <div class="card" style="padding:8px 16px" id="pRecent"></div>
     <div style="margin-top:16px"><button class="btn" id="pExport" onclick="copyReport()">📋 Copiază raportul pentru Claude</button></div>
     <div class="hint" style="margin-top:6px">Lipește-l în conversație ca să primești analiza și testele următoare.</div>
@@ -312,7 +328,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-07-27b";
+var APP_VERSION="2026-07-27c";
 
 /* ---- LOGICĂ PURĂ (testată în Node — vezi smoke_test.js) ---- */
 var HubLogic=(function(){
@@ -786,6 +802,49 @@ function copyReport(){
 }
 
 /* ---- PĂRINTE ---- */
+var parentRows=[];
+/* Cum se citește răspunsul dat, oricare ar fi tipul întrebării */
+function answerText(q,g){
+  if(g===undefined||g===null)return "n-a ajuns la ea";
+  if(q.type==="choice")return (q.options&&q.options[Number(g)]!==undefined)?String(q.options[Number(g)]):String(g);
+  if(q.type==="truefalse")return g?"Adevărat":"Fals";
+  if(q.type==="number")return String(g)===""?"(gol)":String(g);
+  if(q.type==="flash")return g===true?"a zis că a știut":"a zis că n-a știut";
+  if(q.type==="match"){var P=q.pairs||[];return (g||[]).map(function(r,i){
+    return ((P[i]&&P[i][0])||("#"+(i+1)))+" → "+((P[r]&&P[r][1])||"?");}).join("; ");}
+  if(q.type==="order")return (g||[]).map(function(r){return (q.items||[])[r];}).join(" → ");
+  return String(g);
+}
+function correctText(q){
+  if(q.type==="choice")return String((q.options||[])[Number(q.correct)]);
+  if(q.type==="truefalse")return q.answer?"Adevărat":"Fals";
+  if(q.type==="match")return (q.pairs||[]).map(function(p){return p[0]+" → "+p[1];}).join("; ");
+  if(q.type==="order")return (q.items||[]).join(" → ");
+  return String(q.answer===undefined?"":q.answer);
+}
+/* Elena a cerut explicit să vadă unde a greșit, nu doar procentul pe temă.
+   Semnul „citit pe fugă” separă neatenția de necunoaștere — distincția care
+   îi trebuie ca să știe dacă e de exersat sau de explicat. */
+function toggleAttempt(ix){
+  var box=$("det"+ix); if(!box)return;
+  if(!box.classList.contains("hidden")){box.classList.add("hidden");return;}
+  var a=parentRows[ix]; if(!a)return;
+  var t=null; S.tests.forEach(function(x){if(x.id===a.test_id)t=x;});
+  if(!t){box.innerHTML='<div class="small">Testul nu mai e în bază.</div>';box.classList.remove("hidden");return;}
+  var times=(a.meta&&a.meta.times)||[], rows=[];
+  (t.questions||[]).forEach(function(q,i){
+    var g=(a.answers||[])[i];
+    if(g!==undefined&&HubLogic.gradeQuestion(q,g))return;
+    var rush=HubLogic.isRushed(q,times[i])?'<span class="flag">citit pe fugă</span>':"";
+    var sec=times[i]?(" · "+Math.round(times[i]/1000)+"s"):"";
+    rows.push('<div class="dq"><div class="dqt">'+(i+1)+". "+esc(q.q)+rush+'</div>'+
+      '<div class="dl bad">a răspuns: <b>'+esc(answerText(q,g))+'</b>'+esc(sec)+'</div>'+
+      '<div class="dl good">corect: <b>'+esc(correctText(q))+'</b></div>'+
+      (q.explain?'<div class="why">'+esc(q.explain)+'</div>':"")+'</div>');
+  });
+  box.innerHTML=rows.length?rows.join(""):'<div class="none">Nimic greșit la acest test.</div>';
+  box.classList.remove("hidden");
+}
 function showParent(){
   session.role="parent";
   var fa=HubLogic.firstAttempts(S.attempts);
@@ -803,16 +862,21 @@ function showParent(){
       '<div class="bar"><i style="width:'+s.pct+'%;background:'+col+'"></i></div>'+
       '<div style="font-weight:800;font-size:14px;color:'+col+'">'+s.pct+'%</div></div>';
   }).join("") : '<div class="notice small">Încă nu sunt teste rezolvate.</div>';
-  // recent
+  // recent — fiecare rând se deschide și arată exact ce a greșit
   var rec=S.attempts.slice().sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at);}).slice(0,10);
   var byId={}; S.tests.forEach(function(t){byId[t.id]=t;});
-  $("pRecent").innerHTML = rec.length? rec.map(function(a){
+  parentRows=rec;
+  $("pRecent").innerHTML = rec.length? rec.map(function(a,ix){
     var t=byId[a.test_id]||{topic:a.test_id,subject:"mate"};
-    var pct=Math.round(a.score/a.max_score*100), col=pct>=80?"var(--good)":pct>=60?"var(--gold)":"var(--bad)";
+    var pct=a.max_score?Math.round(a.score/a.max_score*100):0;
+    var col=pct>=80?"var(--good)":pct>=60?"var(--gold)":"var(--bad)";
     var d=new Date(a.created_at);
-    return '<div class="trow"><div><div style="font-weight:600;font-size:14px">'+esc(t.topic)+'</div>'+
-      '<div class="small">'+d.getDate()+" "+roDate(d).split(" ")[1]+", "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+'</div></div>'+
-      '<span class="tag" style="background:#f0f1f4;color:'+col+'">'+a.score+"/"+a.max_score+'</span></div>';
+    var lbl=HubLogic.isPartial(a)?" · oprit devreme":"";
+    return '<button class="trow tap" onclick="toggleAttempt('+ix+')">'+
+      '<div><div style="font-weight:600;font-size:14px">'+esc(t.topic)+'</div>'+
+      '<div class="small">'+d.getDate()+" "+roDate(d).split(" ")[1]+", "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+esc(lbl)+'</div></div>'+
+      '<span class="tag" style="background:#f0f1f4;color:'+col+'">'+a.score+"/"+a.max_score+'</span></button>'+
+      '<div class="det hidden" id="det'+ix+'"></div>';
   }).join("") : '<div class="notice small">Nicio activitate încă.</div>';
   var rush=0,seen=0;
   S.attempts.forEach(function(a){var t=byId[a.test_id];if(!t)return;var tm=(a.meta&&a.meta.times)||[];
