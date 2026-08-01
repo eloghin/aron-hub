@@ -359,6 +359,8 @@ h1,h2,h3{margin:0}
     <div class="card" style="padding:8px 16px" id="pRecent"></div>
     <div class="section-h">Jetoane</div>
     <div class="card" style="padding:8px 16px" id="pJet"></div>
+    <div class="section-h">Caietul de vacanță</div>
+    <div class="card" style="padding:12px 16px" id="pCaiet"></div>
     <div class="section-h">De onorat</div>
     <div class="card" style="padding:8px 16px" id="pOnorat"></div>
     <div class="section-h">Timp de compensat</div>
@@ -380,7 +382,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-08-01c";
+var APP_VERSION="2026-08-01e";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -512,7 +514,7 @@ var HubLogic=(function(){
      3. Cel mai bine plătită acțiune din economie e corectarea: 2 jetoane pe
         item de recuperare, maximum 3 pe zi. O zi cu recuperare plătește de
         patru ori cât una simplă. */
-  var JETON_TEST=2, JETON_REC=2, REC_MAX_ZI=3;
+  var JETON_TEST=2, JETON_REC=2, REC_MAX_ZI=3, CAIET_MAX_ZI=2;
   function testeContorizate(attempts){
     var s={};
     (attempts||[]).forEach(function(a){
@@ -583,8 +585,22 @@ var HubLogic=(function(){
   function recuperateAzi(recoveries,today){
     var d=fmt(toDate(today)),n=0;
     (recoveries||[]).forEach(function(r){
+      if(r.sursa==="caiet")return;              // caietul are plafonul lui, separat
       if(String(r.created_at).slice(0,10)===d)n+=(r.total||0);});
     return n;}
+  /* Caietul de activități de vacanță. Se plătește pagina CORECTATĂ împreună,
+     nu pagina completată — altfel s-ar plăti volumul, adică viteza, adică fix
+     mecanismul greșelilor lui. Plafon 2 pe zi, sub cele 3 din aplicație:
+     hub-ul trebuie să rămână calea cea mai bine plătită, pentru că el ține
+     evidența greșelilor și le readuce. */
+  function paginiCaietAzi(recoveries,today){
+    var d=fmt(toDate(today)),n=0;
+    (recoveries||[]).forEach(function(r){
+      if(r.sursa!=="caiet")return;
+      if(String(r.created_at).slice(0,10)===d)n+=(r.corecte||0);});
+    return n;}
+  function maiPoateCaiet(recoveries,today){
+    return Math.max(0,CAIET_MAX_ZI-paginiCaietAzi(recoveries,today));}
   function greseliVechi(attempts,tests,today){
     var bid={};(tests||[]).forEach(function(t){bid[t.id]=t;});
     var d=fmt(toDate(today)),out=[],vazut={};
@@ -656,7 +672,8 @@ var HubLogic=(function(){
   return{unlockedCount:unlockedCount,isUnlocked:isUnlocked,gradeQuestion:gradeQuestion,scoreAttempt:scoreAttempt,
     IDLE_CAP_MS:IDLE_CAP_MS,SESSION_CAP_MS:SESSION_CAP_MS,minutesOf:minutesOf,
     attemptMinutes:attemptMinutes,minutesByDay:minutesByDay,
-    JETON_TEST:JETON_TEST,JETON_REC:JETON_REC,REC_MAX_ZI:REC_MAX_ZI,
+    JETON_TEST:JETON_TEST,JETON_REC:JETON_REC,REC_MAX_ZI:REC_MAX_ZI,CAIET_MAX_ZI:CAIET_MAX_ZI,
+    paginiCaietAzi:paginiCaietAzi,maiPoateCaiet:maiPoateCaiet,
     testeContorizate:testeContorizate,castigate:castigate,cheltuit:cheltuit,sold:sold,
     poateCumpara:poateCumpara,disponibilaDin:disponibilaDin,ultimaCumparare:ultimaCumparare,
     zileDePas:zileDePas,rambursareActiva:rambursareActiva,deOnorat:deOnorat,
@@ -1187,21 +1204,27 @@ function ziScurt(s){
   var p=String(s).slice(0,10).split("-");
   if(p.length<3)return String(s);
   return Number(p[2])+" "+(LUNI_SCURT[Number(p[1])-1]||"");}
-var RAFTURI=[["autonomie","Ce aleg eu"],["ecran","Timp de ecran"],["material","Răsfăț"]];
+/* O singură listă, ordonată după preț. Cu cinci recompense, trei titluri de raft
+   erau mai mult zgomot decât structură; iar ordonarea după cost pune sus ce-și
+   permite azi și jos ținta pentru care merită să strângă. `raft` rămâne în bază,
+   pentru raport și pentru ziua în care catalogul crește destul cât să conteze. */
 function textTarif(){
   return "Test dus până la capăt: <b>+"+HubLogic.JETON_TEST+" 🪙</b>. "+
     "Întrebare veche reluată corect: <b>+"+HubLogic.JETON_REC+" 🪙</b>, maximum "+
-    HubLogic.REC_MAX_ZI+" pe zi. Nu contează câte ai nimerit — contează că ai dus-o până la capăt.";
+    HubLogic.REC_MAX_ZI+" pe zi. "+
+    "Pagină din caietul de vacanță, corectată împreună cu mama: <b>+"+HubLogic.JETON_REC+" 🪙</b>, maximum "+
+    HubLogic.CAIET_MAX_ZI+" pe zi. "+
+    "Nu contează câte ai nimerit — contează că ai dus-o până la capăt.";
 }
 function showShop(){
   var s=jetoane();
   $("sJet").textContent=s+" 🪙";
   $("sCum").innerHTML=textTarif();
   var html="";
-  RAFTURI.forEach(function(rf){
-    var items=(S.rewards||[]).filter(function(r){return r.activ!==false&&r.raft===rf[0];});
-    if(!items.length)return;
-    html+='<div class="section-h">'+esc(rf[1])+'</div><div class="card" style="padding:6px 16px">';
+  var items=(S.rewards||[]).filter(function(r){return r.activ!==false;})
+    .sort(function(a,b){return (a.cost-b.cost)||((a.ordine||0)-(b.ordine||0));});
+  if(items.length){
+    html+='<div class="section-h">Ce poți lua</div><div class="card" style="padding:6px 16px">';
     items.forEach(function(r){
       var c=HubLogic.poateCumpara(r,S.redemptions,todayStr(),s),stare;
       if(c.ok)stare='<button class="btn" style="width:auto;padding:8px 14px" onclick="buyReward(\''+r.id+'\')">'+r.cost+' 🪙</button>';
@@ -1213,7 +1236,7 @@ function showShop(){
         '<div class="mq" style="display:flex;justify-content:space-between;gap:12px;align-items:center">'+
         '<span>'+esc(r.nume)+'</span>'+stare+'</div>'+
         (r.descriere?'<div class="mx">'+esc(r.descriere)+'</div>':'')+'</div></div>';});
-    html+='</div>';});
+    html+='</div>';}
   $("shopBody").innerHTML=html||'<div class="notice small">Magazinul se deschide în curând.</div>';
   show("screenShop");
 }
@@ -1316,6 +1339,40 @@ async function finishRecovery(){
   show("screenResult");
 }
 
+/* ---- CAIETUL DE VACANȚĂ ----
+   Singura plată din economie care nu poate fi verificată de aplicație, deci
+   singura care trece printr-un adult. De aceea are reguli stricte: tarif fix,
+   plafon zilnic, și se apasă DUPĂ ce ați corectat pagina împreună — nu după ce
+   a completat-o. Nu se folosește pentru tema de la școală: ce trebuie făcut
+   oricum nu se cumpără, altfel peste câteva luni nu mai vrea să facă neplătit. */
+function renderCaiet(){
+  var azi=HubLogic.paginiCaietAzi(S.recoveries,todayStr());
+  var mai=HubLogic.maiPoateCaiet(S.recoveries,todayStr());
+  var buton=mai>0
+    ? '<button class="btn" style="width:auto;padding:10px 16px" onclick="adaugaPaginaCaiet()">Am corectat o pagină cu el · +'+HubLogic.JETON_REC+' 🪙</button>'
+    : '<span class="small">Plafonul de azi e atins. Revine mâine.</span>';
+  $("pCaiet").innerHTML=
+    '<div class="trow"><div style="min-width:140px;font-size:14px;font-weight:600">Azi</div>'+
+    '<div style="font-size:14px">'+azi+' din '+HubLogic.CAIET_MAX_ZI+' pagini</div></div>'+
+    '<div style="margin:10px 0">'+buton+'</div>'+
+    '<div class="notice small">Se apasă după ce ați trecut împreună peste pagină și a reparat ce era greșit — nu după ce a completat-o. Volumul l-ar plăti pe cel rapid; corectarea îl plătește pe cel atent.</div>';
+}
+async function adaugaPaginaCaiet(){
+  if(HubLogic.maiPoateCaiet(S.recoveries,todayStr())<=0)return;
+  if(!confirm("Ați corectat împreună o pagină din caiet?\n\nAron primește +"+HubLogic.JETON_REC+" 🪙."))return;
+  var row={student:"aron",items:[],corecte:1,total:1,sursa:"caiet",
+    meta:{v:APP_VERSION,manual:true}};
+  try{
+    var r=await sb.from("recoveries").insert([row]);
+    if(r&&r.error)throw r.error;
+    await refresh();
+  }catch(e){
+    var local={};Object.keys(row).forEach(function(k){local[k]=row[k];});
+    local.created_at=new Date().toISOString();
+    S.recoveries=S.recoveries.concat([local]);
+  }
+  showParent();
+}
 /* ---- RAPORT PENTRU CLAUDE ---- */
 function buildReport(){
   var bid={}; S.tests.forEach(function(t){bid[t.id]=t;});
@@ -1358,14 +1415,16 @@ function buildReport(){
   // economia de jetoane — ce se reglează săptămânal, o singură manetă
   if((S.rewards||[]).length){
     var rid2={};S.rewards.forEach(function(r){rid2[r.id]=r;});
-    var recTot=0,recTotal=0;
-    (S.recoveries||[]).forEach(function(r){recTot+=(r.corecte||0);recTotal+=(r.total||0);});
+    var recTot=0,recTotal=0,caiet=0;
+    (S.recoveries||[]).forEach(function(r){
+      if(r.sursa==="caiet"){caiet+=(r.corecte||0);return;}
+      recTot+=(r.corecte||0);recTotal+=(r.total||0);});
     out.jetoane={
       sold:HubLogic.sold(S.attempts,S.recoveries,S.redemptions),
       castigate:HubLogic.castigate(S.attempts,S.recoveries),
       cheltuite:HubLogic.cheltuit(S.redemptions),
       teste_platite:HubLogic.testeContorizate(S.attempts),
-      itemi_recuperati:recTot, itemi_reluati:recTotal,
+      itemi_recuperati:recTot, itemi_reluati:recTotal, pagini_caiet:caiet,
       cumparaturi:(S.redemptions||[]).map(function(r){
         return {ce:(rid2[r.reward_id]||{}).nume||r.reward_id,
           raft:(rid2[r.reward_id]||{}).raft||null,
@@ -1461,8 +1520,10 @@ function showParent(){
     $("pJet").innerHTML+=
       '<div class="notice small" style="margin:8px 0">Tarif: test dus până la capăt <b>+'+HubLogic.JETON_TEST+
       '</b> · întrebare reluată <b>+'+HubLogic.JETON_REC+'</b> (maximum '+HubLogic.REC_MAX_ZI+
-      ' pe zi). Plata nu depinde de scor.</div>';
+      ' pe zi) · pagină de caiet corectată împreună <b>+'+HubLogic.JETON_REC+
+      '</b> (maximum '+HubLogic.CAIET_MAX_ZI+' pe zi). Plata nu depinde de scor.</div>';
   }else{$("pJet").innerHTML='<div class="notice small">Sistemul de jetoane nu e instalat încă.</div>';}
+  renderCaiet();
   // cumpărături care așteaptă un adult
   var rid={};(S.rewards||[]).forEach(function(r){rid[r.id]=r;});
   var onor=HubLogic.deOnorat(S.redemptions);
