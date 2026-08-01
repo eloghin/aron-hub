@@ -257,6 +257,16 @@ h1,h2,h3{margin:0}
       <div class="xpbar" style="margin-top:8px"><i id="aCovBar" style="width:0%"></i></div>
       <div class="small" id="aCovSub" style="margin-top:6px"></div>
     </div>
+    <div class="card hidden" id="aJetCard" style="padding:14px 16px;margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:1.6rem;font-weight:800" id="aJet">0 🪙</div>
+          <div class="small" id="aJetSub">jetoane</div>
+        </div>
+        <button class="btn" style="width:auto;padding:10px 18px" onclick="showShop()">Magazin</button>
+      </div>
+    </div>
+    <div class="notice small hidden" id="aPas" style="margin-top:12px"></div>
     <div class="section-h">De rezolvat</div>
     <div id="aronTodo"></div>
     <div class="section-h">Antrenament liber</div>
@@ -276,8 +286,23 @@ h1,h2,h3{margin:0}
       <div class="feedback ok" style="margin-top:14px">Timpul petrecut aici nu intră în cele 50 de minute de telefon.</div>
       <div style="margin-top:16px"><button class="btn" id="iFull" onclick="startQuiz(introId,'full')">Începem</button></div>
       <div style="margin-top:10px"><button class="btn ghost" id="iShort" onclick="startQuiz(introId,'short')"></button></div>
+      <div style="margin-top:10px"><button class="btn ghost hidden" id="iRec" onclick="startRecovery()"></button></div>
       <div class="hint" style="margin-top:8px" id="iHint"></div>
     </div>
+  </div>
+
+  <!-- MAGAZIN: alegerea ESTE recompensa, nu premiul de la capăt -->
+  <div id="screenShop" class="hidden">
+    <div class="topbar">
+      <div class="hi">Magazin</div>
+      <button class="link" onclick="showAron()">înapoi</button>
+    </div>
+    <div class="card" style="padding:16px;margin-top:10px">
+      <div style="font-size:1.6rem;font-weight:800" id="sJet">0 🪙</div>
+      <div class="small">jetoanele tale</div>
+    </div>
+    <div id="shopBody"></div>
+    <div style="margin-top:16px"><button class="btn ghost" onclick="showAron()">Înapoi la hub</button></div>
   </div>
 
   <!-- QUIZ -->
@@ -304,6 +329,7 @@ h1,h2,h3{margin:0}
       <div class="rt" id="rTitle">Bravo!</div>
       <div class="rs" id="rScore"></div>
       <div class="xpwin hidden" id="rXp"></div>
+      <div class="softnote hidden" id="rTime"></div>
       <div class="softnote hidden" id="rNote"></div>
     </div>
     <div id="rMistakes"></div>
@@ -328,6 +354,12 @@ h1,h2,h3{margin:0}
     <div class="section-h">Activitate recentă</div>
     <div class="hint" style="text-align:left;margin:-4px 4px 8px">Atinge un test ca să vezi exact ce a greșit.</div>
     <div class="card" style="padding:8px 16px" id="pRecent"></div>
+    <div class="section-h">Jetoane</div>
+    <div class="card" style="padding:8px 16px" id="pJet"></div>
+    <div class="section-h">De onorat</div>
+    <div class="card" style="padding:8px 16px" id="pOnorat"></div>
+    <div class="section-h">Timp de compensat</div>
+    <div class="card" style="padding:8px 16px" id="pTime"></div>
     <div style="margin-top:16px"><button class="btn" id="pExport" onclick="copyReport()">📋 Copiază raportul pentru Claude</button></div>
     <div class="hint" style="margin-top:6px">Lipește-l în conversație ca să primești analiza și testele următoare.</div>
     <div class="ver" id="pVer"></div>
@@ -345,7 +377,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-07-27d";
+var APP_VERSION="2026-08-01b";
 
 /* ---- LOGICĂ PURĂ (testată în Node — vezi smoke_test.js) ---- */
 var HubLogic=(function(){
@@ -457,7 +489,166 @@ var HubLogic=(function(){
       s.correct+=x.score;s.max+=x.max_score;s.tests+=1;});
     return Object.keys(acc).map(function(k){var s=acc[k];s.pct=s.max?Math.round((s.correct/s.max)*100):0;return s;})
       .sort(function(a,b){return a.pct-b.pct;});}
+  /* ================= ECONOMIA DE JETOANE =================
+     Reguli, în ordinea importanței:
+     1. Nimic nu scade jetoanele câștigate. Nu există expirare, penalizare
+        sau sold negativ. La un copil care ridică zid la corectare, pierderea
+        de puncte ar fi sfârșitul sistemului.
+     2. Plata NU e proporțională cu scorul — o zi slabă n-are voie să devină
+        pedeapsă. 2 pe test terminat, indiferent de câte a nimerit.
+     3. Cel mai bine plătită acțiune din economie e corectarea: 2 jetoane pe
+        item de recuperare, maximum 3 pe zi. O zi cu recuperare plătește de
+        patru ori cât una simplă. */
+  var JETON_TEST=2, JETON_REC=2, REC_MAX_ZI=3;
+  function testeContorizate(attempts){
+    var s={};
+    (attempts||[]).forEach(function(a){
+      if(a.meta&&a.meta.random)return;      // o sesiune la nimereală nu plătește
+      if(isPartial(a))return;               // se plătește testul dus până la capăt
+      s[a.test_id]=true;});
+    return Object.keys(s).length;}
+  function castigate(attempts,recoveries){
+    var rec=0;(recoveries||[]).forEach(function(r){rec+=(r.corecte||0);});
+    return JETON_TEST*testeContorizate(attempts)+JETON_REC*rec;}
+  function cheltuit(redemptions){
+    var s=0;(redemptions||[]).forEach(function(r){if(r.stare!=="anulat")s+=(r.cost||0);});
+    return s;}
+  function sold(attempts,recoveries,redemptions){
+    return castigate(attempts,recoveries)-cheltuit(redemptions);}
+  /* Limita se ține pe recompensă, nu pe preț: o recompensă disponibilă
+     oricând nu mai e recompensă, iar prețul mare doar l-ar pune să
+     economisească pentru ceva ce oricum nu poate lua mai des. */
+  function ultimaCumparare(rewardId,redemptions){
+    var last=null;
+    (redemptions||[]).forEach(function(r){
+      if(r.reward_id!==rewardId||r.stare==="anulat")return;
+      if(!last||new Date(r.created_at)>new Date(last.created_at))last=r;});
+    return last;}
+  function disponibilaDin(reward,redemptions){
+    if(!reward||!reward.limita_zile)return null;
+    var last=ultimaCumparare(reward.id,redemptions);
+    if(!last)return null;
+    return fmt(addDays(toDate(String(last.created_at).slice(0,10)),reward.limita_zile));}
+  function poateCumpara(reward,redemptions,today,soldCurent){
+    if(!reward||reward.activ===false)return {ok:false,motiv:"inactiv"};
+    if(soldCurent<reward.cost)return {ok:false,motiv:"sold",lipsesc:reward.cost-soldCurent};
+    var d=disponibilaDin(reward,redemptions);
+    if(d&&fmt(toDate(today))<d)return {ok:false,motiv:"limita",din:d};
+    return {ok:true};}
+  /* „Pas" e ziua cumpărată pe ușa din față. Aron își ia deja dreptul de a sări
+     o zi — prin sesiuni trecute la nimereală. Un copil care poate cumpăra
+     ieșirea nu mai are motiv să o fure. */
+  function zileDePas(redemptions){
+    var z=[];
+    (redemptions||[]).forEach(function(r){
+      if(r.efect!=="pas"||r.stare==="anulat")return;
+      z.push(String(r.aplicat_la||r.created_at).slice(0,10));});
+    return z;}
+  function rambursareActiva(efect,redemptions){
+    var hit=null;
+    (redemptions||[]).forEach(function(r){
+      if(r.efect!==efect)return;
+      if(r.stare!=="cerut")return;
+      if(!hit||new Date(r.created_at)<new Date(hit.created_at))hit=r;});
+    return hit;}
+  function deOnorat(redemptions){
+    return (redemptions||[]).filter(function(r){return r.stare==="cerut"&&!r.efect;});}
+
+  /* ---- RECUPERAREA ----
+     Regula anti-farming: itemul de recuperare NU e aceeași întrebare reluată,
+     ci alta din aceeași temă, când există una neatinsă. Altfel o greșeală
+     intenționată ar fi un cupon de 2 jetoane pentru mâine. Așa, singura cale
+     de a păcăli sistemul e să exersezi — adică fix ce plătim.
+     A doua barieră: se iau doar greșelile din zilele TRECUTE, niciodată din
+     sesiunea de azi, deci nu se poate greși și recupera în aceeași zi. */
+  function cheieRec(testId,idx){return testId+":"+idx;}
+  function recuperateOk(recoveries){
+    var s={};
+    (recoveries||[]).forEach(function(r){
+      ((r.items)||[]).forEach(function(it){if(it&&it.ok&&it.src)s[it.src]=true;});});
+    return s;}
+  function recuperateAzi(recoveries,today){
+    var d=fmt(toDate(today)),n=0;
+    (recoveries||[]).forEach(function(r){
+      if(String(r.created_at).slice(0,10)===d)n+=(r.total||0);});
+    return n;}
+  function greseliVechi(attempts,tests,today){
+    var bid={};(tests||[]).forEach(function(t){bid[t.id]=t;});
+    var d=fmt(toDate(today)),out=[],vazut={};
+    (attempts||[]).forEach(function(a){
+      if(a.meta&&a.meta.random)return;
+      if(String(a.created_at).slice(0,10)>=d)return;   // nimic din ziua de azi
+      var t=bid[a.test_id];if(!t)return;
+      (a.answers||[]).forEach(function(g,i){
+        if(g===undefined||g===null)return;
+        var q=(t.questions||[])[i];if(!q)return;
+        if(gradeQuestion(q,g))return;
+        var k=cheieRec(a.test_id,i);
+        if(vazut[k])return; vazut[k]=true;
+        out.push({src:k,testId:a.test_id,idx:i,topic:t.topic,subject:t.subject});});});
+    return out;}
+  function recoveryPool(attempts,tests,recoveries,today,max){
+    var lim=Math.max(0,Math.min(max===undefined?REC_MAX_ZI:max,
+      REC_MAX_ZI-recuperateAzi(recoveries,today)));
+    if(!lim)return [];
+    var rezolvate=recuperateOk(recoveries);
+    var candidati=greseliVechi(attempts,tests,today).filter(function(g){return !rezolvate[g.src];});
+    var bid={};(tests||[]).forEach(function(t){bid[t.id]=t;});
+    var folosite={},out=[];
+    candidati.forEach(function(g){
+      if(out.length>=lim)return;
+      // întâi o întrebare neatinsă din aceeași temă (varianta, nu reluarea)
+      var ales=null;
+      (tests||[]).forEach(function(t){
+        if(ales||t.topic!==g.topic)return;
+        var vaz=seenIndices(attempts,t.id);
+        (t.questions||[]).forEach(function(q,i){
+          if(ales||vaz[i])return;
+          var k=cheieRec(t.id,i); if(folosite[k])return;
+          ales={testId:t.id,idx:i};});});
+      if(!ales){ // n-a rămas nimic nou pe tema asta: se reia itemul greșit
+        ales={testId:g.testId,idx:g.idx};}
+      var kk=cheieRec(ales.testId,ales.idx);
+      if(folosite[kk])return;
+      folosite[kk]=true;
+      var t2=bid[ales.testId];if(!t2)return;
+      out.push({src:g.src,testId:ales.testId,idx:ales.idx,
+        q:(t2.questions||[])[ales.idx],topic:t2.topic,subject:t2.subject});});
+    return out;}
+
+  /* ---- TIMP DE ECRAN CONSUMAT DE ÎNVĂȚAT ----
+     Se măsoară ca să știm câte minute i se dau înapoi din cele 50, nu ca să-l
+     grăbim. De aceea: nu se afișează niciodată în timpul testului, iar o pauză
+     mai lungă de IDLE_CAP nu se pune la socoteală (tabul rămas deschis nu
+     produce minute). Plafonul pe sesiune oprește orice acumulare absurdă. */
+  var IDLE_CAP_MS=120000;      // o pauză se numără cel mult 2 minute
+  var SESSION_CAP_MS=1800000;  // maximum 30 de minute creditate pe sesiune
+  function minutesOf(ms){
+    if(!ms||ms<0)return 0;
+    if(ms>SESSION_CAP_MS)ms=SESSION_CAP_MS;
+    return Math.max(1,Math.round(ms/60000));}
+  function attemptMinutes(a){
+    var m=a&&a.meta;
+    if(m&&typeof m.activ_ms==="number")return minutesOf(m.activ_ms);
+    // fallback pentru încercările dinainte de contor: suma timpilor pe întrebare
+    var tm=(m&&m.times)||[],s=0;
+    tm.forEach(function(x){if(x)s+=x;});
+    return s?minutesOf(s):0;}
+  function minutesByDay(attempts){
+    var acc={};
+    (attempts||[]).forEach(function(a){
+      var d=String(a.created_at||"").slice(0,10); if(!d)return;
+      acc[d]=(acc[d]||0)+attemptMinutes(a);});
+    return acc;}
   return{unlockedCount:unlockedCount,isUnlocked:isUnlocked,gradeQuestion:gradeQuestion,scoreAttempt:scoreAttempt,
+    IDLE_CAP_MS:IDLE_CAP_MS,SESSION_CAP_MS:SESSION_CAP_MS,minutesOf:minutesOf,
+    attemptMinutes:attemptMinutes,minutesByDay:minutesByDay,
+    JETON_TEST:JETON_TEST,JETON_REC:JETON_REC,REC_MAX_ZI:REC_MAX_ZI,
+    testeContorizate:testeContorizate,castigate:castigate,cheltuit:cheltuit,sold:sold,
+    poateCumpara:poateCumpara,disponibilaDin:disponibilaDin,ultimaCumparare:ultimaCumparare,
+    zileDePas:zileDePas,rambursareActiva:rambursareActiva,deOnorat:deOnorat,
+    recoveryPool:recoveryPool,greseliVechi:greseliVechi,recuperateOk:recuperateOk,
+    recuperateAzi:recuperateAzi,cheieRec:cheieRec,
     totalXP:totalXP,xpAlready:xpAlready,levelFromXP:levelFromXP,streakDays:streakDays,topicStats:topicStats,
     isPartial:isPartial,isRushed:isRushed,firstAttempts:firstAttempts,fmt:fmt,addDays:addDays,WALL_LIMIT:WALL_LIMIT,
     seenIndices:seenIndices,nextIndices:nextIndices,mergeAnswers:mergeAnswers,answeredCountOf:answeredCountOf,
@@ -465,11 +656,11 @@ var HubLogic=(function(){
 })();
 
 /* ---- STARE APLICAȚIE ---- */
-var sb=null, S={settings:null,tests:[],attempts:[]}, session={role:null};
+var sb=null, S={settings:null,tests:[],attempts:[],rewards:[],redemptions:[],recoveries:[]}, session={role:null};
 var pin={role:null,val:"",need:""};
 var quiz=null;
 function $(id){return document.getElementById(id);}
-function show(id){["screenSetup","loading","screenProfiles","screenPin","screenAron","screenIntro","screenQuiz","screenResult","screenParent"]
+function show(id){["screenSetup","loading","screenProfiles","screenPin","screenAron","screenIntro","screenQuiz","screenResult","screenParent","screenShop"]
   .forEach(function(s){$(s).classList.add("hidden");});$(id).classList.remove("hidden");}
 function todayStr(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function esc(s){return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
@@ -533,7 +724,21 @@ async function refresh(){
   var c=await sb.from("attempts").select("*").order("created_at");
   if(a.error)throw a.error; if(b.error)throw b.error; if(c.error)throw c.error;
   S.settings=a.data; S.tests=b.data||[]; S.attempts=c.data||[];
+  // Jetoanele degradează elegant: dacă migrația 5 n-a fost rulată, hub-ul
+  // funcționează exact ca înainte, fără secțiunea de jetoane. Ordinea de
+  // instalare nu poate strica nimic.
+  S.rewards=[]; S.redemptions=[]; S.recoveries=[];
+  try{
+    var d=await sb.from("rewards").select("*").order("ordine");
+    if(!d.error)S.rewards=d.data||[];
+    var e=await sb.from("redemptions").select("*").order("created_at");
+    if(!e.error)S.redemptions=e.data||[];
+    var f=await sb.from("recoveries").select("*").order("created_at");
+    if(!f.error)S.recoveries=f.data||[];
+  }catch(err){ /* tabelele lipsesc — se merge mai departe fără jetoane */ }
 }
+function jetoane(){return HubLogic.sold(S.attempts,S.recoveries,S.redemptions);}
+function jetoaneActive(){return (S.rewards||[]).filter(function(r){return r.activ!==false;}).length>0;}
 
 /* ---- PROFIL & PIN ---- */
 function goProfiles(){session.role=null;show("screenProfiles");}
@@ -561,9 +766,18 @@ function pinBack(){pin.val=pin.val.slice(0,-1);renderPin();}
 function showAron(){
   session.role="aron";
   var xp=HubLogic.totalXP(S.attempts), lv=HubLogic.levelFromXP(xp);
-  var st=HubLogic.streakDays(S.attempts,todayStr(),S.settings.freeze_days||[]);
+  // zilele cumpărate cu „Pas" se comportă ca zilele libere programate: seria rămâne
+  var libere=(S.settings.freeze_days||[]).concat(HubLogic.zileDePas(S.redemptions));
+  var st=HubLogic.streakDays(S.attempts,todayStr(),libere);
   $("aLevel").textContent=lv.level; $("aXp").textContent=xp; $("aXpBar").style.width=lv.pct+"%";
   $("aStreak").textContent=st+"🔥";
+  var sold=jetoane();
+  if(jetoaneActive()){
+    $("aJet").textContent=sold+" 🪙";
+    $("aJetSub").textContent=sold===1?"jeton":"jetoane";
+    $("aJetCard").classList.remove("hidden");
+  }else{$("aJetCard").classList.add("hidden");}
+  var pasAzi=HubLogic.zileDePas(S.redemptions).indexOf(todayStr())>=0;
   var uc=HubLogic.unlockedCount(S.settings.start_date,S.settings.cadence_days,todayStr());
   // o sesiune închisă devreme NU marchează testul ca făcut — revine mâine, fără reproș
   var doneIds={}; S.attempts.forEach(function(a){if(!HubLogic.isPartial(a))doneIds[a.test_id]=true;});
@@ -576,8 +790,31 @@ function showAron(){
     if(doneIds[t.id])done.push(renderTestCard(t,bestByTest[t.id]));
     else todo.push(renderTestCard(t,null));
   });
+  // „Aleg materia de mâine": se aplică în prima zi de DUPĂ cumpărare, atunci
+  // se și marchează folosită. Materia aleasă trece prima în listă.
+  var am=HubLogic.rambursareActiva("alege_materie",S.redemptions);
+  if(am&&String(am.created_at).slice(0,10)<todayStr()&&am.param){
+    var pref=am.param==="mate"?"mate":"romana";
+    done=[];
+    var todoPref=[],todoRest=[];
+    S.tests.forEach(function(t){
+      var unlocked=HubLogic.isUnlocked(t,uc);
+      if(!unlocked){todoRest.push(renderLockedCard(t,uc));return;}
+      if(doneIds[t.id]){done.push(renderTestCard(t,bestByTest[t.id]));return;}
+      var sj=(t.subject==="mate")?"mate":"romana";
+      (sj===pref?todoPref:todoRest).push(renderTestCard(t,null));});
+    todo=todoPref.concat(todoRest);
+    if(todoPref.length)setStareRambursare(am.id,"aplicat");
+  }
   // teste deblocate nerezolvate primele, apoi cele blocate
-  $("aronTodo").innerHTML=todo.join("")||'<div class="notice small">Nimic de rezolvat acum — bravo! 🎉</div>';
+  if(pasAzi){
+    $("aPas").textContent="Azi ai luat Pas. Seria ta rămâne. Ne vedem mâine.";
+    $("aPas").classList.remove("hidden");
+    $("aronTodo").innerHTML='<div class="notice small">Ziua de azi e liberă. Testul te așteaptă mâine.</div>';
+  }else{
+    $("aPas").classList.add("hidden");
+    $("aronTodo").innerHTML=todo.join("")||'<div class="notice small">Nimic de rezolvat acum — bravo! 🎉</div>';
+  }
   $("aronDone").innerHTML=done.join("")||'<div class="notice small">Aici apar testele deja rezolvate, pentru antrenament.</div>';
   // progres pe termen lung: raportat la ÎNTREG planul (până la plan_end), nu la câte teste
   // sunt încărcate momentan în bază — altfel ținta ar tot crește și l-ar induce în eroare.
@@ -644,6 +881,13 @@ function openTest(testId){
     $("iShort").textContent="Doar "+shortN+" întrebări azi";
     $("iHint").textContent="Restul rămân pe mâine. Patru făcute cu cap valorează mai mult decât opt pe fugă.";
   }
+  // Recuperarea e a treia alegere, niciodată prima și niciodată automată.
+  var pool=jetoaneActive()?HubLogic.recoveryPool(S.attempts,S.tests,S.recoveries,todayStr()):[];
+  if(pool.length){
+    $("iRec").textContent="🔁 "+pool.length+(pool.length===1?" întrebare de reluat":" întrebări de reluat")+
+      " (+"+(pool.length*HubLogic.JETON_REC)+" 🪙)";
+    $("iRec").classList.remove("hidden");
+  }else{$("iRec").classList.add("hidden");}
   show("screenIntro");
 }
 
@@ -655,8 +899,25 @@ function startQuiz(testId,mode){
   else { qu=HubLogic.nextIndices(t,S.attempts,t.questions.length); }
   if(!qu.length){qu=[];for(var k=0;k<t.questions.length;k++)qu.push(k);}
   quiz={test:t,queue:qu,base:qu.length,pos:0,answers:[],given:null,answered:false,requeued:{},sel:null,picked:[],
-    times:[],rushed:0,wrongRun:0,t0:0,mode:(mode==="short"?"short":"full")};
+    times:[],rushed:0,wrongRun:0,t0:0,activeMs:0,tick:Date.now(),mode:(mode==="short"?"short":"full")};
+  // „Aleg ordinea în test" — cumpărat, se aplică la primul test de după
+  var ro=HubLogic.rambursareActiva("ordine",S.redemptions);
+  if(ro){
+    var mix=shuffled(quiz.queue.length,7);
+    quiz.queue=mix.map(function(k){return qu[k];});
+    setStareRambursare(ro.id,"aplicat");
+  }
   renderQuestion(); show("screenQuiz");
+}
+/* Ceasul sesiunii: se adună doar intervalele dintre acțiuni reale, fiecare
+   plafonat la IDLE_CAP. Dacă lasă telefonul din mână 20 de minute, intră 2. */
+function tickActive(){
+  if(!quiz)return;
+  var now=Date.now(), d=now-(quiz.tick||now);
+  if(d<0)d=0;
+  if(d>HubLogic.IDLE_CAP_MS)d=HubLogic.IDLE_CAP_MS;
+  quiz.activeMs=(quiz.activeMs||0)+d;
+  quiz.tick=now;
 }
 function curIdx(){return quiz.queue[quiz.pos];}
 function shuffled(n,seed){var a=[],i;for(i=0;i<n;i++)a.push(i);
@@ -774,6 +1035,7 @@ function submitNum(){
 function grade(q,given){
   var i=curIdx();
   quiz.answered=true;
+  tickActive();
   var ms=quiz.t0?(Date.now()-quiz.t0):0;
   var rushed=HubLogic.isRushed(q,ms);
   if(quiz.answers[i]===undefined){ // se păstrează primul răspuns (statistici oneste)
@@ -803,6 +1065,7 @@ function grade(q,given){
   }
 }
 function nextQuestion(){
+  tickActive();
   if(quiz.pos+1<quiz.queue.length){quiz.pos++;renderQuestion();return;}
   return finishQuiz(false); // se întoarce promisiunea, ca salvarea să poată fi așteptată
 }
@@ -824,7 +1087,10 @@ function renderMistakes(t,answers){
     : "";
 }
 async function finishQuiz(stoppedEarly){
+  tickActive();
+  if(quiz.rec)return finishRecovery();   // recuperarea are propriul flux și propria tabelă
   var t=quiz.test;
+  var minuteLucrate=HubLogic.minutesOf(quiz.activeMs);
   var sig=HubLogic.randomSignals(t,quiz.answers,quiz.times);
   var random=HubLogic.looksRandom(t,quiz.answers,quiz.times);
   var saveAnswers,answeredCount,partial;
@@ -843,7 +1109,8 @@ async function finishQuiz(stoppedEarly){
   var xpEarned=random?0:Math.max(0,res.xp-HubLogic.xpAlready(S.attempts,t.id)); // o singură dată pe test
   var row={test_id:t.id,student:"aron",answers:saveAnswers,score:res.score,max_score:res.max,xp:xpEarned,
     meta:{partial:partial,random:random,mode:quiz.mode,stopped:!!stoppedEarly,
-      times:quiz.times,rushed:quiz.rushed,semnale:sig,v:APP_VERSION}};
+      times:quiz.times,rushed:quiz.rushed,semnale:sig,
+      activ_ms:quiz.activeMs||0,minute:minuteLucrate,v:APP_VERSION}};
   var saved=true;
   try{
     var r=await sb.from("attempts").insert([row]);
@@ -872,8 +1139,143 @@ async function finishQuiz(stoppedEarly){
   }
   if(xpEarned>0){$("rXp").textContent="+"+xpEarned+" XP";$("rXp").classList.remove("hidden");}
   else{$("rXp").classList.add("hidden");}
+  // Contorul se arată abia acum, la final, și doar ca socoteală de timp de ecran.
+  // Nu e o notă de viteză: nu apare „repede”/„încet” și nu se compară cu nimic.
+  if(minuteLucrate>0){
+    $("rTime").textContent="⏱ "+minuteLucrate+(minuteLucrate===1?" minut":" minute")+
+      " de învățat. Nu se scad din cele 50 — ți le primești înapoi.";
+    $("rTime").classList.remove("hidden");
+  }else{$("rTime").classList.add("hidden");}
   introId=t.id;
   if(random)$("rRetry").classList.remove("hidden"); else $("rRetry").classList.add("hidden");
+  if(saved){$("rNote").classList.add("hidden");$("rNote").textContent="";}
+  else{$("rNote").textContent="Salvat pe telefon — se trimite singur când revine internetul.";
+    $("rNote").classList.remove("hidden");}
+  renderMistakes(t,quiz.answers);
+  show("screenResult");
+}
+
+/* ================= MAGAZIN ȘI JETOANE =================
+   Prețurile sunt vizibile de la început, inclusiv ce nu-și permite, cu
+   distanța până acolo. Țintele inaccesibile-dar-vizibile sunt motorul
+   economisirii — de aceea nimic nu se ascunde. */
+var LUNI_SCURT=["ian","feb","mar","apr","mai","iun","iul","aug","sep","oct","noi","dec"];
+function ziScurt(s){
+  var p=String(s).slice(0,10).split("-");
+  if(p.length<3)return String(s);
+  return Number(p[2])+" "+(LUNI_SCURT[Number(p[1])-1]||"");}
+var RAFTURI=[["autonomie","Ce aleg eu"],["ecran","Timp de ecran"],["material","Răsfăț"]];
+function showShop(){
+  var s=jetoane();
+  $("sJet").textContent=s+" 🪙";
+  var html="";
+  RAFTURI.forEach(function(rf){
+    var items=(S.rewards||[]).filter(function(r){return r.activ!==false&&r.raft===rf[0];});
+    if(!items.length)return;
+    html+='<div class="section-h">'+esc(rf[1])+'</div><div class="card" style="padding:6px 16px">';
+    items.forEach(function(r){
+      var c=HubLogic.poateCumpara(r,S.redemptions,todayStr(),s),stare;
+      if(c.ok)stare='<button class="btn" style="width:auto;padding:8px 14px" onclick="buyReward(\''+r.id+'\')">'+r.cost+' 🪙</button>';
+      else if(c.motiv==="sold")stare='<span class="small">'+r.cost+' 🪙 · îți mai trebuie '+c.lipsesc+'</span>';
+      else stare='<span class="small">iar de pe '+ziScurt(c.din)+'</span>';
+      html+='<div class="mist"><div class="mq" style="display:flex;justify-content:space-between;gap:12px;align-items:center">'+
+        '<span>'+esc(r.nume)+'</span>'+stare+'</div>'+
+        (r.descriere?'<div class="mx">'+esc(r.descriere)+'</div>':'')+'</div>';});
+    html+='</div>';});
+  $("shopBody").innerHTML=html||'<div class="notice small">Magazinul se deschide în curând.</div>';
+  show("screenShop");
+}
+async function buyReward(id){
+  var r=(S.rewards||[]).find(function(x){return x.id===id;}); if(!r)return;
+  var s=jetoane();
+  var c=HubLogic.poateCumpara(r,S.redemptions,todayStr(),s);
+  if(!c.ok)return;
+  var param=null;
+  if(r.efect==="alege_materie"){
+    param=confirm("Mâine mate?\n\nOK = mate, Anulează = română")?"mate":"romana";
+  }else if(r.efect==="comanda_test"){
+    param=prompt("Ce temă vrei să exersezi?","");
+    if(param===null||!String(param).trim())return;
+    param=String(param).trim().slice(0,120);
+  }
+  // confirmarea arată soldul rămas: apasă repede, nu vrem cumpărături din greșeală
+  if(!confirm(r.nume+" — "+r.cost+" 🪙\nÎți rămân "+(s-r.cost)+"."))return;
+  var row={reward_id:r.id,student:"aron",cost:r.cost,efect:r.efect||null,param:param,
+    stare:(r.efect==="pas")?"aplicat":"cerut"};
+  if(r.efect==="pas")row.aplicat_la=todayStr();
+  try{
+    var res=await sb.from("redemptions").insert([row]);
+    if(res&&res.error)throw res.error;
+    await refresh();
+  }catch(e){
+    var local={};Object.keys(row).forEach(function(k){local[k]=row[k];});
+    local.created_at=new Date().toISOString(); local.id="local-"+Date.now();
+    S.redemptions=S.redemptions.concat([local]);
+  }
+  // confirmare seacă, fără laudă: lauda la cheltuire ar transforma recompensa în test de caracter
+  alert("Ai luat: "+r.nume+".");
+  if(r.efect==="pas"){showAron();return;}
+  showShop();
+}
+async function setStareRambursare(rid,stare){
+  try{ await sb.from("redemptions").update({stare:stare,aplicat_la:todayStr()}).eq("id",rid); }catch(e){}
+  (S.redemptions||[]).forEach(function(r){if(r.id===rid){r.stare=stare;r.aplicat_la=todayStr();}});
+}
+function onoreaza(rid){ setStareRambursare(rid,"onorat").then(showParent,showParent); }
+/* Anularea în aceeași zi, cu jetoanele înapoi — pentru remușcarea de la 11 ani,
+   nu ca instrument de corecție al adultului. */
+function anuleaza(rid){
+  if(!confirm("Anulezi cumpărătura? Jetoanele se întorc."))return;
+  setStareRambursare(rid,"anulat").then(showParent,showParent);
+}
+
+/* ================= RECUPERAREA =================
+   Corectarea aleasă nu e zid. Corectarea impusă e. De aceea nu pornește
+   niciodată singură — e un buton, lângă celelalte, la ecranul de intro. */
+function startRecovery(){
+  var pool=HubLogic.recoveryPool(S.attempts,S.tests,S.recoveries,todayStr());
+  if(!pool.length)return;
+  var t={id:"__recuperare",subject:pool[0].subject||"mate",topic:"Recuperare",
+    title:"Recuperare",questions:pool.map(function(p){return p.q;})};
+  var qu=[];for(var i=0;i<pool.length;i++)qu.push(i);
+  quiz={test:t,queue:qu,base:qu.length,pos:0,answers:[],given:null,answered:false,requeued:{},
+    sel:null,picked:[],times:[],rushed:0,wrongRun:0,t0:0,activeMs:0,tick:Date.now(),
+    mode:"rec",rec:pool};
+  renderQuestion(); show("screenQuiz");
+}
+async function finishRecovery(){
+  var t=quiz.test,pool=quiz.rec,items=[],corecte=0;
+  pool.forEach(function(p,i){
+    var ok=HubLogic.gradeQuestion(t.questions[i],quiz.answers[i]);
+    if(ok)corecte++;
+    items.push({src:p.src,q:HubLogic.cheieRec(p.testId,p.idx),ok:!!ok});});
+  var minute=HubLogic.minutesOf(quiz.activeMs);
+  var row={student:"aron",items:items,corecte:corecte,total:items.length,
+    meta:{times:quiz.times,activ_ms:quiz.activeMs||0,minute:minute,v:APP_VERSION}};
+  var saved=true;
+  try{
+    var r=await sb.from("recoveries").insert([row]);
+    if(r&&r.error)throw r.error;
+    await refresh();
+  }catch(e){
+    saved=false;
+    var local={};Object.keys(row).forEach(function(k){local[k]=row[k];});
+    local.created_at=new Date().toISOString();
+    S.recoveries=S.recoveries.concat([local]);
+  }
+  var castig=corecte*HubLogic.JETON_REC;
+  $("rEmoji").textContent="🔁";
+  $("rTitle").textContent="Recuperare";
+  $("rScore").textContent=corecte+" din "+items.length+" reluate corect. "+
+    (corecte===items.length?"Toate.":"Restul se mai întorc.");
+  if(castig>0){$("rXp").textContent="+"+castig+" 🪙";$("rXp").classList.remove("hidden");}
+  else{$("rXp").classList.add("hidden");}
+  if(minute>0){
+    $("rTime").textContent="⏱ "+minute+(minute===1?" minut":" minute")+
+      " de învățat. Nu se scad din cele 50 — ți le primești înapoi.";
+    $("rTime").classList.remove("hidden");
+  }else{$("rTime").classList.add("hidden");}
+  $("rRetry").classList.add("hidden");
   if(saved){$("rNote").classList.add("hidden");$("rNote").textContent="";}
   else{$("rNote").textContent="Salvat pe telefon — se trimite singur când revine internetul.";
     $("rNote").classList.remove("hidden");}
@@ -901,6 +1303,7 @@ function buildReport(){
       ora:String(a.created_at).slice(11,16),scor:a.score+"/"+a.max_score,gresite:wrong};
     if(grabit.length)o.citite_pe_fuga=grabit;
     if(mediu!=null)o.sec_pe_intrebare=mediu;
+    var mn=HubLogic.attemptMinutes(a); if(mn)o.minute_lucrate=mn;
     return o;
   }).filter(Boolean);
   var partiale=S.attempts.filter(function(a){return HubLogic.isPartial(a)&&!(a.meta&&a.meta.random);}).map(function(a){
@@ -914,6 +1317,30 @@ function buildReport(){
     zile_libere:S.settings.freeze_days||[],
     deblocate:HubLogic.unlockedCount(S.settings.start_date,S.settings.cadence_days,new Date()),
     total_teste:S.tests.length, pe_teme:HubLogic.topicStats(S.attempts,S.tests), incercari:rows};
+  // minutele de ecran consumate cu învățatul, pe zi — de compensat din cele 50
+  var mzi=HubLogic.minutesByDay(S.attempts), mzk=Object.keys(mzi).sort().slice(-14), mrec={};
+  mzk.forEach(function(d){mrec[d]=mzi[d];});
+  out.minute_invatat_pe_zi=mrec;
+  out.minute_azi=mzi[todayStr()]||0;
+  // economia de jetoane — ce se reglează săptămânal, o singură manetă
+  if((S.rewards||[]).length){
+    var rid2={};S.rewards.forEach(function(r){rid2[r.id]=r;});
+    var recTot=0,recTotal=0;
+    (S.recoveries||[]).forEach(function(r){recTot+=(r.corecte||0);recTotal+=(r.total||0);});
+    out.jetoane={
+      sold:HubLogic.sold(S.attempts,S.recoveries,S.redemptions),
+      castigate:HubLogic.castigate(S.attempts,S.recoveries),
+      cheltuite:HubLogic.cheltuit(S.redemptions),
+      teste_platite:HubLogic.testeContorizate(S.attempts),
+      itemi_recuperati:recTot, itemi_reluati:recTotal,
+      cumparaturi:(S.redemptions||[]).map(function(r){
+        return {ce:(rid2[r.reward_id]||{}).nume||r.reward_id,
+          raft:(rid2[r.reward_id]||{}).raft||null,
+          cost:r.cost,stare:r.stare,param:r.param||undefined,
+          data:String(r.created_at).slice(0,10)};}),
+      de_onorat:HubLogic.deOnorat(S.redemptions).length,
+      recuperare_disponibila:HubLogic.recoveryPool(S.attempts,S.tests,S.recoveries,todayStr()).length};
+  }
   if(partiale.length)out.sesiuni_neterminate=partiale;
   if(laNimereala.length)out.sesiuni_la_nimereala=laNimereala;
   if(queueLen())out.netrimise=queueLen();
@@ -987,6 +1414,48 @@ function showParent(){
       '<div class="bar"><i style="width:'+s.pct+'%;background:'+col+'"></i></div>'+
       '<div style="font-weight:800;font-size:14px;color:'+col+'">'+s.pct+'%</div></div>';
   }).join("") : '<div class="notice small">Încă nu sunt teste rezolvate.</div>';
+  // jetoane: câștigat, cheltuit, sold
+  if(jetoaneActive()){
+    var cst=HubLogic.castigate(S.attempts,S.recoveries),chl=HubLogic.cheltuit(S.redemptions);
+    var recTot=0;(S.recoveries||[]).forEach(function(r){recTot+=(r.corecte||0);});
+    $("pJet").innerHTML=
+      '<div class="trow"><div style="min-width:140px;font-size:14px;font-weight:600">Sold</div>'+
+      '<div style="font-weight:800;font-size:14px">'+(cst-chl)+' 🪙</div></div>'+
+      '<div class="trow"><div style="min-width:140px;font-size:14px">Câștigate</div>'+
+      '<div style="font-size:14px">'+cst+' ('+HubLogic.testeContorizate(S.attempts)+' teste, '+recTot+' recuperări)</div></div>'+
+      '<div class="trow"><div style="min-width:140px;font-size:14px">Cheltuite</div>'+
+      '<div style="font-size:14px">'+chl+'</div></div>';
+  }else{$("pJet").innerHTML='<div class="notice small">Sistemul de jetoane nu e instalat încă.</div>';}
+  // cumpărături care așteaptă un adult
+  var rid={};(S.rewards||[]).forEach(function(r){rid[r.id]=r;});
+  var onor=HubLogic.deOnorat(S.redemptions);
+  $("pOnorat").innerHTML = onor.length ? onor.map(function(r){
+    var rw=rid[r.reward_id]||{nume:r.reward_id};
+    return '<div class="mist"><div class="mq">'+esc(rw.nume)+'</div>'+
+      '<div class="mx">cerut pe '+ziScurt(r.created_at)+' · '+r.cost+' 🪙'+
+      (r.param?' · '+esc(r.param):'')+'</div>'+
+      '<div style="display:flex;gap:8px;margin:8px 0">'+
+      '<button class="btn" style="width:auto;padding:8px 14px" onclick="onoreaza('+JSON.stringify(r.id)+')">Onorat</button>'+
+      '<button class="btn ghost" style="width:auto;padding:8px 14px" onclick="anuleaza('+JSON.stringify(r.id)+')">Anulează</button>'+
+      '</div></div>';
+  }).join("") : '<div class="notice small">Nimic de onorat acum.</div>';
+  // minutele de ecran consumate cu învățatul — ce i se dă înapoi din cele 50
+  var mzi=HubLogic.minutesByDay(S.attempts);
+  var zile=Object.keys(mzi).sort().reverse().slice(0,7);
+  var azi=mzi[todayStr()]||0;
+  var sapt=zile.reduce(function(s,d){return s+mzi[d];},0);
+  $("pTime").innerHTML = zile.length
+    ? '<div class="trow"><div style="min-width:120px;font-size:14px;font-weight:600">Azi</div>'+
+      '<div style="font-weight:800;font-size:14px">'+azi+' min</div></div>'+
+      '<div class="trow"><div style="min-width:120px;font-size:14px;font-weight:600">Ultimele 7 zile</div>'+
+      '<div style="font-weight:800;font-size:14px">'+sapt+' min</div></div>'+
+      zile.map(function(d){
+        return '<div class="trow"><div style="min-width:120px;font-size:13px;opacity:.75">'+esc(d)+'</div>'+
+          '<div class="bar"><i style="width:'+Math.min(100,Math.round(mzi[d]/30*100))+'%;background:var(--gold)"></i></div>'+
+          '<div style="font-size:13px;opacity:.75">'+mzi[d]+' min</div></div>';
+      }).join("")+
+      '<div class="notice small" style="margin:8px 0">Timp activ, cu pauzele lungi scoase. Atât i se dă înapoi din cele 50 de minute.</div>'
+    : '<div class="notice small">Încă nu sunt sesiuni măsurate.</div>';
   // recent — fiecare rând se deschide și arată exact ce a greșit
   var rec=S.attempts.slice().sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at);}).slice(0,10);
   var byId={}; S.tests.forEach(function(t){byId[t.id]=t;});
