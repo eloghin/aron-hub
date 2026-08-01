@@ -382,7 +382,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-08-01e";
+var APP_VERSION="2026-08-01g";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -1208,13 +1208,21 @@ function ziScurt(s){
    erau mai mult zgomot decât structură; iar ordonarea după cost pune sus ce-și
    permite azi și jos ținta pentru care merită să strângă. `raft` rămâne în bază,
    pentru raport și pentru ziua în care catalogul crește destul cât să conteze. */
+/* Tariful ca listă de prețuri, nu ca paragraf: trei rânduri, suma în dreapta,
+   aliniate ca în magazin. Un copil de 11 ani scanează o coloană de cifre; un
+   bloc de text cu cifre îngropate în el nu se citește, se sare. */
+function randTarif(eticheta,limita,plata){
+  return '<div class="trow">'+
+    '<div style="flex:1 1 auto;min-width:0;font-size:14px;line-height:1.3">'+eticheta+
+      (limita?'<div class="small" style="opacity:.75;margin-top:2px">'+limita+'</div>':'')+'</div>'+
+    '<div style="font-weight:800;font-size:15px;white-space:nowrap;margin-left:12px">'+plata+'</div></div>';
+}
 function textTarif(){
-  return "Test dus până la capăt: <b>+"+HubLogic.JETON_TEST+" 🪙</b>. "+
-    "Întrebare veche reluată corect: <b>+"+HubLogic.JETON_REC+" 🪙</b>, maximum "+
-    HubLogic.REC_MAX_ZI+" pe zi. "+
-    "Pagină din caietul de vacanță, corectată împreună cu mama: <b>+"+HubLogic.JETON_REC+" 🪙</b>, maximum "+
-    HubLogic.CAIET_MAX_ZI+" pe zi. "+
-    "Nu contează câte ai nimerit — contează că ai dus-o până la capăt.";
+  var p="+"+HubLogic.JETON_TEST+" 🪙", r="+"+HubLogic.JETON_REC+" 🪙";
+  return randTarif("Termini un test","",p)+
+    randTarif("Repari o greșeală veche","cel mult "+HubLogic.REC_MAX_ZI+" pe zi",r)+
+    randTarif("Lucrezi o pagină nouă de caiet, apoi o corectezi cu mama","cel mult "+HubLogic.CAIET_MAX_ZI+" pe zi",r)+
+    '<div class="small" style="margin-top:10px;opacity:.8">Nu contează câte ai nimerit. Contează că ai dus-o până la capăt.</div>';
 }
 function showShop(){
   var s=jetoane();
@@ -1349,17 +1357,17 @@ function renderCaiet(){
   var azi=HubLogic.paginiCaietAzi(S.recoveries,todayStr());
   var mai=HubLogic.maiPoateCaiet(S.recoveries,todayStr());
   var buton=mai>0
-    ? '<button class="btn" style="width:auto;padding:10px 16px" onclick="adaugaPaginaCaiet()">Am corectat o pagină cu el · +'+HubLogic.JETON_REC+' 🪙</button>'
+    ? '<button class="btn" style="width:auto;padding:10px 16px" onclick="adaugaPaginaCaiet()">A lucrat o pagină și am corectat-o cu el · +'+HubLogic.JETON_REC+' 🪙</button>'
     : '<span class="small">Plafonul de azi e atins. Revine mâine.</span>';
   $("pCaiet").innerHTML=
     '<div class="trow"><div style="min-width:140px;font-size:14px;font-weight:600">Azi</div>'+
     '<div style="font-size:14px">'+azi+' din '+HubLogic.CAIET_MAX_ZI+' pagini</div></div>'+
     '<div style="margin:10px 0">'+buton+'</div>'+
-    '<div class="notice small">Se apasă după ce ați trecut împreună peste pagină și a reparat ce era greșit — nu după ce a completat-o. Volumul l-ar plăti pe cel rapid; corectarea îl plătește pe cel atent.</div>';
+    '<div class="notice small">Pagină lucrată acum, nu una veche: o face, apoi treceți împreună peste ea și repară ce a greșit. Se apasă la final, nu când a terminat de scris. Volumul l-ar plăti pe cel rapid; corectarea îl plătește pe cel atent.</div>';
 }
 async function adaugaPaginaCaiet(){
   if(HubLogic.maiPoateCaiet(S.recoveries,todayStr())<=0)return;
-  if(!confirm("Ați corectat împreună o pagină din caiet?\n\nAron primește +"+HubLogic.JETON_REC+" 🪙."))return;
+  if(!confirm("A lucrat o pagină de caiet și ați corectat-o împreună?\n\nAron primește +"+HubLogic.JETON_REC+" 🪙."))return;
   var row={student:"aron",items:[],corecte:1,total:1,sursa:"caiet",
     meta:{v:APP_VERSION,manual:true}};
   try{
@@ -1517,11 +1525,7 @@ function showParent(){
       '<div style="font-size:14px">'+cst+' ('+HubLogic.testeContorizate(S.attempts)+' teste, '+recTot+' recuperări)</div></div>'+
       '<div class="trow"><div style="min-width:140px;font-size:14px">Cheltuite</div>'+
       '<div style="font-size:14px">'+chl+'</div></div>';
-    $("pJet").innerHTML+=
-      '<div class="notice small" style="margin:8px 0">Tarif: test dus până la capăt <b>+'+HubLogic.JETON_TEST+
-      '</b> · întrebare reluată <b>+'+HubLogic.JETON_REC+'</b> (maximum '+HubLogic.REC_MAX_ZI+
-      ' pe zi) · pagină de caiet corectată împreună <b>+'+HubLogic.JETON_REC+
-      '</b> (maximum '+HubLogic.CAIET_MAX_ZI+' pe zi). Plata nu depinde de scor.</div>';
+    $("pJet").innerHTML+='<div class="small" style="margin:10px 0 2px;opacity:.75">Tarif</div>'+textTarif();
   }else{$("pJet").innerHTML='<div class="notice small">Sistemul de jetoane nu e instalat încă.</div>';}
   renderCaiet();
   // cumpărături care așteaptă un adult
