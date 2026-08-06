@@ -7,134 +7,187 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root{
-  --bg:#f4f6fb; --card:#ffffff; --ink:#1c2333; --muted:#6b7385; --line:#e7ebf3;
-  --mate:#4f7cff; --mate-soft:#eaf0ff; --rom:#12b886; --rom-soft:#e3f8f0;
-  --gold:#f5a623; --good:#16a34a; --bad:#e5484d; --shadow:0 6px 22px rgba(28,35,51,.08);
-  --r:18px;
+  /* ——— ACCENT UNIC: violetul aplicației ——— */
+  --v:#7C3AED; --v-2:#A855F7; --v-deep:#5B21B6; --v-soft:#F4EFFF; --v-line:#E4D9FF;
+
+  /* ——— NEUTRE ——— */
+  --bg:#FAFAFB; --card:#FFFFFF; --ink:#17141F; --ink-2:#3D3849;
+  --muted:#797585; --line:#EDEBF2; --fill:#F3F1F8;
+
+  /* ——— MATERII: doar ca pastilă și fundal de iconiță ——— */
+  --mate:#3B6FF0; --mate-soft:#EDF2FF;
+  --rom:#0EA47A;  --rom-soft:#E6F7F1;
+  --gold:#E8930F; --good:#12854A; --bad:#DC2F35;
+
+  /* ——— FORMĂ ——— */
+  --r:24px; --r-tile:20px; --r-btn:16px;
+  --shadow:0 2px 14px rgba(23,20,31,.05);
+  --sh-v:0 8px 22px rgba(124,58,237,.26);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45}
-.wrap{max-width:720px;margin:0 auto;padding:16px 16px 60px}
+.wrap{max-width:720px;margin:0 auto;padding:20px 18px 104px}
 .hidden{display:none!important}
 button{font-family:inherit;cursor:pointer;border:0;background:none}
 h1,h2,h3{margin:0}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--mate);
-  color:#fff;font-weight:700;padding:14px 18px;border-radius:14px;font-size:16px;width:100%}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:linear-gradient(120deg,#7C3AED,#9333EA);
+  color:#fff;font-weight:800;padding:16px 18px;border-radius:var(--r-btn);font-size:16px;width:100%;
+  box-shadow:var(--sh-v)}
 .btn:active{transform:translateY(1px)}
-.btn.ghost{background:#eef1f7;color:var(--ink)}
-.btn.rom{background:var(--rom)}
-.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;
-  padding:5px 10px;border-radius:999px}
+.btn.ghost{background:var(--fill);color:var(--ink-2);box-shadow:none}
+.btn.rom{background:linear-gradient(120deg,#7C3AED,#9333EA)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;
+  padding:5px 10px;border-radius:999px;letter-spacing:.3px}
 .pill.mate{background:var(--mate-soft);color:var(--mate)}
 .pill.rom{background:var(--rom-soft);color:var(--rom)}
 .small{color:var(--muted);font-size:13px}
 
 /* Profile picker */
 .center{min-height:70vh;display:flex;flex-direction:column;justify-content:center;gap:18px}
-.logo{font-size:40px;text-align:center}
-.title{text-align:center;font-size:26px;font-weight:800}
+.logo{font-size:42px;text-align:center}
+.title{text-align:center;font-size:28px;font-weight:800;letter-spacing:-.6px}
 .subtitle{text-align:center;color:var(--muted);margin-top:-8px}
 .profiles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
-.profile{padding:22px 14px;border-radius:var(--r);text-align:center;border:2px solid var(--line);
+.profile{padding:24px 14px;border-radius:var(--r);text-align:center;border:1px solid var(--line);
   background:var(--card);box-shadow:var(--shadow)}
 .profile .av{font-size:44px}
-.profile .nm{font-weight:800;margin-top:6px;font-size:18px}
-.profile.aron{border-color:var(--mate)}
-.profile.parent{border-color:var(--rom)}
+.profile .nm{font-weight:800;margin-top:8px;font-size:18px}
+.profile.aron{border-color:var(--v-line);background:linear-gradient(160deg,#fff,#F8F4FF)}
+.profile.parent{border-color:var(--line)}
 
 /* PIN */
 .pinbox{max-width:320px;margin:0 auto;text-align:center}
-.pindisplay{letter-spacing:14px;font-size:34px;font-weight:800;min-height:44px}
+.pindisplay{letter-spacing:14px;font-size:34px;font-weight:800;min-height:44px;color:var(--v)}
 .keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
-.key{padding:16px;border-radius:14px;background:var(--card);border:1px solid var(--line);
+.key{padding:17px;border-radius:var(--r-btn);background:var(--card);border:1px solid var(--line);
   font-size:22px;font-weight:700;box-shadow:var(--shadow)}
-.key:active{background:#eef1f7}
+.key:active{background:var(--v-soft)}
 
 /* Header stats */
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.hi{font-size:22px;font-weight:800}
-.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0 4px}
-.stat{padding:14px;border-radius:16px;text-align:center}
-.stat.lvl{background:linear-gradient(135deg,#5b8bff,#4f7cff);color:#fff}
-.stat.xp{background:#fff;border:1px solid var(--line)}
-.stat.streak{background:linear-gradient(135deg,#ffb547,#f5a623);color:#fff}
-.stat .big{font-size:24px;font-weight:800;line-height:1}
-.stat .lab{font-size:11px;opacity:.9;margin-top:4px;font-weight:600}
-.xpbar{height:9px;background:#eceff5;border-radius:999px;overflow:hidden;margin-top:8px}
-.xpbar>i{display:block;height:100%;background:linear-gradient(90deg,#5b8bff,#4f7cff)}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px}
+.hi{font-size:30px;font-weight:800;letter-spacing:-.7px;line-height:1.15}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 4px}
+.stat{padding:14px 10px;border-radius:20px;text-align:center;background:#fff;
+  border:1px solid var(--line);box-shadow:var(--shadow)}
+.stat .big{font-size:22px;font-weight:800;line-height:1;letter-spacing:-.5px}
+.stat .lab{font-size:10.5px;color:#9C98A8;margin-top:4px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.7px}
+.stat.lvl .big{color:var(--v)}
+.stat.streak .big{color:var(--gold)}
+.xpbar{height:8px;background:#EFEDF4;border-radius:999px;overflow:hidden;margin-top:9px}
+.xpbar>i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#7C3AED,#A855F7)}
+
+/* Cardul compact de jetoane */
+.jet{display:flex;align-items:center;gap:14px;padding:14px;width:100%;text-align:left;
+  background:#fff;border:1px solid var(--v-line);border-radius:var(--r);
+  box-shadow:0 4px 18px rgba(124,58,237,.08)}
+.jet .jt{width:48px;height:48px;border-radius:16px;flex:0 0 auto;font-size:23px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#7C3AED,#A855F7);box-shadow:0 5px 14px rgba(124,58,237,.30)}
+.jet .jb{flex:1;min-width:0}
+.jet .jn{font-size:19px;font-weight:800;letter-spacing:-.4px}
+.jet .jn span{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:0}
+.jet .js{font-size:12.5px;color:var(--muted);margin-top:2px}
+.jet .js b{color:var(--v)}
+
+/* Filtre orizontale */
+.chips{display:flex;gap:9px;margin-top:16px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;padding:9px 16px;border-radius:999px;font-size:14px;font-weight:700;
+  background:#fff;border:1px solid var(--line);color:var(--ink-2)}
+.chip.on{background:var(--v-soft);border-color:var(--v-line);color:var(--v)}
 
 /* Test list */
-.section-h{font-size:14px;font-weight:800;color:var(--muted);text-transform:uppercase;
-  letter-spacing:.5px;margin:22px 4px 10px}
-.test{display:flex;align-items:center;gap:14px;padding:16px;margin-bottom:12px}
-.test .ico{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;
-  justify-content:center;font-size:22px;flex:0 0 auto}
-.test.mate .ico{background:var(--mate-soft)}
-.test.rom .ico{background:var(--rom-soft)}
+.section-h{font-size:12px;font-weight:800;color:#9C98A8;text-transform:uppercase;
+  letter-spacing:1.1px;margin:26px 2px 12px}
+.test{display:flex;align-items:center;gap:14px;padding:14px;margin-bottom:11px}
+.test .ico{width:54px;height:54px;border-radius:var(--r-tile);display:flex;align-items:center;
+  justify-content:center;font-size:26px;flex:0 0 auto;
+  background:linear-gradient(140deg,#F6F2FF,#EDE4FF)}
+.test.mate .ico{background:linear-gradient(140deg,#EEF3FF,#DFE8FF)}
+.test.rom .ico{background:linear-gradient(140deg,#E9F9F3,#D8F2E8)}
 .test .body{flex:1;min-width:0}
-.test .tt{font-weight:700;font-size:15px}
-.test .mt{font-size:12px;color:var(--muted);margin-top:2px}
-.test .go{font-size:22px;color:var(--muted)}
-.test.locked{opacity:.55}
-.badge{font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px}
-.badge.done{background:#e7f7ec;color:var(--good)}
-.badge.lock{background:#f0f1f4;color:var(--muted)}
+.test .tt{font-weight:700;font-size:15.5px;letter-spacing:-.2px}
+.test .mt{font-size:12.5px;color:var(--muted);margin-top:3px}
+.test .go{font-size:20px;color:#C6C2D0;font-weight:700}
+.test.locked{opacity:.5}
+.test.done{opacity:.62}
+.badge{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;letter-spacing:.3px}
+.badge.done{background:#E9F7EE;color:var(--good)}
+.badge.lock{background:var(--fill);color:var(--muted)}
 
 /* Quiz */
 .qhead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .qhead .x{font-size:26px;color:var(--muted);width:34px}
-.qprog{flex:1;height:8px;background:#eceff5;border-radius:999px;overflow:hidden}
-.qprog>i{display:block;height:100%;background:var(--mate);transition:width .3s}
-.qprog.rom>i{background:var(--rom)}
+.qprog{flex:1;height:8px;background:#EFEDF4;border-radius:999px;overflow:hidden}
+.qprog>i{display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,#7C3AED,#A855F7);transition:width .3s}
+.qprog.rom>i{background:linear-gradient(90deg,#7C3AED,#A855F7)}
 .qcount{font-weight:800;color:var(--muted);font-size:14px}
-.qtext{font-size:20px;font-weight:700;margin:10px 4px 18px;line-height:1.4}
+.qtext{font-size:20px;font-weight:700;margin:10px 4px 18px;line-height:1.4;letter-spacing:-.3px}
 .opts{display:flex;flex-direction:column;gap:10px}
-.opt{text-align:left;padding:16px;border-radius:14px;border:2px solid var(--line);
+.opt{text-align:left;padding:16px;border-radius:var(--r-btn);border:1.5px solid var(--line);
   background:var(--card);font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px}
-.opt .lt{width:26px;height:26px;border-radius:8px;background:#eef1f7;display:flex;
+.opt .lt{width:26px;height:26px;border-radius:9px;background:var(--fill);display:flex;
   align-items:center;justify-content:center;font-weight:800;font-size:14px;flex:0 0 auto}
-.opt.correct{border-color:var(--good);background:#eefaf0}
-.opt.wrong{border-color:var(--bad);background:#fdecec}
+.opt.correct{border-color:var(--good);background:#EEFAF0}
+.opt.wrong{border-color:var(--bad);background:#FDECEC}
 .opt.correct .lt{background:var(--good);color:#fff}
 .opt.wrong .lt{background:var(--bad);color:#fff}
 .opt:disabled{cursor:default}
 .hint{color:var(--muted);font-size:.86rem;text-align:center}
-.opt.sel{border-color:var(--mate);background:#eef3ff}
-.opt.sel .lt{background:var(--mate);color:#fff}
-.numin{width:100%;padding:16px;border-radius:14px;border:2px solid var(--line);font-size:20px;
-  font-weight:700;text-align:center;outline:none}
-.numin:focus{border-color:var(--mate)}
-.feedback{margin-top:16px;padding:14px 16px;border-radius:14px;font-size:15px}
-.feedback.ok{background:#eefaf0;color:#166534}
-.feedback.no{background:#fdecec;color:#991b1b}
+.opt.sel{border-color:var(--v);background:var(--v-soft)}
+.opt.sel .lt{background:var(--v);color:#fff}
+.numin{width:100%;padding:16px;border-radius:var(--r-btn);border:1.5px solid var(--line);
+  font-size:20px;font-weight:700;text-align:center;outline:none}
+.numin:focus{border-color:var(--v)}
+.feedback{margin-top:16px;padding:14px 16px;border-radius:var(--r-btn);font-size:15px}
+.feedback.ok{background:#EEFAF0;color:#166534}
+.feedback.no{background:#FDECEC;color:#991b1b}
 .feedback b{display:block;margin-bottom:3px}
 
 /* Results */
 .result{text-align:center;padding:30px 20px}
 .result .em{font-size:60px}
-.result .rt{font-size:26px;font-weight:800;margin-top:6px}
+.result .rt{font-size:26px;font-weight:800;margin-top:6px;letter-spacing:-.5px}
 .result .rs{font-size:17px;color:var(--muted);margin-top:4px}
-.xpwin{display:inline-block;margin-top:16px;background:var(--gold);color:#fff;font-weight:800;
-  padding:10px 20px;border-radius:999px;font-size:18px}
+.xpwin{display:inline-block;margin-top:16px;
+  background:linear-gradient(120deg,#7C3AED,#A855F7);color:#fff;font-weight:800;
+  padding:11px 22px;border-radius:999px;font-size:18px;box-shadow:var(--sh-v)}
 
 /* Parent */
 .pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:8px 0}
-.pcard{padding:16px;text-align:center}
-.pcard .big{font-size:26px;font-weight:800}
+.pcard{padding:18px;text-align:center}
+.pcard .big{font-size:26px;font-weight:800;letter-spacing:-.5px}
 .pcard .lab{font-size:12px;color:var(--muted);margin-top:3px}
 .trow{display:flex;justify-content:space-between;align-items:center;padding:12px 4px;
   border-bottom:1px solid var(--line)}
 .trow:last-child{border:0}
-.bar{height:8px;background:#eceff5;border-radius:999px;overflow:hidden;flex:1;margin:0 10px}
-.bar>i{display:block;height:100%}
-.tag{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px}
+.bar{height:8px;background:#EFEDF4;border-radius:999px;overflow:hidden;flex:1;margin:0 10px}
+.bar>i{display:block;height:100%;border-radius:999px}
+.tag{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;letter-spacing:.3px}
 .notice{padding:18px;text-align:center;color:var(--muted)}
 .foot{text-align:center;margin-top:26px}
 .link{color:var(--muted);font-size:13px;text-decoration:underline}
-.err{background:#fff3f3;border:1px solid #ffd0d0;color:#a11;padding:16px;border-radius:14px;margin-top:12px;font-size:14px}
+.err{background:#FFF3F3;border:1px solid #FFD0D0;color:#A11;padding:16px;
+  border-radius:var(--r-btn);margin-top:12px;font-size:14px}
+
+/* Bara de navigare de jos */
+.navbar{position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:rgba(255,255,255,.94);backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);display:none}
+.navbar.on{display:block}
+.navbar .in{max-width:720px;margin:0 auto;display:flex;justify-content:space-around;
+  padding:9px 4px calc(12px + env(safe-area-inset-bottom))}
+.nv{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:#9C98A8;font-size:11px;font-weight:700;padding:4px 0}
+.nv svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+.nv.on{color:var(--v)}
 
 /* Recapitularea greșelilor, la finalul testului */
 .mist{padding:12px 0;border-bottom:1px solid var(--line)}
@@ -155,7 +208,7 @@ h1,h2,h3{margin:0}
 .det .good{color:var(--good)}
 .det .why{color:var(--muted);font-size:12.5px;margin-top:4px}
 .flag{display:inline-block;font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;
-  background:#fff3e0;color:#b45309;margin-left:6px;vertical-align:middle}
+  background:#FFF4E2;color:#B45309;margin-left:6px;vertical-align:middle}
 .det .none{color:var(--good);font-size:13px;padding:8px 0}
 .ver{text-align:center;color:var(--muted);font-size:11px;margin-top:18px}
 </style>
@@ -238,40 +291,51 @@ h1,h2,h3{margin:0}
   <!-- ARON DASHBOARD -->
   <div id="screenAron" class="hidden">
     <div class="topbar">
-      <div class="hi">Salut, Aron! 👋</div>
+      <div>
+        <div class="hi">Salut, Aron</div>
+        <div class="small" id="aToday" style="margin-top:3px"></div>
+      </div>
       <button class="link" onclick="goProfiles()">ieși</button>
     </div>
-    <div class="statgrid">
-      <div class="stat lvl"><div class="big" id="aLevel">1</div><div class="lab">NIVEL</div></div>
-      <div class="stat xp">
-        <div class="big" id="aXp">0</div><div class="lab">XP TOTAL</div>
-        <div class="xpbar"><i id="aXpBar" style="width:0%"></i></div>
+
+    <div class="notice small hidden" id="aPas" style="margin-top:12px"></div>
+
+    <!-- Primul lucru pe care îl vede: ce are de făcut azi -->
+    <div class="section-h" style="margin-top:20px">De rezolvat</div>
+    <div id="aronTodo"></div>
+
+    <!-- Jetoanele: card mic, după listă. Recompensa nu deschide ecranul. -->
+    <button class="jet hidden" id="aJetCard" onclick="showShop()">
+      <div class="jt">🪙</div>
+      <div class="jb">
+        <div class="jn"><span id="aJet">0 🪙</span> <span id="aJetSub">jetoane</span></div>
+        <div class="js" id="aJetNext"></div>
       </div>
-      <div class="stat streak"><div class="big" id="aStreak">0🔥</div><div class="lab">ZILE LA RÂND</div></div>
-    </div>
-    <div class="card" style="padding:14px 16px;margin-top:14px">
+      <div class="go" style="font-size:20px;color:#C6C2D0;font-weight:700">›</div>
+    </button>
+    <div class="small hidden" id="aJetCum"></div>
+
+    <div class="section-h">Antrenament liber</div>
+    <div id="aronDone"></div>
+
+    <div class="section-h">Unde ai ajuns</div>
+    <div class="card" style="padding:16px 18px">
       <div style="display:flex;justify-content:space-between;align-items:baseline">
-        <b style="font-size:.95rem">Recapitulare de vară</b>
+        <b style="font-size:15px">Recapitulare de vară</b>
         <span class="small" id="aCovLab">0 din 0</span>
       </div>
       <div class="xpbar" style="margin-top:8px"><i id="aCovBar" style="width:0%"></i></div>
-      <div class="small" id="aCovSub" style="margin-top:6px"></div>
+      <div class="small" id="aCovSub" style="margin-top:8px"></div>
     </div>
-    <div class="card hidden" id="aJetCard" style="padding:14px 16px;margin-top:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:1.6rem;font-weight:800" id="aJet">0 🪙</div>
-          <div class="small" id="aJetSub">jetoane</div>
-        </div>
-        <button class="btn" style="width:auto;padding:10px 18px" onclick="showShop()">Magazin</button>
+    <div class="statgrid">
+      <div class="stat lvl"><div class="big" id="aLevel">1</div><div class="lab">Nivel</div></div>
+      <div class="stat xp">
+        <div class="big" id="aXp">0</div><div class="lab">XP total</div>
+        <div class="xpbar"><i id="aXpBar" style="width:0%"></i></div>
       </div>
-      <div class="small" id="aJetCum" style="margin-top:10px"></div>
+      <div class="stat streak"><div class="big" id="aStreak">0🔥</div><div class="lab">Zile la rând</div></div>
     </div>
-    <div class="notice small hidden" id="aPas" style="margin-top:12px"></div>
-    <div class="section-h">De rezolvat</div>
-    <div id="aronTodo"></div>
-    <div class="section-h">Antrenament liber</div>
-    <div id="aronDone"></div>
+
     <div class="foot"><span class="small" id="aronLockInfo"></span></div>
   </div>
 
@@ -373,6 +437,28 @@ h1,h2,h3{margin:0}
   <div id="fatal" class="hidden"></div>
 </div>
 
+<!-- Bara de jos: apare doar pe ecranele lui Aron, nu în timpul unui test -->
+<div class="navbar" id="navbar">
+  <div class="in">
+    <button class="nv" id="nvHome" onclick="showAron()">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/></svg>
+      Acasă
+    </button>
+    <button class="nv" id="nvTests" onclick="navGo('todo')">
+      <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8.5 8.5h7M8.5 12.5h7M8.5 16.5h4"/></svg>
+      Teste
+    </button>
+    <button class="nv" id="nvShop" onclick="showShop()">
+      <svg viewBox="0 0 24 24"><path d="M4 8h16l-1.2 11.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+      Magazin
+    </button>
+    <button class="nv" id="nvProg" onclick="navGo('prog')">
+      <svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>
+      Progres
+    </button>
+  </div>
+</div>
+
 <script>
 /* ====== CONFIG ======
    Nu e nevoie să editezi nimic aici. La prima deschidere apare un ecran
@@ -382,7 +468,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-08-03a";
+var APP_VERSION="2026-08-05a";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -692,7 +778,28 @@ var pin={role:null,val:"",need:""};
 var quiz=null;
 function $(id){return document.getElementById(id);}
 function show(id){["screenSetup","loading","screenProfiles","screenPin","screenAron","screenIntro","screenQuiz","screenResult","screenParent","screenShop"]
-  .forEach(function(s){$(s).classList.add("hidden");});$(id).classList.remove("hidden");}
+  .forEach(function(s){$(s).classList.add("hidden");});$(id).classList.remove("hidden");
+  updateNav(id);}
+
+/* Bara de jos apare doar acasă și în magazin. În timpul unui test dispare,
+   ca să nu existe nicio ieșire accidentală din mijlocul întrebărilor. */
+function updateNav(id){
+  var nb=$("navbar"); if(!nb)return;
+  var on=(id==="screenAron"||id==="screenShop");
+  nb.classList.toggle("on",on);
+  if(!on)return;
+  $("nvHome").classList.toggle("on",id==="screenAron");
+  $("nvTests").classList.remove("on");
+  $("nvProg").classList.remove("on");
+  $("nvShop").classList.toggle("on",id==="screenShop");
+  var jetOn=false; try{jetOn=jetoaneActive();}catch(e){}
+  $("nvShop").classList.toggle("hidden",!jetOn);
+}
+function navGo(unde){
+  if($("screenAron").classList.contains("hidden"))showAron();
+  var t=(unde==="prog")?$("aCovLab"):$("aronTodo");
+  if(t)setTimeout(function(){t.scrollIntoView({behavior:"smooth",block:"center"});},60);
+}
 function todayStr(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function esc(s){return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
 
@@ -802,11 +909,1736 @@ function showAron(){
   var st=HubLogic.streakDays(S.attempts,todayStr(),libere);
   $("aLevel").textContent=lv.level; $("aXp").textContent=xp; $("aXpBar").style.width=lv.pct+"%";
   $("aStreak").textContent=st+"🔥";
+  // subtitlul de sus: data de azi + seria, ca să nu mai stea cifrele în prim-plan
+  var zile=["duminică","luni","marți","miercuri","joi","vineri","sâmbătă"];
+  $("aToday").textContent=zile[new Date().getDay()]+", "+roDate(todayStr())+
+    (st>0?(" · ziua "+st+" la rând"):"");
   var sold=jetoane();
   if(jetoaneActive()){
     $("aJet").textContent=sold+" 🪙";
     $("aJetSub").textContent=sold===1?"jeton":"jetoane";
     $("aJetCum").innerHTML=textTarif();
+    // ținta următoare: cea mai ieftină recompensă pe care încă nu și-o permite
+    var nxt=(S.rewards||[]).filter(function(r){return r.activ!==false&&r.cost>sold;})
+      .sort(function(a,b){return a.cost-b.cost;})[0];
+    $("aJetNext").innerHTML = nxt
+      ? ('încă <b>'+(nxt.cost-sold)+'</b> până la „'+esc(nxt.nume)+'”')
+      : 'ai destule pentru orice e în magazin';
+    $("aJetCard").classList.remove("hidden");
+  }else{$("aJetCard").classList.add("hidden");}
+  var pasAzi=HubLogic.zileDePas(S.redemptions).indexOf(todayStr())>=0;
+  var uc=HubLogic.unlockedCount(S.settings.start_date,S.settings.cadence_days,todayStr());
+  // o sesiune închisă devreme NU marchează testul ca făcut — revine mâine, fără reproș
+  var doneIds={}; S.attempts.forEach(function(a){if(!HubLogic.isPartial(a))doneIds[a.test_id]=true;});
+  var bestByTest={}; S.attempts.forEach(function(a){if(HubLogic.isPartial(a))return;
+    var b=bestByTest[a.test_id];if(!b||a.score>b.score)bestByTest[a.test_id]=a;});
+  var todo=[],done=[];
+  S.tests.forEach(function(t){
+    var unlocked=HubLogic.isUnlocked(t,uc);
+    if(!unlocked){todo.push(renderLockedCard(t,uc));return;}
+    if(doneIds[t.id])done.push(renderTestCard(t,bestByTest[t.id]));
+    else todo.push(renderTestCard(t,null));
+  });
+  // „Aleg materia de mâine": se aplică în prima zi de DUPĂ cumpărare, atunci
+  // se și marchează folosită. Materia aleasă trece prima în listă.
+  var am=HubLogic.rambursareActiva("alege_materie",S.redemptions);
+  if(am&&String(am.created_at).slice(0,10)<todayStr()&&am.param){
+    var pref=am.param==="mate"?"mate":"romana";
+    done=[];
+    var todoPref=[],todoRest=[];
+    S.tests.forEach(function(t){
+      var unlocked=HubLogic.isUnlocked(t,uc);
+      if(!unlocked){todoRest.push(renderLockedCard(t,uc));return;}
+      if(doneIds[t.id]){done.push(renderTestCard(t,bestByTest[t.id]));return;}
+      var sj=(t.subject==="mate")?"mate":"romana";
+      (sj===pref?todoPref:todoRest).push(renderTestCard(t,null));});
+    todo=todoPref.concat(todoRest);
+    if(todoPref.length)setStareRambursare(am.id,"aplicat");
+  }
+  // teste deblocate nerezolvate primele, apoi cele blocate
+  if(pasAzi){
+    $("aPas").textContent="Azi ai luat Pas. Seria ta rămâne. Ne vedem mâine.";
+    $("aPas").classList.remove("hidden");
+    $("aronTodo").innerHTML='<div class="notice small">Ziua de azi e liberă. Testul te așteaptă mâine.</div>';
+  }else{
+    $("aPas").classList.add("hidden");
+    $("aronTodo").innerHTML=todo.join("")||'<div class="notice small">Nimic de rezolvat acum — bravo! 🎉</div>';
+  }
+  $("aronDone").innerHTML=done.join("")||'<div class="notice small">Aici apar testele deja rezolvate, pentru antrenament.</div>';
+  // progres pe termen lung: raportat la ÎNTREG planul (până la plan_end), nu la câte teste
+  // sunt încărcate momentan în bază — altfel ținta ar tot crește și l-ar induce în eroare.
+  var totalUnits = S.settings.plan_end
+    ? HubLogic.unlockedCount(S.settings.start_date, S.settings.cadence_days, S.settings.plan_end)
+    : S.tests.length;
+  var doneUnits=Object.keys(doneIds).length;
+  if(doneUnits>totalUnits)totalUnits=doneUnits;
+  var covPct=totalUnits?Math.round(doneUnits/totalUnits*100):0;
+  $("aCovLab").textContent=doneUnits+" din "+totalUnits;
+  $("aCovBar").style.width=covPct+"%";
+  $("aCovSub").textContent=doneUnits>=totalUnits?"Ai terminat toată recapitularea. 🏆"
+    :("Mai ai "+(totalUnits-doneUnits)+" până pe "+roDate(S.settings.plan_end||todayStr())+", când începe școala.");
+  var nextDate=HubLogic.addDays(S.settings.start_date, uc*S.settings.cadence_days);
+  var remaining=S.tests.length-uc;
+  $("aronLockInfo").textContent = remaining>0 ? ("Următorul test se deblochează pe "+roDate(nextDate)) : "Ai deblocat toate testele disponibile.";
+  show("screenAron");
+}
+function roDate(d){var m=["ian","feb","mar","apr","mai","iun","iul","aug","sep","oct","nov","dec"];
+  if(!(d instanceof Date)){ // acceptă și text „2026-09-06” venit din baza de date
+    var p=String(d).slice(0,10).split("-");
+    if(p.length!==3)return String(d);
+    d=new Date(Number(p[0]),Number(p[1])-1,Number(p[2]));
+    if(isNaN(d.getTime()))return "";
+  }
+  return d.getDate()+" "+m[d.getMonth()];}
+function renderTestCard(t,best){
+  var cls=t.subject==="mate"?"mate":"rom", ico=t.subject==="mate"?"🔢":"✏️";
+  var badge=best?('<span class="badge done">'+best.score+"/"+best.max_score+"</span>"):
+    ('<span class="pill '+cls+'">nou</span>');
+  return '<button class="card test '+cls+'" onclick="openTest(\''+t.id+'\')">'+
+    '<div class="ico">'+ico+'</div><div class="body"><div class="tt">'+esc(t.topic)+'</div>'+
+    '<div class="mt">'+esc(t.title)+'</div></div>'+badge+'<div class="go">›</div></button>';
+}
+function renderLockedCard(t,uc){
+  var cls=t.subject==="mate"?"mate":"rom", ico=t.subject==="mate"?"🔢":"✏️";
+  var when=HubLogic.addDays(S.settings.start_date,(t.release_order-1)*S.settings.cadence_days);
+  return '<div class="card test '+cls+' locked"><div class="ico">'+ico+'</div>'+
+    '<div class="body"><div class="tt">'+esc(t.topic)+'</div><div class="mt">se deblochează pe '+roDate(when)+'</div></div>'+
+    '<span class="badge lock">🔒</span></div>';
+}
+
+/* ---- INTRO: predictibilitate + o alegere reală ----
+   Aron „preferă să știe la ce să se aștepte” și nu are, în rest, nicio alegere
+   în aplicație. „Doar 4 azi” e ieșirea cinstită în locul celei pe care și-o
+   ia singur (răspunsuri la nimereală). Cele 4 sunt întrebările nevăzute,
+   deci două sesiuni scurte parcurg tot testul. */
+var introId=null;
+function openTest(testId){
+  var t=S.tests.find(function(x){return x.id===testId;});if(!t)return;
+  introId=testId;
+  var rest=HubLogic.nextIndices(t,S.attempts,t.questions.length).length;
+  var total=t.questions.length;
+  $("iTopic").textContent=t.topic;
+  $("iTitle").textContent=t.title;
+  $("iMeta").textContent=(rest<total)
+    ? (rest+" întrebări rămase din "+total+" · vreo "+Math.max(1,Math.round(rest*0.8))+" minute")
+    : (total+" întrebări · vreo "+Math.max(1,Math.round(total*0.8))+" minute");
+  var shortN=Math.min(HubLogic.SHORT_N,rest);
+  if(rest<=HubLogic.SHORT_N){
+    $("iShort").classList.add("hidden"); $("iHint").textContent="";
+  }else{
+    $("iShort").classList.remove("hidden");
+    $("iShort").textContent="Doar "+shortN+" întrebări azi";
+    $("iHint").textContent="Restul rămân pe mâine. Patru făcute cu cap valorează mai mult decât opt pe fugă.";
+  }
+  // Recuperarea e a treia alegere, niciodată prima și niciodată automată.
+  var pool=jetoaneActive()?HubLogic.recoveryPool(S.attempts,S.tests,S.recoveries,todayStr()):[];
+  if(pool.length){
+    $("iRec").textContent="🔁 "+pool.length+(pool.length===1?" întrebare de reluat":" întrebări de reluat")+
+      " (+"+(pool.length*HubLogic.JETON_REC)+" 🪙)";
+    $("iRec").classList.remove("hidden");
+  }else{$("iRec").classList.add("hidden");}
+  show("screenIntro");
+}
+
+/* ---- QUIZ ---- */
+function startQuiz(testId,mode){
+  var t=S.tests.find(function(x){return x.id===testId;});if(!t)return;
+  var qu;
+  if(mode==="short"){ qu=HubLogic.nextIndices(t,S.attempts,HubLogic.SHORT_N); }
+  else { qu=HubLogic.nextIndices(t,S.attempts,t.questions.length); }
+  if(!qu.length){qu=[];for(var k=0;k<t.questions.length;k++)qu.push(k);}
+  quiz={test:t,queue:qu,base:qu.length,pos:0,answers:[],given:null,answered:false,requeued:{},sel:null,picked:[],
+    times:[],rushed:0,wrongRun:0,t0:0,activeMs:0,tick:Date.now(),mode:(mode==="short"?"short":"full")};
+  // „Aleg ordinea în test" — cumpărat, se aplică la primul test de după
+  var ro=HubLogic.rambursareActiva("ordine",S.redemptions);
+  if(ro){
+    var mix=shuffled(quiz.queue.length,7);
+    quiz.queue=mix.map(function(k){return qu[k];});
+    setStareRambursare(ro.id,"aplicat");
+  }
+  renderQuestion(); show("screenQuiz");
+}
+/* Ceasul sesiunii: se adună doar intervalele dintre acțiuni reale, fiecare
+   plafonat la IDLE_CAP. Dacă lasă telefonul din mână 20 de minute, intră 2. */
+function tickActive(){
+  if(!quiz)return;
+  var now=Date.now(), d=now-(quiz.tick||now);
+  if(d<0)d=0;
+  if(d>HubLogic.IDLE_CAP_MS)d=HubLogic.IDLE_CAP_MS;
+  quiz.activeMs=(quiz.activeMs||0)+d;
+  quiz.tick=now;
+}
+function curIdx(){return quiz.queue[quiz.pos];}
+function shuffled(n,seed){var a=[],i;for(i=0;i<n;i++)a.push(i);
+  for(i=n-1;i>0;i--){seed=(seed*1103515245+12345)%2147483648;var j=seed%(i+1);var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function renderQuestion(){
+  var t=quiz.test,q=t.questions[curIdx()],cls=t.subject==="mate"?"mate":"rom";
+  $("qProg").className="qprog"+(cls==="rom"?" rom":"");
+  // bara și numărătoarea se raportează la sesiunea de azi; cardurile revenite nu o fac să pară mai lungă
+  var base=quiz.base||t.questions.length;
+  $("qProg").firstElementChild.style.width=Math.round(Math.min(quiz.pos,base)/base*100)+"%";
+  $("qCount").textContent=(quiz.pos<base)?((quiz.pos+1)+"/"+base):"revenire";
+  $("qTopic").className="pill "+cls; $("qTopic").textContent=(t.subject==="mate"?"🔢 ":"✏️ ")+t.topic;
+  $("qText").textContent=q.q;
+  quiz.answered=false; quiz.given=null; quiz.sel=null; quiz.picked=[];
+  quiz.t0=Date.now(); // se măsoară, nu se afișează niciodată
+  $("qFeedback").classList.add("hidden"); $("qNext").classList.add("hidden"); $("qStop").classList.add("hidden");
+  var body="";
+  if(q.type==="flash"){
+    body='<div class="opts"><button class="opt" id="flashReveal" onclick="flashReveal()">'+
+      '<span>👀 Arată răspunsul</span></button></div>'+
+      '<div id="flashBack" class="hidden"><div class="feedback ok" style="margin-top:10px"><b>Răspuns</b>'+esc(q.answer||"")+'</div>'+
+      '<div class="opts" style="margin-top:10px">'+
+      '<button class="opt" onclick="flashAnswer(true)"><span class="lt">✓</span><span>Am știut</span></button>'+
+      '<button class="opt" onclick="flashAnswer(false)"><span class="lt">✗</span><span>N-am știut</span></button></div></div>';
+  }else if(q.type==="match"){
+    var ordR=shuffled(q.pairs.length,curIdx()+7);
+    quiz.rmap=ordR;
+    body='<div class="opts" id="matchL">'+q.pairs.map(function(p,idx){
+      return '<button class="opt" id="ml'+idx+'" onclick="matchPickL('+idx+')"><span class="lt">'+(idx+1)+'</span><span>'+esc(p[0])+'</span></button>';
+    }).join("")+'</div><div style="height:8px"></div><div class="opts" id="matchR">'+ordR.map(function(orig,pos){
+      return '<button class="opt" id="mr'+pos+'" onclick="matchPickR('+pos+')"><span class="lt">'+String.fromCharCode(65+pos)+'</span><span>'+esc(q.pairs[orig][1])+'</span></button>';
+    }).join("")+'</div>';
+  }else if(q.type==="order"){
+    var ordO=shuffled(q.items.length,curIdx()+13);
+    quiz.omap=ordO;
+    body='<div class="opts" id="orderList">'+ordO.map(function(orig,pos){
+      return '<button class="opt" id="oi'+pos+'" onclick="orderPick('+pos+')"><span class="lt">·</span><span>'+esc(q.items[orig])+'</span></button>';
+    }).join("")+'</div><div style="margin-top:12px"><button class="btn '+(cls==="rom"?"rom":"")+'" id="orderGo" onclick="orderSubmit()" disabled>Verifică</button>'+
+      '<button class="btn ghost" style="margin-top:8px" onclick="orderReset()">Reia ordinea</button></div>';
+  }else if(q.type==="choice"){
+    body='<div class="opts">'+q.options.map(function(o,idx){
+      return '<button class="opt" id="opt'+idx+'" onclick="answerChoice('+idx+')">'+
+        '<span class="lt">'+String.fromCharCode(65+idx)+'</span><span>'+esc(o)+'</span></button>';
+    }).join("")+'</div>';
+  }else if(q.type==="truefalse"){
+    body='<div class="opts"><button class="opt" onclick="answerTF(true)"><span class="lt">A</span>Adevărat</button>'+
+      '<button class="opt" onclick="answerTF(false)"><span class="lt">F</span>Fals</button></div>';
+  }else{
+    body='<input class="numin" id="numIn" inputmode="numeric" autocomplete="off" placeholder="răspunsul tău" '+
+      'onkeydown="if(event.key===\'Enter\')submitNum()"><div style="margin-top:12px">'+
+      '<button class="btn '+(cls==="rom"?"rom":"")+'" onclick="submitNum()">Verifică</button></div>';
+  }
+  $("qBody").innerHTML=body;
+  if(q.type==="number")setTimeout(function(){var e=$("numIn");if(e)e.focus();},60);
+}
+function lockChoiceButtons(){var b=$("qBody").querySelectorAll(".opt");b.forEach(function(x){x.disabled=true;});}
+/* --- flashcards --- */
+function flashReveal(){$("flashReveal").classList.add("hidden");$("flashBack").classList.remove("hidden");}
+function flashAnswer(knew){
+  if(quiz.answered)return; var i=curIdx(),q=quiz.test.questions[i];
+  quiz.given=knew; grade(q,knew); lockChoiceButtons();
+  if(!knew&&!quiz.requeued[i]){quiz.requeued[i]=true;quiz.queue.push(i);
+    $("qFeedback").innerHTML+="<br><i>Cardul revine la finalul rundei.</i>";}
+}
+/* --- potrivire perechi --- */
+function matchPickL(idx){ if(quiz.answered)return;
+  // reatingerea unei perechi deja făcute o desface: o atingere greșită pe telefon
+  // nu mai înseamnă răspuns greșit garantat
+  if(quiz.picked[idx]!==undefined){ quiz.picked[idx]=undefined;
+    var e0=$("ml"+idx); if(e0)e0.querySelector(".lt").textContent=(idx+1); }
+  quiz.sel=idx;
+  quiz.test.questions[curIdx()].pairs.forEach(function(_,k){var e=$("ml"+k);if(e)e.classList.toggle("sel",k===idx);}); }
+function matchPickR(pos){
+  if(quiz.answered||quiz.sel===null)return; var q=quiz.test.questions[curIdx()];
+  quiz.picked[quiz.sel]=quiz.rmap[pos];
+  var l=$("ml"+quiz.sel); if(l)l.querySelector(".lt").textContent=String.fromCharCode(65+pos);
+  $("ml"+quiz.sel).classList.remove("sel"); quiz.sel=null;
+  var done=true;for(var k=0;k<q.pairs.length;k++){if(quiz.picked[k]===undefined)done=false;}
+  if(done){var g=quiz.picked.slice(); grade(q,g); lockChoiceButtons();
+    if(!HubLogic.gradeQuestion(q,g)){var s=q.pairs.map(function(p,k){return (k+1)+" → "+p[1];}).join("; ");
+      $("qFeedback").innerHTML+="<br><i>Corect: "+esc(s)+"</i>";}}
+}
+/* --- ordonare --- */
+function orderPick(pos){
+  if(quiz.answered)return; var e=$("oi"+pos); if(!e||e.classList.contains("sel"))return;
+  quiz.picked.push(quiz.omap[pos]); e.classList.add("sel"); e.querySelector(".lt").textContent=quiz.picked.length;
+  if(quiz.picked.length===quiz.omap.length)$("orderGo").disabled=false;
+}
+function orderReset(){
+  if(quiz.answered)return; quiz.picked=[];
+  quiz.omap.forEach(function(_,pos){var e=$("oi"+pos);
+    if(e){e.classList.remove("sel");e.querySelector(".lt").textContent="·";}});
+  $("orderGo").disabled=true;
+}
+function orderSubmit(){
+  if(quiz.answered)return; var q=quiz.test.questions[curIdx()],g=quiz.picked.slice();
+  grade(q,g); lockChoiceButtons(); $("orderGo").disabled=true;
+  if(!HubLogic.gradeQuestion(q,g))$("qFeedback").innerHTML+="<br><i>Ordinea corectă: "+esc(q.items.join(" → "))+"</i>";
+}
+function answerChoice(idx){
+  if(quiz.answered)return; var q=quiz.test.questions[curIdx()];
+  quiz.given=idx; grade(q,idx);
+  lockChoiceButtons();
+  $("opt"+idx).classList.add(HubLogic.gradeQuestion(q,idx)?"correct":"wrong");
+  if(!HubLogic.gradeQuestion(q,idx)) $("opt"+q.correct).classList.add("correct");
+}
+function answerTF(v){
+  if(quiz.answered)return; var q=quiz.test.questions[curIdx()];
+  quiz.given=v; grade(q,v); lockChoiceButtons();
+}
+function submitNum(){
+  if(quiz.answered)return; var q=quiz.test.questions[curIdx()],e=$("numIn"); if(!e||e.value.trim()==="")return;
+  quiz.given=e.value; e.disabled=true; grade(q,e.value);
+}
+function grade(q,given){
+  var i=curIdx();
+  quiz.answered=true;
+  tickActive();
+  var ms=quiz.t0?(Date.now()-quiz.t0):0;
+  var rushed=HubLogic.isRushed(q,ms);
+  if(quiz.answers[i]===undefined){ // se păstrează primul răspuns (statistici oneste)
+    quiz.answers[i]=given;
+    quiz.times[i]=ms;
+    if(rushed)quiz.rushed++;
+  }
+  var ok=HubLogic.gradeQuestion(q,given);
+  // „încă nu”, nu „greșit”; iar explicația vorbește despre regulă, nu despre el
+  var head=ok?"Corect ✓":"Încă nu";
+  var lead=(!ok&&rushed)?"Cerința asta cere citită de două ori. ":"";
+  var fb=$("qFeedback"); fb.className="feedback "+(ok?"ok":"no");
+  fb.innerHTML="<b>"+head+"</b>"+esc(lead+(q.explain||""));
+  fb.classList.remove("hidden");
+  quiz.wrongRun=ok?0:(quiz.wrongRun+1);
+  var last=(quiz.pos+1>=quiz.queue.length);
+  $("qNext").classList.remove("hidden");
+  $("qNext").textContent=last?"Vezi rezultatul 🎉":"Continuă →";
+  if(quiz.test.subject!=="mate")$("qNext").classList.add("rom");else $("qNext").classList.remove("rom");
+  // Regula celor două greșeli consecutive: nu se insistă pe a treia.
+  // Se oferă o ieșire, formulată ca alegere, nu ca eșec.
+  if(quiz.wrongRun>=HubLogic.WALL_LIMIT && !last){
+    $("qNext").textContent="Mai încerc una";
+    $("qStop").classList.remove("hidden");
+    fb.innerHTML+='<div class="softnote">Două la rând înseamnă doar că partea asta e încă nouă. '+
+      'Poți continua sau te oprești aici — ce ai făcut până acum se păstrează.</div>';
+  }
+}
+function nextQuestion(){
+  tickActive();
+  if(quiz.pos+1<quiz.queue.length){quiz.pos++;renderQuestion();return;}
+  return finishQuiz(false); // se întoarce promisiunea, ca salvarea să poată fi așteptată
+}
+function stopEarly(){ return finishQuiz(true); }
+function confirmQuit(){ if(confirm("Ieși din test? Progresul acestui test nu se salvează."))showAron(); }
+
+/* Recapitularea greșelilor — momentul cu cel mai mare randament din tot testul.
+   Înainte, explicațiile treceau pe ecran în timpul jocului și dispăreau. */
+function renderMistakes(t,answers){
+  var rows=[];
+  (t.questions||[]).forEach(function(q,i){
+    if(answers[i]===undefined)return;
+    if(HubLogic.gradeQuestion(q,answers[i]))return;
+    rows.push('<div class="mist"><div class="mq">'+esc(q.q)+'</div>'+
+      '<div class="mx">'+esc(q.explain||q.answer||"")+'</div></div>');
+  });
+  $("rMistakes").innerHTML = rows.length
+    ? '<div class="section-h">De reținut</div><div class="card" style="padding:6px 16px">'+rows.join("")+'</div>'
+    : "";
+}
+async function finishQuiz(stoppedEarly){
+  tickActive();
+  if(quiz.rec)return finishRecovery();   // recuperarea are propriul flux și propria tabelă
+  var t=quiz.test;
+  var castInainte=HubLogic.castigate(S.attempts,S.recoveries);
+  // Dacă din orice motiv ceasul sesiunii n-a pornit, se cade pe suma timpilor
+  // pe întrebare — mai mică decât realitatea, dar niciodată zero pe o sesiune reală.
+  var sumaTimpi=0;(quiz.times||[]).forEach(function(x){if(x)sumaTimpi+=x;});
+  var minuteLucrate=HubLogic.minutesOf(quiz.activeMs||sumaTimpi);
+  var sig=HubLogic.randomSignals(t,quiz.answers,quiz.times);
+  var random=HubLogic.looksRandom(t,quiz.answers,quiz.times);
+  var saveAnswers,answeredCount,partial;
+  if(random){
+    // nu se amestecă în istoric și nu se pune la socoteală
+    saveAnswers=quiz.answers;
+    answeredCount=HubLogic.answeredCountOf(saveAnswers,t);
+    partial=true;
+  }else{
+    // sesiunile scurte se adună: răspunsurile de azi se lipesc peste cele de dinainte
+    saveAnswers=HubLogic.mergeAnswers(S.attempts,t,quiz.answers);
+    answeredCount=HubLogic.answeredCountOf(saveAnswers,t);
+    partial=stoppedEarly?true:(answeredCount<t.questions.length);
+  }
+  var res=HubLogic.scoreAttempt(t,saveAnswers,partial?answeredCount:null);
+  var xpEarned=random?0:Math.max(0,res.xp-HubLogic.xpAlready(S.attempts,t.id)); // o singură dată pe test
+  var row={test_id:t.id,student:"aron",answers:saveAnswers,score:res.score,max_score:res.max,xp:xpEarned,
+    meta:{partial:partial,random:random,mode:quiz.mode,stopped:!!stoppedEarly,
+      times:quiz.times,rushed:quiz.rushed,semnale:sig,
+      activ_ms:quiz.activeMs||0,minute:minuteLucrate,v:APP_VERSION}};
+  var saved=true;
+  try{
+    var r=await sb.from("attempts").insert([row]);
+    if(r&&r.error)throw r.error;
+    await refresh();
+  }catch(e){
+    saved=false; queuePush(row);
+    var local={}; Object.keys(row).forEach(function(k){local[k]=row[k];});
+    local.created_at=new Date().toISOString();
+    S.attempts=S.attempts.concat([local]); // ca hub-ul să arate corect până la retrimitere
+  }
+  var pct=res.max?Math.round(res.score/res.max*100):0;
+  if(random){
+    // fără acuzație, fără blocare: pur și simplu nu se pune la socoteală, iar seria rămâne
+    $("rEmoji").textContent="⏭️";
+    $("rTitle").textContent="Nu o punem la socoteală";
+    $("rScore").textContent="A mers prea repede ca să conteze la progres. Seria ta rămâne — ai venit azi. "+
+      "Testul revine mâine, sau îl poți relua acum, dacă ai chef.";
+  }else{
+    $("rEmoji").textContent=partial?"🌱":pct===100?"🏆":pct>=70?"🎉":pct>=40?"💪":"📚";
+    $("rTitle").textContent=partial?"Ne oprim aici":
+      pct===100?"Perfect!":pct>=70?"Bravo!":pct>=40?"Bun început!":"Ai dus-o până la capăt";
+    $("rScore").textContent=partial
+      ? ("Din "+res.max+" întrebări, "+res.score+" corecte. Restul te așteaptă mâine.")
+      : ("Ai răspuns corect la "+res.score+" din "+res.max+" întrebări.");
+  }
+  // Cât a câștigat ACUM, nu la ce sold a ajuns: dacă nu vede plata, nu există.
+  var jetCastigate=HubLogic.castigate(S.attempts,S.recoveries)-castInainte;
+  var bucati=[];
+  if(jetCastigate>0)bucati.push("+"+jetCastigate+" 🪙");
+  if(xpEarned>0)bucati.push("+"+xpEarned+" XP");
+  if(bucati.length){$("rXp").textContent=bucati.join(" · ");$("rXp").classList.remove("hidden");}
+  else{$("rXp").classList.add("hidden");}
+  // Contorul se arată abia acum, la final, și doar ca socoteală de timp de ecran.
+  // Nu e o notă de viteză: nu apare „repede”/„încet” și nu se compară cu nimic.
+  if(minuteLucrate>0){
+    $("rTime").textContent="⏱ "+minuteLucrate+(minuteLucrate===1?" minut":" minute")+
+      " de învățat. Nu se scad din cele 50 — ți le primești înapoi.";
+    $("rTime").classList.remove("hidden");
+  }else{$("rTime").classList.add("hidden");}
+  introId=t.id;
+  if(random)$("rRetry").classList.remove("hidden"); else $("rRetry").classList.add("hidden");
+  if(saved){$("rNote").classList.add("hidden");$("rNote").textContent="";}
+  else{$("rNote").textContent="Salvat pe telefon — se trimite singur când revine internetul.";
+    $("rNote").classList.remove("hidden");}
+  renderMistakes(t,quiz.answers);
+  show("screenResult");
+}
+
+/* ================= MAGAZIN ȘI JETOANE =================
+   Prețurile sunt vizibile de la început, inclusiv ce nu-și permite, cu
+   distanța până acolo. Țintele inaccesibile-dar-vizibile sunt motorul
+   economisirii — de aceea nimic nu se ascunde. */
+var LUNI_SCURT=["ian","feb","mar","apr","mai","iun","iul","aug","sep","oct","noi","dec"];
+function ziScurt(s){
+  var p=String(s).slice(0,10).split("-");
+  if(p.length<3)return String(s);
+  return Number(p[2])+" "+(LUNI_SCURT[Number(p[1])-1]||"");}
+/* O singură listă, ordonată după preț. Cu cinci recompense, trei titluri de raft
+   erau mai mult zgomot decât structură; iar ordonarea după cost pune sus ce-și
+   permite azi și jos ținta pentru care merită să strângă. `raft` rămâne în bază,
+   pentru raport și pentru ziua în care catalogul crește destul cât să conteze. */
+/* Tariful ca listă de prețuri, nu ca paragraf: trei rânduri, suma în dreapta,
+   aliniate ca în magazin. Un copil de 11 ani scanează o coloană de cifre; un
+   bloc de text cu cifre îngropate în el nu se citește, se sare. */
+function randTarif(eticheta,limita,plata){
+  return '<div class="trow">'+
+    '<div style="flex:1 1 auto;min-width:0;font-size:14px;line-height:1.3">'+eticheta+
+      (limita?'<div class="small" style="opacity:.75;margin-top:2px">'+limita+'</div>':'')+'</div>'+
+    '<div style="font-weight:800;font-size:15px;white-space:nowrap;margin-left:12px">'+plata+'</div></div>';
+}
+function textTarif(){
+  var p="+"+HubLogic.JETON_TEST+" 🪙", r="+"+HubLogic.JETON_REC+" 🪙";
+  return randTarif("Termini un test","",p)+
+    randTarif("Repari o greșeală veche","cel mult "+HubLogic.REC_MAX_ZI+" pe zi",r)+
+    randTarif("Lucrezi o pagină nouă de caiet, apoi o corectezi cu mama","cel mult "+HubLogic.CAIET_MAX_ZI+" pe zi",r)+
+    '<div class="small" style="margin-top:10px;opacity:.8">Nu contează câte ai nimerit. Contează că ai dus-o până la capăt.</div>';
+}
+function showShop(){
+  var s=jetoane();
+  $("sJet").textContent=s+" 🪙";
+  $("sCum").innerHTML=textTarif();
+  var html="";
+  var items=(S.rewards||[]).filter(function(r){return r.activ!==false;})
+    .sort(function(a,b){return (a.cost-b.cost)||((a.ordine||0)-(b.ordine||0));});
+  if(items.length){
+    html+='<div class="section-h">Ce poți lua</div><div class="card" style="padding:6px 16px">';
+    items.forEach(function(r){
+      var c=HubLogic.poateCumpara(r,S.redemptions,todayStr(),s),stare;
+      if(c.ok)stare='<button class="btn" style="width:auto;padding:8px 14px" onclick="buyReward(\''+r.id+'\')">'+r.cost+' 🪙</button>';
+      else if(c.motiv==="sold")stare='<span class="small">'+r.cost+' 🪙 · îți mai trebuie '+c.lipsesc+'</span>';
+      else stare='<span class="small">iar de pe '+ziScurt(c.din)+'</span>';
+      var ic=ICONS[r.id]?'<img src="'+ICONS[r.id]+'" alt="" width="46" height="46" style="border-radius:13px;flex:0 0 auto">':'';
+      html+='<div class="mist" style="display:flex;gap:12px;align-items:center">'+ic+
+        '<div style="flex:1 1 auto;min-width:0">'+
+        '<div class="mq" style="display:flex;justify-content:space-between;gap:12px;align-items:center">'+
+        '<span>'+esc(r.nume)+'</span>'+stare+'</div>'+
+        (r.descriere?'<div class="mx">'+esc(r.descriere)+'</div>':'')+'</div></div>';});
+    html+='</div>';}
+  $("shopBody").innerHTML=html||'<div class="notice small">Magazinul se deschide în curând.</div>';
+  show("screenShop");
+}
+async function buyReward(id){
+  var r=(S.rewards||[]).find(function(x){return x.id===id;}); if(!r)return;
+  var s=jetoane();
+  var c=HubLogic.poateCumpara(r,S.redemptions,todayStr(),s);
+  if(!c.ok)return;
+  var param=null;
+  if(r.efect==="alege_materie"){
+    param=confirm("Mâine mate?\n\nOK = mate, Anulează = română")?"mate":"romana";
+  }else if(r.efect==="comanda_test"){
+    param=prompt("Ce temă vrei să exersezi?","");
+    if(param===null||!String(param).trim())return;
+    param=String(param).trim().slice(0,120);
+  }
+  // confirmarea arată soldul rămas: apasă repede, nu vrem cumpărături din greșeală
+  if(!confirm(r.nume+" — "+r.cost+" 🪙\nÎți rămân "+(s-r.cost)+"."))return;
+  var row={reward_id:r.id,student:"aron",cost:r.cost,efect:r.efect||null,param:param,
+    stare:(r.efect==="pas")?"aplicat":"cerut"};
+  if(r.efect==="pas")row.aplicat_la=todayStr();
+  try{
+    var res=await sb.from("redemptions").insert([row]);
+    if(res&&res.error)throw res.error;
+    await refresh();
+  }catch(e){
+    var local={};Object.keys(row).forEach(function(k){local[k]=row[k];});
+    local.created_at=new Date().toISOString(); local.id="local-"+Date.now();
+    S.redemptions=S.redemptions.concat([local]);
+  }
+  // confirmare seacă, fără laudă: lauda la cheltuire ar transforma recompensa în test de caracter
+  alert("Ai luat: "+r.nume+".");
+  if(r.efect==="pas"){showAron();return;}
+  showShop();
+}
+async function setStareRambursare(rid,stare){
+  try{ await sb.from("redemptions").update({stare:stare,aplicat_la:todayStr()}).eq("id",rid); }catch(e){}
+  (S.redemptions||[]).forEach(function(r){if(r.id===rid){r.stare=stare;r.aplicat_la=todayStr();}});
+}
+function onoreaza(rid){ setStareRambursare(rid,"onorat").then(showParent,showParent); }
+/* Anularea în aceeași zi, cu jetoanele înapoi — pentru remușcarea de la 11 ani,
+   nu ca instrument de corecție al adultului. */
+function anuleaza(rid){
+  if(!confirm("Anulezi cumpărătura? Jetoanele se întorc."))return;
+  setStareRambursare(rid,"anulat").then(showParent,showParent);
+}
+
+/* ================= RECUPERAREA =================
+   Corectarea aleasă nu e zid. Corectarea impusă e. De aceea nu pornește
+   niciodată singură — e un buton, lângă celelalte, la ecranul de intro. */
+function startRecovery(){
+  var pool=HubLogic.recoveryPool(S.attempts,S.tests,S.recoveries,todayStr());
+  if(!pool.length)return;
+  var t={id:"__recuperare",subject:pool[0].subject||"mate",topic:"Recuperare",
+    title:"Recuperare",questions:pool.map(function(p){return p.q;})};
+  var qu=[];for(var i=0;i<pool.length;i++)qu.push(i);
+  quiz={test:t,queue:qu,base:qu.length,pos:0,answers:[],given:null,answered:false,requeued:{},
+    sel:null,picked:[],times:[],rushed:0,wrongRun:0,t0:0,activeMs:0,tick:Date.now(),
+    mode:"rec",rec:pool};
+  renderQuestion(); show("screenQuiz");
+}
+async function finishRecovery(){
+  var t=quiz.test,pool=quiz.rec,items=[],corecte=0;
+  pool.forEach(function(p,i){
+    var ok=HubLogic.gradeQuestion(t.questions[i],quiz.answers[i]);
+    if(ok)corecte++;
+    items.push({src:p.src,q:HubLogic.cheieRec(p.testId,p.idx),ok:!!ok});});
+  var sumaTimpi=0;(quiz.times||[]).forEach(function(x){if(x)sumaTimpi+=x;});
+  var minute=HubLogic.minutesOf(quiz.activeMs||sumaTimpi);
+  var row={student:"aron",items:items,corecte:corecte,total:items.length,
+    meta:{times:quiz.times,activ_ms:quiz.activeMs||0,minute:minute,v:APP_VERSION}};
+  var saved=true;
+  try{
+    var r=await sb.from("recoveries").insert([row]);
+    if(r&&r.error)throw r.error;
+    await refresh();
+  }catch(e){
+    saved=false;
+    var local={};Object.keys(row).forEach(function(k){local[k]=row[k];});
+    local.created_at=new Date().toISOString();
+    S.recoveries=S.recoveries.concat([local]);
+  }
+  var castig=corecte*HubLogic.JETON_REC;
+  $("rEmoji").textContent="🔁";
+  $("rTitle").textContent="Recuperare";
+  $("rScore").textContent=corecte+" din "+items.length+" reluate corect. "+
+    (corecte===items.length?"Toate.":"Restul se mai întorc.");
+  if(castig>0){$("rXp").textContent="+"+castig+" 🪙";$("rXp").classList.remove("hidden");}
+  else{$("rXp").classList.add("hidden");}
+  if(minute>0){
+    $("rTime").textContent="⏱ "+minute+(minute===1?" minut":" minute")+
+      " de învățat. Nu se scad din cele 50 — ți le primești înapoi.";
+    $("rTime").classList.remove("hidden");
+  }else{$("rTime").classList.add("hidden");}
+  $("rRetry").classList.add("hidden");
+  if(saved){$("rNote").classList.add("hidden");$("rNote").textContent="";}
+  else{$("rNote").textContent="Salvat pe telefon — se trimite singur când revine internetul.";
+    $("rNote").classList.remove("hidden");}
+  renderMistakes(t,quiz.answers);
+  show("screenResult");
+}
+
+/* ---- CAIETUL DE VACANȚĂ ----
+   Singura plată din economie care nu poate fi verificată de aplicație, deci
+   singura care trece printr-un adult. De aceea are reguli stricte: tarif fix,
+   plafon zilnic, și se apasă DUPĂ ce ați corectat pagina împreună — nu după ce
+   a completat-o. Nu se folosește pentru tema de la școală: ce trebuie făcut
+   oricum nu se cumpără, altfel peste câteva luni nu mai vrea să facă neplătit. */
+function renderCaiet(){
+  var azi=HubLogic.paginiCaietAzi(S.recoveries,todayStr());
+  var mai=HubLogic.maiPoateCaiet(S.recoveries,todayStr());
+  var buton=mai>0
+    ? '<button class="btn" style="width:auto;padding:10px 16px" onclick="adaugaPaginaCaiet()">A lucrat o pagină și am corectat-o cu el · +'+HubLogic.JETON_REC+' 🪙</button>'
+    : '<span class="small">Plafonul de azi e atins. Revine mâine.</span>';
+  $("pCaiet").innerHTML=
+    '<div class="trow"><div style="min-width:140px;font-size:14px;font-weight:600">Azi</div>'+
+    '<div style="font-size:14px">'+azi+' din '+HubLogic.CAIET_MAX_ZI+' pagini</div></div>'+
+    '<div style="margin:10px 0">'+buton+'</div>'+
+    '<div class="notice small">Pagină lucrată acum, nu una veche: o face, apoi treceți împreună peste ea și repară ce a greșit. Se apasă la final, nu când a terminat de scris. Volumul l-ar plăti pe cel rapid; corectarea îl plătește pe cel atent.</div>';
+}
+async function adaugaPaginaCaiet(){
+  if(HubLogic.maiPoateCaiet(S.recoveries,todayStr())<=0)return;
+  if(!confirm("A lucrat o pagină de caiet și ați corectat-o împreună?\n\nAron primește +"+HubLogic.JETON_REC+" 🪙."))return;
+  var row={student:"aron",items:[],corecte:1,total:1,sursa:"caiet",
+    meta:{v:APP_VERSION,manual:true}};
+  try{
+    var r=await sb.from("recoveries").insert([row]);
+    if(r&&r.error)throw r.error;
+    await refresh();
+  }catch(e){
+    var local={};Object.keys(row).forEach(function(k){local[k]=row[k];});
+    local.created_at=new Date().toISOString();
+    S.recoveries=S.recoveries.concat([local]);
+  }
+  showParent();
+}
+/* ---- RAPORT PENTRU CLAUDE ---- */
+function buildReport(){
+  var bid={}; S.tests.forEach(function(t){bid[t.id]=t;});
+  var fa={}; S.attempts.slice().sort(function(a,b){return new Date(a.created_at)-new Date(b.created_at);})
+    .forEach(function(a){if(!fa[a.test_id])fa[a.test_id]=a;});
+  var rows=Object.keys(fa).map(function(k){
+    var a=fa[k],t=bid[k]; if(!t)return null;
+    var wrong=[],grabit=[],tm=(a.meta&&a.meta.times)||[];
+    (t.questions||[]).forEach(function(q,i){
+      var g=(a.answers||[])[i];
+      if(g===undefined)return;
+      if(!HubLogic.gradeQuestion(q,g)) wrong.push(i+1);
+      if(HubLogic.isRushed(q,tm[i])) grabit.push(i+1);
+    });
+    var secs=tm.filter(function(x){return !!x;});
+    var mediu=secs.length?Math.round(secs.reduce(function(s,x){return s+x;},0)/secs.length/1000):null;
+    var o={test:k,topic:t.topic,subject:t.subject,data:String(a.created_at).slice(0,10),
+      ora:String(a.created_at).slice(11,16),scor:a.score+"/"+a.max_score,gresite:wrong};
+    if(grabit.length)o.citite_pe_fuga=grabit;
+    if(mediu!=null)o.sec_pe_intrebare=mediu;
+    var mn=HubLogic.attemptMinutes(a); if(mn)o.minute_lucrate=mn;
+    return o;
+  }).filter(Boolean);
+  var partiale=S.attempts.filter(function(a){return HubLogic.isPartial(a)&&!(a.meta&&a.meta.random);}).map(function(a){
+    return {test:a.test_id,data:String(a.created_at).slice(0,10),mod:(a.meta&&a.meta.mode)||"full",
+      oprit_devreme:!!(a.meta&&a.meta.stopped),vazute:a.max_score,corecte:a.score};});
+  var laNimereala=S.attempts.filter(function(a){return a.meta&&a.meta.random;}).map(function(a){
+    return {test:a.test_id,data:String(a.created_at).slice(0,10),ora:String(a.created_at).slice(11,16),
+      semnale:a.meta.semnale};});
+  var out={generat:todayStr(),versiune:APP_VERSION,xp:HubLogic.totalXP(S.attempts),
+    serie:HubLogic.streakDays(S.attempts,new Date(),S.settings.freeze_days||[]),
+    zile_libere:S.settings.freeze_days||[],
+    deblocate:HubLogic.unlockedCount(S.settings.start_date,S.settings.cadence_days,new Date()),
+    total_teste:S.tests.length, pe_teme:HubLogic.topicStats(S.attempts,S.tests), incercari:rows};
+  // minutele de ecran consumate cu învățatul, pe zi — de compensat din cele 50
+  var mzi=HubLogic.minutesByDay(S.attempts), mzk=Object.keys(mzi).sort().slice(-14), mrec={};
+  mzk.forEach(function(d){mrec[d]=mzi[d];});
+  out.minute_invatat_pe_zi=mrec;
+  out.minute_azi=mzi[todayStr()]||0;
+  // economia de jetoane — ce se reglează săptămânal, o singură manetă
+  if((S.rewards||[]).length){
+    var rid2={};S.rewards.forEach(function(r){rid2[r.id]=r;});
+    var recTot=0,recTotal=0,caiet=0;
+    (S.recoveries||[]).forEach(function(r){
+      if(r.sursa==="caiet"){caiet+=(r.corecte||0);return;}
+      recTot+=(r.corecte||0);recTotal+=(r.total||0);});
+    out.jetoane={
+      sold:HubLogic.sold(S.attempts,S.recoveries,S.redemptions),
+      castigate:HubLogic.castigate(S.attempts,S.recoveries),
+      cheltuite:HubLogic.cheltuit(S.redemptions),
+      teste_platite:HubLogic.testeContorizate(S.attempts),
+      itemi_recuperati:recTot, itemi_reluati:recTotal, pagini_caiet:caiet,
+      cumparaturi:(S.redemptions||[]).map(function(r){
+        return {ce:(rid2[r.reward_id]||{}).nume||r.reward_id,
+          raft:(rid2[r.reward_id]||{}).raft||null,
+          cost:r.cost,stare:r.stare,param:r.param||undefined,
+          data:String(r.created_at).slice(0,10)};}),
+      de_onorat:HubLogic.deOnorat(S.redemptions).length,
+      recuperare_disponibila:HubLogic.recoveryPool(S.attempts,S.tests,S.recoveries,todayStr()).length};
+  }
+  if(partiale.length)out.sesiuni_neterminate=partiale;
+  if(laNimereala.length)out.sesiuni_la_nimereala=laNimereala;
+  if(queueLen())out.netrimise=queueLen();
+  return out;
+}
+function copyReport(){
+  var txt="RAPORT HUB ARON\n"+JSON.stringify(buildReport(),null,1);
+  function done(){var b=$("pExport");b.textContent="✓ Copiat!";setTimeout(function(){b.textContent="📋 Copiază raportul pentru Claude";},1800);}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,function(){prompt("Copiază manual:",txt);});}
+  else{prompt("Copiază manual:",txt);}
+}
+
+/* ---- PĂRINTE ---- */
+var parentRows=[];
+/* Cum se citește răspunsul dat, oricare ar fi tipul întrebării */
+function answerText(q,g){
+  if(g===undefined||g===null)return "n-a ajuns la ea";
+  if(q.type==="choice")return (q.options&&q.options[Number(g)]!==undefined)?String(q.options[Number(g)]):String(g);
+  if(q.type==="truefalse")return g?"Adevărat":"Fals";
+  if(q.type==="number")return String(g)===""?"(gol)":String(g);
+  if(q.type==="flash")return g===true?"a zis că a știut":"a zis că n-a știut";
+  if(q.type==="match"){var P=q.pairs||[];return (g||[]).map(function(r,i){
+    return ((P[i]&&P[i][0])||("#"+(i+1)))+" → "+((P[r]&&P[r][1])||"?");}).join("; ");}
+  if(q.type==="order")return (g||[]).map(function(r){return (q.items||[])[r];}).join(" → ");
+  return String(g);
+}
+function correctText(q){
+  if(q.type==="choice")return String((q.options||[])[Number(q.correct)]);
+  if(q.type==="truefalse")return q.answer?"Adevărat":"Fals";
+  if(q.type==="match")return (q.pairs||[]).map(function(p){return p[0]+" → "+p[1];}).join("; ");
+  if(q.type==="order")return (q.items||[]).join(" → ");
+  return String(q.answer===undefined?"":q.answer);
+}
+/* Elena a cerut explicit să vadă unde a greșit, nu doar procentul pe temă.
+   Semnul „citit pe fugă” separă neatenția de necunoaștere — distincția care
+   îi trebuie ca să știe dacă e de exersat sau de explicat. */
+function toggleAttempt(ix){
+  var box=$("det"+ix); if(!box)return;
+  if(!box.classList.contains("hidden")){box.classList.add("hidden");return;}
+  var a=parentRows[ix]; if(!a)return;
+  var t=null; S.tests.forEach(function(x){if(x.id===a.test_id)t=x;});
+  if(!t){box.innerHTML='<div class="small">Testul nu mai e în bază.</div>';box.classList.remove("hidden");return;}
+  var times=(a.meta&&a.meta.times)||[], rows=[];
+  (t.questions||[]).forEach(function(q,i){
+    var g=(a.answers||[])[i];
+    if(g!==undefined&&HubLogic.gradeQuestion(q,g))return;
+    var rush=HubLogic.isRushed(q,times[i])?'<span class="flag">citit pe fugă</span>':"";
+    var sec=times[i]?(" · "+Math.round(times[i]/1000)+"s"):"";
+    rows.push('<div class="dq"><div class="dqt">'+(i+1)+". "+esc(q.q)+rush+'</div>'+
+      '<div class="dl bad">a răspuns: <b>'+esc(answerText(q,g))+'</b>'+esc(sec)+'</div>'+
+      '<div class="dl good">corect: <b>'+esc(correctText(q))+'</b></div>'+
+      (q.explain?'<div class="why">'+esc(q.explain)+'</div>':"")+'</div>');
+  });
+  box.innerHTML=rows.length?rows.join(""):'<div class="none">Nimic greșit la acest test.</div>';
+  box.classList.remove("hidden");
+}
+function showParent(){
+  session.role="parent";
+  var fa=HubLogic.firstAttempts(S.attempts);
+  var done=Object.keys(fa).length;
+  var sc=0,mx=0; Object.keys(fa).forEach(function(k){sc+=fa[k].score;mx+=fa[k].max_score;});
+  $("pDone").textContent=done;
+  $("pAvg").textContent=mx?Math.round(sc/mx*100)+"%":"–";
+  $("pXp").textContent=HubLogic.totalXP(S.attempts);
+  $("pStreak").textContent=HubLogic.streakDays(S.attempts,todayStr(),S.settings.freeze_days||[]);
+  // topics
+  var ts=HubLogic.topicStats(S.attempts,S.tests);
+  $("pTopics").innerHTML = ts.length? ts.map(function(s){
+    var col=s.pct>=80?"var(--good)":s.pct>=60?"var(--gold)":"var(--bad)";
+    return '<div class="trow"><div style="min-width:120px;font-size:14px;font-weight:600">'+esc(s.topic)+'</div>'+
+      '<div class="bar"><i style="width:'+s.pct+'%;background:'+col+'"></i></div>'+
+      '<div style="font-weight:800;font-size:14px;color:'+col+'">'+s.pct+'%</div></div>';
+  }).join("") : '<div class="notice small">Încă nu sunt teste rezolvate.</div>';
+  // jetoane: câștigat, cheltuit, sold
+  if(jetoaneActive()){
+    var cst=HubLogic.castigate(S.attempts,S.recoveries),chl=HubLogic.cheltuit(S.redemptions);
+    var recTot=0;(S.recoveries||[]).forEach(function(r){recTot+=(r.corecte||0);});
+    $("pJet").innerHTML=
+      '<div class="trow"><div style="min-width:140px;font-size:14px;font-weight:600">Sold</div>'+
+      '<div style="font-weight:800;font-size:14px">'+(cst-chl)+' 🪙</div></div>'+
+      '<div class="trow"><div style="min-width:140px;font-size:14px">Câștigate</div>'+
+      '<div style="font-size:14px">'+cst+' ('+HubLogic.testeContorizate(S.attempts)+' teste, '+recTot+' recuperări)</div></div>'+
+      '<div class="trow"><div style="min-width:140px;font-size:14px">Cheltuite</div>'+
+      '<div style="font-size:14px">'+chl+'</div></div>';
+    $("pJet").innerHTML+='<div class="small" style="margin:10px 0 2px;opacity:.75">Tarif</div>'+textTarif();
+  }else{$("pJet").innerHTML='<div class="notice small">Sistemul de jetoane nu e instalat încă.</div>';}
+  renderCaiet();
+  // cumpărături care așteaptă un adult
+  var rid={};(S.rewards||[]).forEach(function(r){rid[r.id]=r;});
+  var onor=HubLogic.deOnorat(S.redemptions);
+  $("pOnorat").innerHTML = onor.length ? onor.map(function(r){
+    var rw=rid[r.reward_id]||{nume:r.reward_id};
+    var ic2=ICONS[r.reward_id]?'<img src="'+ICONS[r.reward_id]+'" alt="" width="34" height="34" style="border-radius:10px;vertical-align:middle;margin-right:8px">':'';
+    return '<div class="mist"><div class="mq">'+ic2+esc(rw.nume)+'</div>'+
+      '<div class="mx">cerut pe '+ziScurt(r.created_at)+' · '+r.cost+' 🪙'+
+      (r.param?' · '+esc(r.param):'')+'</div>'+
+      '<div style="display:flex;gap:8px;margin:8px 0">'+
+      '<button class="btn" style="width:auto;padding:8px 14px" onclick="onoreaza('+JSON.stringify(r.id)+')">Onorat</button>'+
+      '<button class="btn ghost" style="width:auto;padding:8px 14px" onclick="anuleaza('+JSON.stringify(r.id)+')">Anulează</button>'+
+      '</div></div>';
+  }).join("") : '<div class="notice small">Nimic de onorat acum.</div>';
+  // minutele de ecran consumate cu învățatul — ce i se dă înapoi din cele 50
+  var mzi=HubLogic.minutesByDay(S.attempts);
+  var zile=Object.keys(mzi).sort().reverse().slice(0,7);
+  var azi=mzi[todayStr()]||0;
+  var sapt=zile.reduce(function(s,d){return s+mzi[d];},0);
+  $("pTime").innerHTML = zile.length
+    ? '<div class="trow"><div style="min-width:120px;font-size:14px;font-weight:600">Azi</div>'+
+      '<div style="font-weight:800;font-size:14px">'+azi+' min</div></div>'+
+      '<div class="trow"><div style="min-width:120px;font-size:14px;font-weight:600">Ultimele 7 zile</div>'+
+      '<div style="font-weight:800;font-size:14px">'+sapt+' min</div></div>'+
+      zile.map(function(d){
+        return '<div class="trow"><div style="min-width:120px;font-size:13px;opacity:.75">'+esc(d)+'</div>'+
+          '<div class="bar"><i style="width:'+Math.min(100,Math.round(mzi[d]/30*100))+'%;background:var(--gold)"></i></div>'+
+          '<div style="font-size:13px;opacity:.75">'+mzi[d]+' min</div></div>';
+      }).join("")+
+      '<div class="notice small" style="margin:8px 0">Timp activ, cu pauzele lungi scoase. Atât i se dă înapoi din cele 50 de minute.</div>'
+    : '<div class="notice small">Încă nu sunt sesiuni măsurate.</div>';
+  var faraMasura=(S.attempts||[]).filter(function(a){return HubLogic.attemptMinutes(a)===0;}).length;
+  if(faraMasura)$("pTime").innerHTML+='<div class="notice small" style="margin:8px 0">'+faraMasura+
+    ' sesiuni sunt dinainte de contor și n-au timp măsurat.</div>';
+  // recent — fiecare rând se deschide și arată exact ce a greșit
+  var rec=S.attempts.slice().sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at);}).slice(0,10);
+  var byId={}; S.tests.forEach(function(t){byId[t.id]=t;});
+  parentRows=rec;
+  $("pRecent").innerHTML = rec.length? rec.map(function(a,ix){
+    var t=byId[a.test_id]||{topic:a.test_id,subject:"mate"};
+    var pct=a.max_score?Math.round(a.score/a.max_score*100):0;
+    var col=pct>=80?"var(--good)":pct>=60?"var(--gold)":"var(--bad)";
+    var d=new Date(a.created_at);
+    var m=a.meta||{};
+    var lbl=m.random?" · trecut pe fugă, necontorizat":
+      m.stopped?" · oprit devreme":
+      (m.mode==="short"?" · sesiune scurtă":(HubLogic.isPartial(a)?" · neterminat":""));
+    return '<button class="trow tap" onclick="toggleAttempt('+ix+')">'+
+      '<div><div style="font-weight:600;font-size:14px">'+esc(t.topic)+'</div>'+
+      '<div class="small">'+d.getDate()+" "+roDate(d).split(" ")[1]+", "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+esc(lbl)+'</div></div>'+
+      '<span class="tag" style="background:#f0f1f4;color:'+col+'">'+a.score+"/"+a.max_score+'</span></button>'+
+      '<div class="det hidden" id="det'+ix+'"></div>';
+  }).join("") : '<div class="notice small">Nicio activitate încă.</div>';
+  var rush=0,seen=0;
+  S.attempts.forEach(function(a){var t=byId[a.test_id];if(!t)return;var tm=(a.meta&&a.meta.times)||[];
+    (t.questions||[]).forEach(function(q,i){if(tm[i]){seen++;if(HubLogic.isRushed(q,tm[i]))rush++;}});});
+  var extra=[];
+  if(seen)extra.push("citite pe fugă: "+rush+" din "+seen+" enunțuri lungi");
+  if(queueLen())extra.push(queueLen()+" încercări încă netrimise (se trimit singure)");
+  $("pVer").textContent=(extra.length?extra.join(" · ")+" · ":"")+"versiune "+APP_VERSION;
+  show("screenParent");
+}
+
+window.addEventListener("DOMContentLoaded",boot);
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Hub Aron — Clasa V</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{
+  /* ——— ACCENT UNIC: violetul aplicației ——— */
+  --v:#7C3AED; --v-2:#A855F7; --v-deep:#5B21B6; --v-soft:#F4EFFF; --v-line:#E4D9FF;
+
+  /* ——— NEUTRE ——— */
+  --bg:#FAFAFB; --card:#FFFFFF; --ink:#17141F; --ink-2:#3D3849;
+  --muted:#797585; --line:#EDEBF2; --fill:#F3F1F8;
+
+  /* ——— MATERII: doar ca pastilă și fundal de iconiță ——— */
+  --mate:#3B6FF0; --mate-soft:#EDF2FF;
+  --rom:#0EA47A;  --rom-soft:#E6F7F1;
+  --gold:#E8930F; --good:#12854A; --bad:#DC2F35;
+
+  /* ——— FORMĂ ——— */
+  --r:24px; --r-tile:20px; --r-btn:16px;
+  --shadow:0 2px 14px rgba(23,20,31,.05);
+  --sh-v:0 8px 22px rgba(124,58,237,.26);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45}
+.wrap{max-width:720px;margin:0 auto;padding:20px 18px 104px}
+.hidden{display:none!important}
+button{font-family:inherit;cursor:pointer;border:0;background:none}
+h1,h2,h3{margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:linear-gradient(120deg,#7C3AED,#9333EA);
+  color:#fff;font-weight:800;padding:16px 18px;border-radius:var(--r-btn);font-size:16px;width:100%;
+  box-shadow:var(--sh-v)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:var(--fill);color:var(--ink-2);box-shadow:none}
+.btn.rom{background:linear-gradient(120deg,#7C3AED,#9333EA)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;
+  padding:5px 10px;border-radius:999px;letter-spacing:.3px}
+.pill.mate{background:var(--mate-soft);color:var(--mate)}
+.pill.rom{background:var(--rom-soft);color:var(--rom)}
+.small{color:var(--muted);font-size:13px}
+
+/* Profile picker */
+.center{min-height:70vh;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.logo{font-size:42px;text-align:center}
+.title{text-align:center;font-size:28px;font-weight:800;letter-spacing:-.6px}
+.subtitle{text-align:center;color:var(--muted);margin-top:-8px}
+.profiles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+.profile{padding:24px 14px;border-radius:var(--r);text-align:center;border:1px solid var(--line);
+  background:var(--card);box-shadow:var(--shadow)}
+.profile .av{font-size:44px}
+.profile .nm{font-weight:800;margin-top:8px;font-size:18px}
+.profile.aron{border-color:var(--v-line);background:linear-gradient(160deg,#fff,#F8F4FF)}
+.profile.parent{border-color:var(--line)}
+
+/* PIN */
+.pinbox{max-width:320px;margin:0 auto;text-align:center}
+.pindisplay{letter-spacing:14px;font-size:34px;font-weight:800;min-height:44px;color:var(--v)}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.key{padding:17px;border-radius:var(--r-btn);background:var(--card);border:1px solid var(--line);
+  font-size:22px;font-weight:700;box-shadow:var(--shadow)}
+.key:active{background:var(--v-soft)}
+
+/* Header stats */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px}
+.hi{font-size:30px;font-weight:800;letter-spacing:-.7px;line-height:1.15}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 4px}
+.stat{padding:14px 10px;border-radius:20px;text-align:center;background:#fff;
+  border:1px solid var(--line);box-shadow:var(--shadow)}
+.stat .big{font-size:22px;font-weight:800;line-height:1;letter-spacing:-.5px}
+.stat .lab{font-size:10.5px;color:#9C98A8;margin-top:4px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.7px}
+.stat.lvl .big{color:var(--v)}
+.stat.streak .big{color:var(--gold)}
+.xpbar{height:8px;background:#EFEDF4;border-radius:999px;overflow:hidden;margin-top:9px}
+.xpbar>i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#7C3AED,#A855F7)}
+
+/* Cardul compact de jetoane */
+.jet{display:flex;align-items:center;gap:14px;padding:14px;width:100%;text-align:left;
+  background:#fff;border:1px solid var(--v-line);border-radius:var(--r);
+  box-shadow:0 4px 18px rgba(124,58,237,.08)}
+.jet .jt{width:48px;height:48px;border-radius:16px;flex:0 0 auto;font-size:23px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#7C3AED,#A855F7);box-shadow:0 5px 14px rgba(124,58,237,.30)}
+.jet .jb{flex:1;min-width:0}
+.jet .jn{font-size:19px;font-weight:800;letter-spacing:-.4px}
+.jet .jn span{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:0}
+.jet .js{font-size:12.5px;color:var(--muted);margin-top:2px}
+.jet .js b{color:var(--v)}
+
+/* Filtre orizontale */
+.chips{display:flex;gap:9px;margin-top:16px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;padding:9px 16px;border-radius:999px;font-size:14px;font-weight:700;
+  background:#fff;border:1px solid var(--line);color:var(--ink-2)}
+.chip.on{background:var(--v-soft);border-color:var(--v-line);color:var(--v)}
+
+/* Test list */
+.section-h{font-size:12px;font-weight:800;color:#9C98A8;text-transform:uppercase;
+  letter-spacing:1.1px;margin:26px 2px 12px}
+.test{display:flex;align-items:center;gap:14px;padding:14px;margin-bottom:11px}
+.test .ico{width:54px;height:54px;border-radius:var(--r-tile);display:flex;align-items:center;
+  justify-content:center;font-size:26px;flex:0 0 auto;
+  background:linear-gradient(140deg,#F6F2FF,#EDE4FF)}
+.test.mate .ico{background:linear-gradient(140deg,#EEF3FF,#DFE8FF)}
+.test.rom .ico{background:linear-gradient(140deg,#E9F9F3,#D8F2E8)}
+.test .body{flex:1;min-width:0}
+.test .tt{font-weight:700;font-size:15.5px;letter-spacing:-.2px}
+.test .mt{font-size:12.5px;color:var(--muted);margin-top:3px}
+.test .go{font-size:20px;color:#C6C2D0;font-weight:700}
+.test.locked{opacity:.5}
+.test.done{opacity:.62}
+.badge{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:999px;letter-spacing:.3px}
+.badge.done{background:#E9F7EE;color:var(--good)}
+.badge.lock{background:var(--fill);color:var(--muted)}
+
+/* Quiz */
+.qhead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.qhead .x{font-size:26px;color:var(--muted);width:34px}
+.qprog{flex:1;height:8px;background:#EFEDF4;border-radius:999px;overflow:hidden}
+.qprog>i{display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,#7C3AED,#A855F7);transition:width .3s}
+.qprog.rom>i{background:linear-gradient(90deg,#7C3AED,#A855F7)}
+.qcount{font-weight:800;color:var(--muted);font-size:14px}
+.qtext{font-size:20px;font-weight:700;margin:10px 4px 18px;line-height:1.4;letter-spacing:-.3px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{text-align:left;padding:16px;border-radius:var(--r-btn);border:1.5px solid var(--line);
+  background:var(--card);font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px}
+.opt .lt{width:26px;height:26px;border-radius:9px;background:var(--fill);display:flex;
+  align-items:center;justify-content:center;font-weight:800;font-size:14px;flex:0 0 auto}
+.opt.correct{border-color:var(--good);background:#EEFAF0}
+.opt.wrong{border-color:var(--bad);background:#FDECEC}
+.opt.correct .lt{background:var(--good);color:#fff}
+.opt.wrong .lt{background:var(--bad);color:#fff}
+.opt:disabled{cursor:default}
+.hint{color:var(--muted);font-size:.86rem;text-align:center}
+.opt.sel{border-color:var(--v);background:var(--v-soft)}
+.opt.sel .lt{background:var(--v);color:#fff}
+.numin{width:100%;padding:16px;border-radius:var(--r-btn);border:1.5px solid var(--line);
+  font-size:20px;font-weight:700;text-align:center;outline:none}
+.numin:focus{border-color:var(--v)}
+.feedback{margin-top:16px;padding:14px 16px;border-radius:var(--r-btn);font-size:15px}
+.feedback.ok{background:#EEFAF0;color:#166534}
+.feedback.no{background:#FDECEC;color:#991b1b}
+.feedback b{display:block;margin-bottom:3px}
+
+/* Results */
+.result{text-align:center;padding:30px 20px}
+.result .em{font-size:60px}
+.result .rt{font-size:26px;font-weight:800;margin-top:6px;letter-spacing:-.5px}
+.result .rs{font-size:17px;color:var(--muted);margin-top:4px}
+.xpwin{display:inline-block;margin-top:16px;
+  background:linear-gradient(120deg,#7C3AED,#A855F7);color:#fff;font-weight:800;
+  padding:11px 22px;border-radius:999px;font-size:18px;box-shadow:var(--sh-v)}
+
+/* Parent */
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:8px 0}
+.pcard{padding:18px;text-align:center}
+.pcard .big{font-size:26px;font-weight:800;letter-spacing:-.5px}
+.pcard .lab{font-size:12px;color:var(--muted);margin-top:3px}
+.trow{display:flex;justify-content:space-between;align-items:center;padding:12px 4px;
+  border-bottom:1px solid var(--line)}
+.trow:last-child{border:0}
+.bar{height:8px;background:#EFEDF4;border-radius:999px;overflow:hidden;flex:1;margin:0 10px}
+.bar>i{display:block;height:100%;border-radius:999px}
+.tag{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;letter-spacing:.3px}
+.notice{padding:18px;text-align:center;color:var(--muted)}
+.foot{text-align:center;margin-top:26px}
+.link{color:var(--muted);font-size:13px;text-decoration:underline}
+.err{background:#FFF3F3;border:1px solid #FFD0D0;color:#A11;padding:16px;
+  border-radius:var(--r-btn);margin-top:12px;font-size:14px}
+
+/* Bara de navigare de jos */
+.navbar{position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:rgba(255,255,255,.94);backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);display:none}
+.navbar.on{display:block}
+.navbar .in{max-width:720px;margin:0 auto;display:flex;justify-content:space-around;
+  padding:9px 4px calc(12px + env(safe-area-inset-bottom))}
+.nv{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:#9C98A8;font-size:11px;font-weight:700;padding:4px 0}
+.nv svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+.nv.on{color:var(--v)}
+
+/* Recapitularea greșelilor, la finalul testului */
+.mist{padding:12px 0;border-bottom:1px solid var(--line)}
+.mist:last-child{border:0}
+.mist .mq{font-size:14px;font-weight:700;line-height:1.35}
+.mist .mx{font-size:13px;color:var(--muted);margin-top:4px}
+.softnote{margin-top:10px;font-size:13px;color:var(--muted);line-height:1.4}
+
+/* Detaliul unei încercări, în ecranul de părinte */
+.trow.tap{cursor:pointer;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);font-family:inherit}
+.det{padding:2px 0 14px}
+.det .dq{padding:10px 0;border-top:1px dashed var(--line)}
+.det .dq:first-child{border-top:0}
+.det .dqt{font-size:13.5px;font-weight:700;line-height:1.35}
+.det .dl{font-size:12.5px;margin-top:5px;line-height:1.5}
+.det .dl b{font-weight:700}
+.det .bad{color:var(--bad)}
+.det .good{color:var(--good)}
+.det .why{color:var(--muted);font-size:12.5px;margin-top:4px}
+.flag{display:inline-block;font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;
+  background:#FFF4E2;color:#B45309;margin-left:6px;vertical-align:middle}
+.det .none{color:var(--good);font-size:13px;padding:8px 0}
+.ver{text-align:center;color:var(--muted);font-size:11px;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- SETUP (prima dată) -->
+  <div id="screenSetup" class="hidden">
+    <div class="center">
+      <div class="logo">⚙️</div>
+      <div class="title">Configurare (o singură dată)</div>
+      <div class="subtitle">Lipește cele două valori din Supabase. Le găsești în ghid.</div>
+      <div class="card" style="padding:18px;max-width:460px;margin:0 auto;width:100%">
+        <label class="small" style="font-weight:700">Project URL</label>
+        <input class="numin" id="setUrl" style="text-align:left;font-size:14px;font-weight:500;margin:6px 0 14px" placeholder="https://xxxx.supabase.co">
+        <label class="small" style="font-weight:700">anon public key</label>
+        <input class="numin" id="setKey" style="text-align:left;font-size:14px;font-weight:500;margin:6px 0 4px" placeholder="eyJ...">
+        <div id="setMsg" class="small" style="min-height:18px;color:var(--bad)"></div>
+        <button class="btn" style="margin-top:8px" onclick="saveSetup()">Salvează și pornește</button>
+      </div>
+      <div id="setShare" class="hidden" style="max-width:460px;margin:14px auto 0;width:100%">
+        <div class="feedback ok"><b>Gata! Acesta e linkul familiei:</b>
+          <div id="shareLink" style="word-break:break-all;font-size:13px;margin:6px 0"></div>
+          <button class="btn" style="background:var(--good)" onclick="copyShare()">📋 Copiază linkul</button>
+          <div class="small" style="margin-top:8px">Salvează-l pe telefonul tău și al lui Aron. Config-ul e inclus în link.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading" class="center">
+    <div class="logo">📚</div>
+    <div class="subtitle">Se încarcă…</div>
+  </div>
+
+  <!-- PROFILE PICKER -->
+  <div id="screenProfiles" class="hidden">
+    <div class="center">
+      <div class="logo">🚀</div>
+      <div class="title">Hub-ul lui Aron</div>
+      <div class="subtitle">Clasa a V-a · recapitulare</div>
+      <div class="profiles">
+        <button class="profile aron" onclick="pickProfile('aron')">
+          <div class="av">🧑‍🚀</div><div class="nm">Aron</div><div class="small">învață & câștigă XP</div>
+        </button>
+        <button class="profile parent" onclick="pickProfile('parent')">
+          <div class="av">👩‍🏫</div><div class="nm">Părinte</div><div class="small">progres & rapoarte</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIN -->
+  <div id="screenPin" class="hidden">
+    <div class="center">
+      <div class="title" id="pinTitle">Introdu PIN-ul</div>
+      <div class="pinbox">
+        <div class="pindisplay" id="pinDisplay"></div>
+        <div id="pinMsg" class="small">&nbsp;</div>
+        <div class="keys">
+          <button class="key" onclick="pinPress('1')">1</button>
+          <button class="key" onclick="pinPress('2')">2</button>
+          <button class="key" onclick="pinPress('3')">3</button>
+          <button class="key" onclick="pinPress('4')">4</button>
+          <button class="key" onclick="pinPress('5')">5</button>
+          <button class="key" onclick="pinPress('6')">6</button>
+          <button class="key" onclick="pinPress('7')">7</button>
+          <button class="key" onclick="pinPress('8')">8</button>
+          <button class="key" onclick="pinPress('9')">9</button>
+          <button class="key ghost" onclick="pinBack()">⌫</button>
+          <button class="key" onclick="pinPress('0')">0</button>
+          <button class="key ghost" onclick="goProfiles()">↩</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARON DASHBOARD -->
+  <div id="screenAron" class="hidden">
+    <div class="topbar">
+      <div>
+        <div class="hi">Salut, Aron</div>
+        <div class="small" id="aToday" style="margin-top:3px"></div>
+      </div>
+      <button class="link" onclick="goProfiles()">ieși</button>
+    </div>
+
+    <div class="notice small hidden" id="aPas" style="margin-top:12px"></div>
+
+    <!-- Primul lucru pe care îl vede: ce are de făcut azi -->
+    <div class="section-h" style="margin-top:20px">De rezolvat</div>
+    <div id="aronTodo"></div>
+
+    <!-- Jetoanele: card mic, după listă. Recompensa nu deschide ecranul. -->
+    <button class="jet hidden" id="aJetCard" onclick="showShop()">
+      <div class="jt">🪙</div>
+      <div class="jb">
+        <div class="jn"><span id="aJet">0 🪙</span> <span id="aJetSub">jetoane</span></div>
+        <div class="js" id="aJetNext"></div>
+      </div>
+      <div class="go" style="font-size:20px;color:#C6C2D0;font-weight:700">›</div>
+    </button>
+    <div class="small hidden" id="aJetCum"></div>
+
+    <div class="section-h">Antrenament liber</div>
+    <div id="aronDone"></div>
+
+    <div class="section-h">Unde ai ajuns</div>
+    <div class="card" style="padding:16px 18px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <b style="font-size:15px">Recapitulare de vară</b>
+        <span class="small" id="aCovLab">0 din 0</span>
+      </div>
+      <div class="xpbar" style="margin-top:8px"><i id="aCovBar" style="width:0%"></i></div>
+      <div class="small" id="aCovSub" style="margin-top:8px"></div>
+    </div>
+    <div class="statgrid">
+      <div class="stat lvl"><div class="big" id="aLevel">1</div><div class="lab">Nivel</div></div>
+      <div class="stat xp">
+        <div class="big" id="aXp">0</div><div class="lab">XP total</div>
+        <div class="xpbar"><i id="aXpBar" style="width:0%"></i></div>
+      </div>
+      <div class="stat streak"><div class="big" id="aStreak">0🔥</div><div class="lab">Zile la rând</div></div>
+    </div>
+
+    <div class="foot"><span class="small" id="aronLockInfo"></span></div>
+  </div>
+
+  <!-- INTRO TEST: îi spune la ce să se aștepte și îi lasă o alegere -->
+  <div id="screenIntro" class="hidden">
+    <div class="topbar">
+      <div class="hi" id="iTopic">Test</div>
+      <button class="link" onclick="showAron()">înapoi</button>
+    </div>
+    <div class="card" style="padding:20px;margin-top:10px">
+      <div style="font-weight:700;font-size:17px" id="iTitle"></div>
+      <div class="small" id="iMeta" style="margin-top:8px"></div>
+      <div class="feedback ok" style="margin-top:14px">Timpul petrecut aici nu intră în cele 50 de minute de telefon.</div>
+      <div style="margin-top:16px"><button class="btn" id="iFull" onclick="startQuiz(introId,'full')">Începem</button></div>
+      <div style="margin-top:10px"><button class="btn ghost" id="iShort" onclick="startQuiz(introId,'short')"></button></div>
+      <div style="margin-top:10px"><button class="btn ghost hidden" id="iRec" onclick="startRecovery()"></button></div>
+      <div class="hint" style="margin-top:8px" id="iHint"></div>
+    </div>
+  </div>
+
+  <!-- MAGAZIN: alegerea ESTE recompensa, nu premiul de la capăt -->
+  <div id="screenShop" class="hidden">
+    <div class="topbar">
+      <div class="hi">Magazin</div>
+      <button class="link" onclick="showAron()">înapoi</button>
+    </div>
+    <div class="card" style="padding:16px;margin-top:10px">
+      <div style="font-size:1.6rem;font-weight:800" id="sJet">0 🪙</div>
+      <div class="small">jetoanele tale</div>
+    </div>
+    <div class="section-h">Cum câștigi</div>
+    <div class="card" style="padding:12px 16px"><div class="small" id="sCum"></div></div>
+    <div id="shopBody"></div>
+    <div style="margin-top:16px"><button class="btn ghost" onclick="showAron()">Înapoi la hub</button></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="screenQuiz" class="hidden">
+    <div class="qhead">
+      <button class="x" onclick="confirmQuit()">✕</button>
+      <div class="qprog" id="qProg"><i style="width:0%"></i></div>
+      <div class="qcount" id="qCount">1/8</div>
+    </div>
+    <div class="pill" id="qTopic" style="margin:2px 0 6px"></div>
+    <div class="qtext" id="qText"></div>
+    <div id="qBody"></div>
+    <div id="qFeedback" class="hidden"></div>
+    <div style="margin-top:18px">
+      <button class="btn hidden" id="qNext" onclick="nextQuestion()">Continuă →</button>
+      <button class="btn ghost hidden" id="qStop" style="margin-top:10px" onclick="stopEarly()">Ajunge pe azi</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screenResult" class="hidden">
+    <div class="card result">
+      <div class="em" id="rEmoji">🎉</div>
+      <div class="rt" id="rTitle">Bravo!</div>
+      <div class="rs" id="rScore"></div>
+      <div class="xpwin hidden" id="rXp"></div>
+      <div class="softnote hidden" id="rTime"></div>
+      <div class="softnote hidden" id="rNote"></div>
+    </div>
+    <div id="rMistakes"></div>
+    <div style="margin-top:18px"><button class="btn hidden" id="rRetry" onclick="openTest(introId)">Reia testul acum</button></div>
+    <div style="margin-top:10px"><button class="btn ghost" onclick="showAron()">Înapoi la hub</button></div>
+  </div>
+
+  <!-- PARENT DASHBOARD -->
+  <div id="screenParent" class="hidden">
+    <div class="topbar">
+      <div class="hi">Progresul lui Aron</div>
+      <button class="link" onclick="goProfiles()">ieși</button>
+    </div>
+    <div class="pgrid">
+      <div class="card pcard"><div class="big" id="pDone">0</div><div class="lab">teste rezolvate</div></div>
+      <div class="card pcard"><div class="big" id="pAvg">–</div><div class="lab">scor mediu</div></div>
+      <div class="card pcard"><div class="big" id="pXp">0</div><div class="lab">XP total</div></div>
+      <div class="card pcard"><div class="big" id="pStreak">0</div><div class="lab">zile la rând</div></div>
+    </div>
+    <div class="section-h">Pe teme (procent corect)</div>
+    <div class="card" style="padding:8px 16px" id="pTopics"></div>
+    <div class="section-h">Activitate recentă</div>
+    <div class="hint" style="text-align:left;margin:-4px 4px 8px">Atinge un test ca să vezi exact ce a greșit.</div>
+    <div class="card" style="padding:8px 16px" id="pRecent"></div>
+    <div class="section-h">Jetoane</div>
+    <div class="card" style="padding:8px 16px" id="pJet"></div>
+    <div class="section-h">Caietul de vacanță</div>
+    <div class="card" style="padding:12px 16px" id="pCaiet"></div>
+    <div class="section-h">De onorat</div>
+    <div class="card" style="padding:8px 16px" id="pOnorat"></div>
+    <div class="section-h">Timp de compensat</div>
+    <div class="card" style="padding:8px 16px" id="pTime"></div>
+    <div style="margin-top:16px"><button class="btn" id="pExport" onclick="copyReport()">📋 Copiază raportul pentru Claude</button></div>
+    <div class="hint" style="margin-top:6px">Lipește-l în conversație ca să primești analiza și testele următoare.</div>
+    <div class="ver" id="pVer"></div>
+  </div>
+
+  <div id="fatal" class="hidden"></div>
+</div>
+
+<!-- Bara de jos: apare doar pe ecranele lui Aron, nu în timpul unui test -->
+<div class="navbar" id="navbar">
+  <div class="in">
+    <button class="nv" id="nvHome" onclick="showAron()">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/></svg>
+      Acasă
+    </button>
+    <button class="nv" id="nvTests" onclick="navGo('todo')">
+      <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8.5 8.5h7M8.5 12.5h7M8.5 16.5h4"/></svg>
+      Teste
+    </button>
+    <button class="nv" id="nvShop" onclick="showShop()">
+      <svg viewBox="0 0 24 24"><path d="M4 8h16l-1.2 11.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+      Magazin
+    </button>
+    <button class="nv" id="nvProg" onclick="navGo('prog')">
+      <svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>
+      Progres
+    </button>
+  </div>
+</div>
+
+<script>
+/* ====== CONFIG ======
+   Nu e nevoie să editezi nimic aici. La prima deschidere apare un ecran
+   unde lipești cele două valori din Supabase; ele se salvează în link.
+   (Opțional le poți pune direct mai jos, în locul textului PASTE_...) */
+var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
+var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
+/* ==================== */
+
+var APP_VERSION="2026-08-05a";
+/* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
+   nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
+var ICONS={
+  pas:"data:image/webp;base64,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",
+  ecran_plus15:"data:image/webp;base64,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",
+  chipsuri:"data:image/webp;base64,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",
+  fastfood:"data:image/webp;base64,UklGRgwNAABXRUJQVlA4IAANAAAQPACdASrAAMAAPlUmkUYjoiGhJhQqYHAKiWJu6KQAswDPik9/M9yRu/s35ke2ZXX7b+JfXd4fdZeWFy7/yfu6+cP89/2HsM/Q3+w9wP9Sv9n1DPMB+qP/c/zPu+/5L9gPc9/b/8n+wHwAf1P/KdYh+2/sC/sl6Zv/i/4nwlf1z/h/u57PH/77Obpf+vP+A7Zu/vxxe+vbnlH9Q9uX+B5vd7/AC/GP0FvXoAPzX+i97nqs9+eWZ8PugN+d/Q50RPVvsHhh2utu+6dj+7NPam3ghhzZVj3ZJdiXi88N6bec282iD9Y0hbxaAXKnzwjsSl36M15V/tuLpNBfKDhRBj3/FjBrece4at01lSuT3F9SGbGW2690brYUOkUUXp28+cpANvEwvglM4CrkPAtCjn5tCcgHTedkeYCZPNQWyoJK0pgavq0DAlPjgSlC6aB5FMXB5eBEZa8hUKCvu8dufBRtcYhf/Jli8JBPIqXmS9sdtC6maUQynx1m/wbq6noog2DzJafjjzs+EKqWeA72mjjFl7TOPN+fLtpR/ZPjKPj7YY5ZIbt82LVD7Pn/ptVOqXW5dupZSmW5mKUVcmWdfaTXqv2bcyEmiRgtyJ/JsBIDkuQlWodfhP2imLm+TxtF467hfVrNLdA6IAAA/vnVoabuKi42/E0upDtr1IemvS6hDqPCHjNp/DwtGmuF2M/tiuJNzwoR3BC726nyhScjBUlgy0CnYLwEozxNVQ/Wt6G8finT+Mn2gXVmx1tJVms7t4rf3xVhaABoK2orrsp1gF74nZinGSOYhNtN3IKZCHd+4qH9RX80WFaxVK2HHwi6oZ5fx6BEQ+0QXW1PSsT02GCwi8hBYvSrTY42PDC693Yag6X9+4J/PoTUN9BBQGn5Z8AAHBW6JzP+tIl0w7T+pkZjVnFqD/+6K7gAdWxT13CO9HL1WnCqIsFT5Y0a+BZRh7g24hnQm1Ujlfz/fzgd5fTjnuKTZb+pW4mKdZTCLMDKUQroqE5J00L0BwD811tKb9rkNWZrU77cVu94AToKMGUU7AcSzbbwDhXNnd6ExEjx1jT1YLrT9jz9VX94pf/rgC9loFFinwDnv2mqa86Qj5UAnfoHhOukJpcGRcJGGYN68zfFj50HcQPnUriq2s4DBgINfwXILuh8fkUMtavtVKVVsWqEi6vVVrJ717y+jEJ3JPm1uEUzoPauuTadVXCQRmX4E/+MUiZDDmqJMsdRz2iDhS+Drh+bwKpMrsziTwMsrjl8MeBTTdTQNv1XcimsV/cvV5+IrxzSknmu5Yg3/QvjRorGw+eOcd0NF5JsQigicO2fPEb/Zjp3l9vZj8aU5+pzEcBEUxaMzV2OylP5+Mssw9lcLjGhjpFeekdNOIAxm5vmKI6TwXzbptZTzyPS0DUWXojORL6dcD71K7ooWLbj2U2t31PN8BfQlxfqm5KZr/CRcpr76Py+ZPFV/12VOUmrgzOZlFPE9i1i3GTulszkGi2FG4vvyjpKMlbDGWEOnP6JMiGyidKi+k21SPPk2fT039Jtgspa+GWgFYwx0otuC1i9eaTA/Otoe3YAszypkUHRNCzmcP6od/OMiV9ogH0VHATJ9edj9iZzFlkwrS2l4171ZK0ySB9P+uSYb5Ot3bRzc6L6VC3kecluA21uY+OISjtmXaZPRAPp9+Gr3FmsfRdPXlG+nVV4vRC6fPR9HAV2NSOqL33Ns+36IZoh6hJ+70jXcisCs3sfkhuwtXLmj+N5xo7xPQ7p9hr99jdk+0Ous4LUXcrTT8U3DDXd2ds6mLHAl9JqP/2jUAiLHwn6v+rAFO5IamlOG5YVDhptsUQMHlFzw7YjoRz55kEpbwittIfF3w/xNCG+dMildPH97r3ORI0aFcNivXTygbNZvPCL8GE7CgZX+VS7Jr8JNVrDaWkSflpyaiv4FTnyySuPqQ5eJ3MEoz3sYNz2ZwiLCpMFR6+NcbxFaIEOyxnccBALmEmLRAus+DwhvRl8szbcnHxbHg5dVzgCnvzDJqqY2mugAywAcq20QgdDXMRcu1H2nyUmZmwOKbGt51//O9M0E23E39YPke+2OfO/rb8zbWCWIn8oKvBSKSeUpPANckv0X3Yji63nWAGaT+V/G9OEXOaWL6AgUD4rp3r6KFqLyxPmH4Pq/r2b4OcR30+kw9eaja3nKo9cc52XEpqJxx5vGakDBaJrwq4qkRQqGx41Dual8jc8FGsUBSbZZh5x7Zx3fauuWpj6F9ePpi3+QU9SU0wq9pLjNVvw9loUv8GJy+qv+alJktFGjbXgUho0nqRblQc8JFejviggAf8B4uAkapQSgJWCmA8VYmP9LHCPLm33y0TV4iW21n4k36UfaFAhC9uG3Dq+GgvrQ6ZflflIkvzOpwhJ67NXLdNiz2o3DCk0vueWqxyTH4QTSLc9xB3NJbAG8cHsflcudftaU+NvClMXBO/A5zOup3Et9cEUvLCpTrjHOppj1seLsk2nddsno4wsXtblfgGe+0EUZHfPcsA0cMedQLte3GmLeteQUINab/2fo/R1clgQitOrP/oLf/rPbY6VsWnkvoVR8Scl0RgL7f8xKeOKWPBSHqSch9uH9fjgb266DMpAlImmPOkk8sb/dZXbjdJlnVAt7vu8xp9MStWL1mKAPXPo3MOo051ZisnN4C9biZmwBnPGzXFrYziilvLt6ovzND8biXwlLd4BKdhaEVFmcfAmsU/euOaGwVHonr5C9aErE+h42Zo8liSnrqZ7nxeh5hcJurL57JbltUGNDad6LioCQc/IgvNXDRFx1PjC5SCH4+9bmuk9DnKOXA1ZBt+93pQ0NtvG9z2YJM7Jmr7VtjE/ggm1XHILLU5OE1/86NxsrRaQ8Rvr1PZLb9BHeIkgthURIkHXXkQN9EzFexbE41efQXdxNSSr9qvAsEKcdERc6weshC3Mf3BgU73ovTpX3OGxYULmzM6LMoTdF3Z2XdUzFzqhn+zeNjQZcSqFUMSVlC/utJ41LLNWubal78VKzL8iC967yb1u8/i0VjQ/flonhCsuBgXhV8CrePth1Q8CCoqll170P06gyxRGurZksOS3+Uw0ctMYiDHNYGXC9kmLxiZ/3pExXceeC3OUsWbWfcnxf6be62Iw596wIePtEEWt6DDM2ZlhwMflh9K0USaDOkqnZ/eeb+lityAemo3625VYgod8vbvUNiTTg2Buh2qEruqJ3AHPFHPULyffnI6yDuCqR7p614+L4XbAaXa2RmpphPVaHLVJNi9YoXAYSFiBy6EUt5B/J8LGpodNYpxWiadzbzqBsY1yS+Yoy8OEzDS/iW/RMSvaS+o4YObNKp6szDZJyy+p78dKd94dyLbGEl8dubqLca0+tG5BSf2bas/qIRC3+lxu8OR5/BdhBeD+yMOp+S6XcprprPMX9KE96zD0msghlyxQndn2y3orJUZ3USgSPrhSLpmOYR295+H9H9SCv7Ll66ty/k3Esz57rwUbSSiJLLfO66M+EbaDkwG0zHHykLDF8m2cZmEcoaGbk94pk9rquyfXzAqv/48OsSocw3Dh901+5XyWdIFVv3yw9K+ruflrTcUSROf9Lcc+if+luOUNZ9Sqzs0mfm/ysgvM1IKG6s01lWEbNm3DKY7EvlLYhlaMf8wAycRA6YsyO3uxxtM1Wj1hIT8o5A1zkrlPvlP5fceUYYCB+CQ7yUkOJN+bApN+RzxrKx+DbtgFmuujM3uZOkAJbX2vSeUd7H1c2fFO1xuPiY230mMIh4jD3iC0COASEgGpKCeHdqwUxWa/+OT/9W+sHT5OgSW4mXkPDRHEGc48bu7hwUa2DsUswpH+Xf0FptNdwvfS9lUWdDNk6r/4LSc+G7OzqayksO1gf7uhDLyuJQwyv87F7Ccr7iHcfM1VcYtzYXWglXvTwwZntsn2X+Z7MJpA9h1mu64cn36wGLnWZCVpUE2fsE1Tk11rn0NdrmAmrQT81+kVYKWvWABq0IigcGTxcoD5Ub4qCkrN+7hQxBoA+eAB2BA0YVDtWaM+pMh6PRV7SNQUuo1++4bfTsJ9zjkz9p2dRVc33+d72NBOR4njkZ9hZClrT7MIuAzUrNH9vPVUJAGspmtM4nGEHMbznw0XT8oGkWY2s7W4Je4BnIkAo/74gSecxAbf0xl7DSBKUJ8jh1fcJK8KTzkHCdzKlnNrmlBazIRnAPQgpW7dZrhdFvpYCS/KvgsSObSP8cpqmC9zcIWr9d+xeun8DIK1JcOrYzZWFhIzWkp5C4KL8dpudfQGjdFcUuFj/gwM7zueXIyvgKIcjcpGs2/vJNIczMz+17bDW+7Cl9bJIZJAzEUW4PkiWGZgkJYWnMPXAtW+u+odZf8QuRifNWHo6VbNHBw2CznqA/BBsDdVqYWWQeyQDyYNsM922+t5PjhmE7qXmSo8yQawAAAA",
+  pizza:"data:image/webp;base64,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",
+  mami_doarme:"data:image/webp;base64,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"
+};
+
+
+/* ---- LOGICĂ PURĂ (testată în Node — vezi smoke_test.js) ---- */
+var HubLogic=(function(){
+  var XP_PER_CORRECT=10,XP_PERFECT_BONUS=20,XP_PER_LEVEL=100;
+  var WALL_LIMIT=2;            // greșeli consecutive după care se oferă o ieșire elegantă
+  var RUSH_MS_PER_CHAR=22;     // sub atât pe caracter de enunț = citit pe fugă
+  var RUSH_MIN_STEM=90;        // se aplică doar enunțurilor lungi
+  function toDate(d){if(d instanceof Date)return new Date(d.getFullYear(),d.getMonth(),d.getDate());
+    var p=String(d).slice(0,10).split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
+  function daysBetween(a,b){return Math.round((toDate(b)-toDate(a))/86400000);}
+  function unlockedCount(s,c,t){var d=daysBetween(s,t);if(d<0)return 0;return Math.floor(d/c)+1;}
+  function isUnlocked(test,uc){return test.release_order<=uc;}
+  function normalizeNum(s){return String(s==null?"":s).replace(/\s/g,"").replace(",",".").trim().toLowerCase();}
+  function seqOK(g,n){if(!g||g.length!==n)return false;for(var i=0;i<n;i++){if(Number(g[i])!==i)return false;}return true;}
+  function gradeQuestion(q,g){if(g===undefined||g===null)return false;
+    if(q.type==="choice")return Number(g)===Number(q.correct);
+    if(q.type==="truefalse")return Boolean(g)===Boolean(q.answer);
+    if(q.type==="number")return normalizeNum(g)===normalizeNum(q.answer);
+    if(q.type==="flash")return g===true;
+    if(q.type==="match")return seqOK(g,(q.pairs||[]).length);
+    if(q.type==="order")return seqOK(g,(q.items||[]).length);return false;}
+  /* answeredCount lipsă = test dus până la capăt. Prezent = sesiune închisă mai devreme:
+     scorul se raportează la câte întrebări a văzut, nu la câte avea testul. */
+  function scoreAttempt(test,answers,answeredCount){
+    var qs=test.questions,c=0;
+    for(var i=0;i<qs.length;i++){if(answers[i]!==undefined&&gradeQuestion(qs[i],answers[i]))c++;}
+    var complete=(answeredCount==null||answeredCount>=qs.length);
+    var max=complete?qs.length:answeredCount,m=Number(test.xp_mult)||1;
+    return{score:c,max:max,xp:(c*XP_PER_CORRECT+((complete&&c===qs.length)?XP_PERFECT_BONUS:0))*m};}
+  function isPartial(a){return !!(a&&a.meta&&a.meta.partial);}
+  /* Statisticile se sprijină pe prima încercare COMPLETĂ. O sesiune închisă
+     devreme contează pentru serie (a venit), nu pentru nivelul pe temă. */
+  function firstAttempts(a){var b={};a.slice().sort(function(x,y){return new Date(x.created_at)-new Date(y.created_at);})
+    .forEach(function(x){if(isPartial(x))return;if(!b[x.test_id])b[x.test_id]=x;});return b;}
+  function xpAlready(a,testId){var m=0;a.forEach(function(x){if(x.test_id===testId&&(x.xp||0)>m)m=x.xp||0;});return m;}
+  /* XP maxim pe test, o singură dată: o sesiune parțială nu se pierde, dar nici nu se adună. */
+  function totalXP(a){var best={};a.forEach(function(x){var v=x.xp||0;
+    if(!(x.test_id in best)||v>best[x.test_id])best[x.test_id]=v;});
+    var s=0;Object.keys(best).forEach(function(k){s+=best[k];});return s;}
+  function levelFromXP(xp){var lv=Math.floor(xp/XP_PER_LEVEL)+1,into=xp%XP_PER_LEVEL;
+    return{level:lv,into:into,need:XP_PER_LEVEL,pct:Math.round((into/XP_PER_LEVEL)*100)};}
+  function addDays(d,n){var x=toDate(d);x.setDate(x.getDate()+n);return x;}
+  function fmt(d){var x=toDate(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");}
+  /* Zilele libere programate (turneu, drum lung) nu rup seria și nici nu o cresc. */
+  function streakDays(a,today,freeze){
+    var fz={};(freeze||[]).forEach(function(d){fz[String(d).slice(0,10)]=true;});
+    var days={};(a||[]).forEach(function(x){days[String(x.created_at).slice(0,10)]=true;});
+    var t=toDate(today),i=0,st=0;
+    if(!days[fmt(t)]&&!fz[fmt(t)])i=1; // dacă azi n-a lucrat încă, seria de ieri e validă
+    for(;i<400;i++){var k=fmt(addDays(t,-i));
+      if(days[k]){st++;continue;}
+      if(fz[k]){continue;}
+      break;}
+    return st;}
+  /* --- Sesiuni scurte: se servesc întrebările la care n-a ajuns încă, deci
+     două sesiuni scurte parcurg tot testul. „Doar 4 azi” e o ieșire cinstită,
+     nu o scurtătură. --- */
+  function seenIndices(attempts,testId){
+    var s={};(attempts||[]).forEach(function(a){
+      if(a.test_id!==testId)return;
+      if(a.meta&&a.meta.random)return;           // o sesiune la nimereală nu contează ca „văzut”
+      var ans=a.answers||[];
+      for(var i=0;i<ans.length;i++){if(ans[i]!==undefined)s[i]=true;}});
+    return s;}
+  function nextIndices(test,attempts,n){
+    var seen=seenIndices(attempts,test.id),out=[],i;
+    for(i=0;i<test.questions.length&&out.length<n;i++){if(!seen[i])out.push(i);}
+    if(!out.length){for(i=0;i<test.questions.length&&out.length<n;i++)out.push(i);} // totul văzut → reluare
+    return out;}
+  function mergeAnswers(attempts,test,cur){
+    var out=[],i;
+    for(i=0;i<test.questions.length;i++)out[i]=undefined;
+    (attempts||[]).slice().sort(function(x,y){return new Date(x.created_at)-new Date(y.created_at);})
+      .forEach(function(a){
+        if(a.test_id!==test.id)return;
+        if(a.meta&&a.meta.random)return;
+        (a.answers||[]).forEach(function(v,i){if(v!==undefined)out[i]=v;});});
+    (cur||[]).forEach(function(v,i){if(v!==undefined)out[i]=v;});
+    return out;}
+  function answeredCountOf(answers,test){var n=0;
+    for(var i=0;i<test.questions.length;i++){if((answers||[])[i]!==undefined)n++;}return n;}
+  /* --- Sesiune trecută la nimereală ---
+     Două semnale simultane: a mers repede prin majoritatea întrebărilor ȘI a luat
+     sub jumătate. Nu se acuză nimic pe ecran — sesiunea pur și simplu nu contează
+     la progres, seria rămâne, testul revine. Așa, un fals pozitiv nu doare. */
+  var RANDOM_MIN_Q=4, RANDOM_FAST_FRAC=0.6, RANDOM_ACC=0.5, FAST_MS=2500;
+  function isFastAnswer(q,ms){return !!ms&&(ms<FAST_MS||isRushed(q,ms));}
+  function randomSignals(test,answers,times){
+    var idx=[],i;times=times||[];
+    for(i=0;i<test.questions.length;i++){if((answers||[])[i]!==undefined)idx.push(i);}
+    var fast=0,correct=0;
+    idx.forEach(function(i){var q=test.questions[i];
+      if(isFastAnswer(q,times[i]))fast++;
+      if(gradeQuestion(q,answers[i]))correct++;});
+    return {n:idx.length,rapide:fast,corecte:correct,
+      fractie_rapide:idx.length?Math.round(fast/idx.length*100)/100:0,
+      acuratete:idx.length?Math.round(correct/idx.length*100)/100:0};}
+  function looksRandom(test,answers,times){
+    var s=randomSignals(test,answers,times);
+    if(s.n<RANDOM_MIN_Q)return false;
+    return s.fractie_rapide>=RANDOM_FAST_FRAC && s.acuratete<RANDOM_ACC;}
+  function stemLen(q){return String((q&&q.q)||"").length;}
+  /* Graba se măsoară, nu se arată. Prag conservator: sub o treime din timpul
+     necesar unei citiri normale la 11 ani (~66ms/caracter). */
+  function isRushed(q,ms){var L=stemLen(q);if(!ms||L<RUSH_MIN_STEM)return false;return ms<L*RUSH_MS_PER_CHAR;}
+  function topicStats(a,tests){var bid={};tests.forEach(function(t){bid[t.id]=t;});var f=firstAttempts(a),acc={};
+    Object.keys(f).forEach(function(k){var x=f[k],t=bid[x.test_id];if(!t)return;
+      var s=acc[t.topic]||(acc[t.topic]={topic:t.topic,subject:t.subject,correct:0,max:0,tests:0});
+      s.correct+=x.score;s.max+=x.max_score;s.tests+=1;});
+    return Object.keys(acc).map(function(k){var s=acc[k];s.pct=s.max?Math.round((s.correct/s.max)*100):0;return s;})
+      .sort(function(a,b){return a.pct-b.pct;});}
+  /* ================= ECONOMIA DE JETOANE =================
+     Reguli, în ordinea importanței:
+     1. Nimic nu scade jetoanele câștigate. Nu există expirare, penalizare
+        sau sold negativ. La un copil care ridică zid la corectare, pierderea
+        de puncte ar fi sfârșitul sistemului.
+     2. Plata NU e proporțională cu scorul — o zi slabă n-are voie să devină
+        pedeapsă. 2 pe test terminat, indiferent de câte a nimerit.
+     3. Cel mai bine plătită acțiune din economie e corectarea: 2 jetoane pe
+        item de recuperare, maximum 3 pe zi. O zi cu recuperare plătește de
+        patru ori cât una simplă. */
+  var JETON_TEST=2, JETON_REC=2, REC_MAX_ZI=3, CAIET_MAX_ZI=2;
+  function testeContorizate(attempts){
+    var s={};
+    (attempts||[]).forEach(function(a){
+      if(a.meta&&a.meta.random)return;      // o sesiune la nimereală nu plătește
+      if(isPartial(a))return;               // se plătește testul dus până la capăt
+      s[a.test_id]=true;});
+    return Object.keys(s).length;}
+  function castigate(attempts,recoveries){
+    var rec=0;(recoveries||[]).forEach(function(r){rec+=(r.corecte||0);});
+    return JETON_TEST*testeContorizate(attempts)+JETON_REC*rec;}
+  function cheltuit(redemptions){
+    var s=0;(redemptions||[]).forEach(function(r){if(r.stare!=="anulat")s+=(r.cost||0);});
+    return s;}
+  function sold(attempts,recoveries,redemptions){
+    return castigate(attempts,recoveries)-cheltuit(redemptions);}
+  /* Limita se ține pe recompensă, nu pe preț: o recompensă disponibilă
+     oricând nu mai e recompensă, iar prețul mare doar l-ar pune să
+     economisească pentru ceva ce oricum nu poate lua mai des. */
+  function ultimaCumparare(rewardId,redemptions){
+    var last=null;
+    (redemptions||[]).forEach(function(r){
+      if(r.reward_id!==rewardId||r.stare==="anulat")return;
+      if(!last||new Date(r.created_at)>new Date(last.created_at))last=r;});
+    return last;}
+  function disponibilaDin(reward,redemptions){
+    if(!reward||!reward.limita_zile)return null;
+    var last=ultimaCumparare(reward.id,redemptions);
+    if(!last)return null;
+    return fmt(addDays(toDate(String(last.created_at).slice(0,10)),reward.limita_zile));}
+  function poateCumpara(reward,redemptions,today,soldCurent){
+    if(!reward||reward.activ===false)return {ok:false,motiv:"inactiv"};
+    if(soldCurent<reward.cost)return {ok:false,motiv:"sold",lipsesc:reward.cost-soldCurent};
+    var d=disponibilaDin(reward,redemptions);
+    if(d&&fmt(toDate(today))<d)return {ok:false,motiv:"limita",din:d};
+    return {ok:true};}
+  /* „Pas" e ziua cumpărată pe ușa din față. Aron își ia deja dreptul de a sări
+     o zi — prin sesiuni trecute la nimereală. Un copil care poate cumpăra
+     ieșirea nu mai are motiv să o fure. */
+  function zileDePas(redemptions){
+    var z=[];
+    (redemptions||[]).forEach(function(r){
+      if(r.efect!=="pas"||r.stare==="anulat")return;
+      z.push(String(r.aplicat_la||r.created_at).slice(0,10));});
+    return z;}
+  function rambursareActiva(efect,redemptions){
+    var hit=null;
+    (redemptions||[]).forEach(function(r){
+      if(r.efect!==efect)return;
+      if(r.stare!=="cerut")return;
+      if(!hit||new Date(r.created_at)<new Date(hit.created_at))hit=r;});
+    return hit;}
+  function deOnorat(redemptions){
+    return (redemptions||[]).filter(function(r){return r.stare==="cerut"&&!r.efect;});}
+
+  /* ---- RECUPERAREA ----
+     Regula anti-farming: itemul de recuperare NU e aceeași întrebare reluată,
+     ci alta din aceeași temă, când există una neatinsă. Altfel o greșeală
+     intenționată ar fi un cupon de 2 jetoane pentru mâine. Așa, singura cale
+     de a păcăli sistemul e să exersezi — adică fix ce plătim.
+     A doua barieră: se iau doar greșelile din zilele TRECUTE, niciodată din
+     sesiunea de azi, deci nu se poate greși și recupera în aceeași zi. */
+  function cheieRec(testId,idx){return testId+":"+idx;}
+  function recuperateOk(recoveries){
+    var s={};
+    (recoveries||[]).forEach(function(r){
+      ((r.items)||[]).forEach(function(it){if(it&&it.ok&&it.src)s[it.src]=true;});});
+    return s;}
+  function recuperateAzi(recoveries,today){
+    var d=fmt(toDate(today)),n=0;
+    (recoveries||[]).forEach(function(r){
+      if(r.sursa==="caiet")return;              // caietul are plafonul lui, separat
+      if(String(r.created_at).slice(0,10)===d)n+=(r.total||0);});
+    return n;}
+  /* Caietul de activități de vacanță. Se plătește pagina CORECTATĂ împreună,
+     nu pagina completată — altfel s-ar plăti volumul, adică viteza, adică fix
+     mecanismul greșelilor lui. Plafon 2 pe zi, sub cele 3 din aplicație:
+     hub-ul trebuie să rămână calea cea mai bine plătită, pentru că el ține
+     evidența greșelilor și le readuce. */
+  function paginiCaietAzi(recoveries,today){
+    var d=fmt(toDate(today)),n=0;
+    (recoveries||[]).forEach(function(r){
+      if(r.sursa!=="caiet")return;
+      if(String(r.created_at).slice(0,10)===d)n+=(r.corecte||0);});
+    return n;}
+  function maiPoateCaiet(recoveries,today){
+    return Math.max(0,CAIET_MAX_ZI-paginiCaietAzi(recoveries,today));}
+  function greseliVechi(attempts,tests,today){
+    var bid={};(tests||[]).forEach(function(t){bid[t.id]=t;});
+    var d=fmt(toDate(today)),out=[],vazut={};
+    (attempts||[]).forEach(function(a){
+      if(a.meta&&a.meta.random)return;
+      if(String(a.created_at).slice(0,10)>=d)return;   // nimic din ziua de azi
+      var t=bid[a.test_id];if(!t)return;
+      (a.answers||[]).forEach(function(g,i){
+        if(g===undefined||g===null)return;
+        var q=(t.questions||[])[i];if(!q)return;
+        if(gradeQuestion(q,g))return;
+        var k=cheieRec(a.test_id,i);
+        if(vazut[k])return; vazut[k]=true;
+        out.push({src:k,testId:a.test_id,idx:i,topic:t.topic,subject:t.subject});});});
+    return out;}
+  function recoveryPool(attempts,tests,recoveries,today,max){
+    var lim=Math.max(0,Math.min(max===undefined?REC_MAX_ZI:max,
+      REC_MAX_ZI-recuperateAzi(recoveries,today)));
+    if(!lim)return [];
+    var rezolvate=recuperateOk(recoveries);
+    var candidati=greseliVechi(attempts,tests,today).filter(function(g){return !rezolvate[g.src];});
+    var bid={};(tests||[]).forEach(function(t){bid[t.id]=t;});
+    var folosite={},out=[];
+    candidati.forEach(function(g){
+      if(out.length>=lim)return;
+      // întâi o întrebare neatinsă din aceeași temă (varianta, nu reluarea)
+      var ales=null;
+      (tests||[]).forEach(function(t){
+        if(ales||t.topic!==g.topic)return;
+        var vaz=seenIndices(attempts,t.id);
+        (t.questions||[]).forEach(function(q,i){
+          if(ales||vaz[i])return;
+          var k=cheieRec(t.id,i); if(folosite[k])return;
+          ales={testId:t.id,idx:i};});});
+      if(!ales){ // n-a rămas nimic nou pe tema asta: se reia itemul greșit
+        ales={testId:g.testId,idx:g.idx};}
+      var kk=cheieRec(ales.testId,ales.idx);
+      if(folosite[kk])return;
+      folosite[kk]=true;
+      var t2=bid[ales.testId];if(!t2)return;
+      out.push({src:g.src,testId:ales.testId,idx:ales.idx,
+        q:(t2.questions||[])[ales.idx],topic:t2.topic,subject:t2.subject});});
+    return out;}
+
+  /* ---- TIMP DE ECRAN CONSUMAT DE ÎNVĂȚAT ----
+     Se măsoară ca să știm câte minute i se dau înapoi din cele 50, nu ca să-l
+     grăbim. De aceea: nu se afișează niciodată în timpul testului, iar o pauză
+     mai lungă de IDLE_CAP nu se pune la socoteală (tabul rămas deschis nu
+     produce minute). Plafonul pe sesiune oprește orice acumulare absurdă. */
+  var IDLE_CAP_MS=120000;      // o pauză se numără cel mult 2 minute
+  var SESSION_CAP_MS=1800000;  // maximum 30 de minute creditate pe sesiune
+  function minutesOf(ms){
+    if(!ms||ms<0)return 0;
+    if(ms>SESSION_CAP_MS)ms=SESSION_CAP_MS;
+    return Math.max(1,Math.round(ms/60000));}
+  function attemptMinutes(a){
+    var m=a&&a.meta;
+    if(m&&typeof m.activ_ms==="number")return minutesOf(m.activ_ms);
+    // fallback pentru încercările dinainte de contor: suma timpilor pe întrebare
+    var tm=(m&&m.times)||[],s=0;
+    tm.forEach(function(x){if(x)s+=x;});
+    return s?minutesOf(s):0;}
+  function minutesByDay(attempts){
+    var acc={};
+    (attempts||[]).forEach(function(a){
+      var d=String(a.created_at||"").slice(0,10); if(!d)return;
+      acc[d]=(acc[d]||0)+attemptMinutes(a);});
+    return acc;}
+  return{unlockedCount:unlockedCount,isUnlocked:isUnlocked,gradeQuestion:gradeQuestion,scoreAttempt:scoreAttempt,
+    IDLE_CAP_MS:IDLE_CAP_MS,SESSION_CAP_MS:SESSION_CAP_MS,minutesOf:minutesOf,
+    attemptMinutes:attemptMinutes,minutesByDay:minutesByDay,
+    JETON_TEST:JETON_TEST,JETON_REC:JETON_REC,REC_MAX_ZI:REC_MAX_ZI,CAIET_MAX_ZI:CAIET_MAX_ZI,
+    paginiCaietAzi:paginiCaietAzi,maiPoateCaiet:maiPoateCaiet,
+    testeContorizate:testeContorizate,castigate:castigate,cheltuit:cheltuit,sold:sold,
+    poateCumpara:poateCumpara,disponibilaDin:disponibilaDin,ultimaCumparare:ultimaCumparare,
+    zileDePas:zileDePas,rambursareActiva:rambursareActiva,deOnorat:deOnorat,
+    recoveryPool:recoveryPool,greseliVechi:greseliVechi,recuperateOk:recuperateOk,
+    recuperateAzi:recuperateAzi,cheieRec:cheieRec,
+    totalXP:totalXP,xpAlready:xpAlready,levelFromXP:levelFromXP,streakDays:streakDays,topicStats:topicStats,
+    isPartial:isPartial,isRushed:isRushed,firstAttempts:firstAttempts,fmt:fmt,addDays:addDays,WALL_LIMIT:WALL_LIMIT,
+    seenIndices:seenIndices,nextIndices:nextIndices,mergeAnswers:mergeAnswers,answeredCountOf:answeredCountOf,
+    looksRandom:looksRandom,randomSignals:randomSignals,isFastAnswer:isFastAnswer,SHORT_N:4};
+})();
+
+/* ---- STARE APLICAȚIE ---- */
+var sb=null, S={settings:null,tests:[],attempts:[],rewards:[],redemptions:[],recoveries:[]}, session={role:null};
+var pin={role:null,val:"",need:""};
+var quiz=null;
+function $(id){return document.getElementById(id);}
+function show(id){["screenSetup","loading","screenProfiles","screenPin","screenAron","screenIntro","screenQuiz","screenResult","screenParent","screenShop"]
+  .forEach(function(s){$(s).classList.add("hidden");});$(id).classList.remove("hidden");
+  updateNav(id);}
+
+/* Bara de jos apare doar acasă și în magazin. În timpul unui test dispare,
+   ca să nu existe nicio ieșire accidentală din mijlocul întrebărilor. */
+function updateNav(id){
+  var nb=$("navbar"); if(!nb)return;
+  var on=(id==="screenAron"||id==="screenShop");
+  nb.classList.toggle("on",on);
+  if(!on)return;
+  $("nvHome").classList.toggle("on",id==="screenAron");
+  $("nvTests").classList.remove("on");
+  $("nvProg").classList.remove("on");
+  $("nvShop").classList.toggle("on",id==="screenShop");
+  var jetOn=false; try{jetOn=jetoaneActive();}catch(e){}
+  $("nvShop").classList.toggle("hidden",!jetOn);
+}
+function navGo(unde){
+  if($("screenAron").classList.contains("hidden"))showAron();
+  var t=(unde==="prog")?$("aCovLab"):$("aronTodo");
+  if(t)setTimeout(function(){t.scrollIntoView({behavior:"smooth",block:"center"});},60);
+}
+function todayStr(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+
+function encCfg(u,k){return btoa(unescape(encodeURIComponent(JSON.stringify({u:u,k:k}))));}
+function decCfg(s){try{return JSON.parse(decodeURIComponent(escape(atob(s))));}catch(e){return null;}}
+function loadConfig(){
+  // 1) din link (?c=...)  2) din memoria browserului  3) baked în fișier
+  var m=location.search.match(/[?&]c=([^&]+)/);
+  if(m){var c=decCfg(decodeURIComponent(m[1]));if(c&&c.u&&c.k){try{localStorage.setItem("hubcfg",m[1]);}catch(e){}return c;}}
+  try{var ls=localStorage.getItem("hubcfg");if(ls){var c2=decCfg(ls);if(c2&&c2.u&&c2.k)return c2;}}catch(e){}
+  if(SUPABASE_URL.indexOf("PASTE_")!==0&&SUPABASE_ANON_KEY.indexOf("PASTE_")!==0)return{u:SUPABASE_URL,k:SUPABASE_ANON_KEY};
+  return null;
+}
+function saveSetup(){
+  var u=$("setUrl").value.trim(), k=$("setKey").value.trim();
+  if(!/^https:\/\/.+\.supabase\.co\/?$/.test(u)){$("setMsg").textContent="URL-ul pare greșit (trebuie https://...supabase.co).";return;}
+  if(k.length<30){$("setMsg").textContent="Cheia anon pare prea scurtă.";return;}
+  u=u.replace(/\/$/,""); var enc=encCfg(u,k);
+  try{localStorage.setItem("hubcfg",enc);}catch(e){}
+  var link=location.origin+location.pathname+"?c="+enc;
+  $("shareLink").textContent=link; window._shareLink=link;
+  $("setShare").classList.remove("hidden"); $("setMsg").textContent="";
+  SUPABASE_URL=u; SUPABASE_ANON_KEY=k;
+  // pornește în fundal
+  setTimeout(function(){boot();},1400);
+}
+function copyShare(){
+  if(navigator.clipboard)navigator.clipboard.writeText(window._shareLink||"");
+  var b=event.target; var t=b.textContent; b.textContent="✓ Copiat!"; setTimeout(function(){b.textContent=t;},1500);
+}
+async function boot(){
+  var cfg=loadConfig();
+  if(!cfg){show("screenSetup");return;}
+  SUPABASE_URL=cfg.u; SUPABASE_ANON_KEY=cfg.k;
+  try{
+    sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+    await flushQueue();
+    await refresh();
+    show("screenProfiles");
+  }catch(e){
+    $("loading").classList.add("hidden");
+    $("fatal").classList.remove("hidden");
+    $("fatal").innerHTML='<div class="err">Nu m-am putut conecta la Supabase. Verifică URL-ul și cheia. ('+esc(e.message||e)+')</div>';
+  }
+}
+/* Plasă de siguranță: dacă salvarea pică (net slab), rândul rămâne în telefon
+   și se trimite la următoarea deschidere. Înainte, eroarea era înghițită în silență. */
+function queuePush(row){try{var q=JSON.parse(localStorage.getItem("hubq")||"[]");q.push(row);
+  localStorage.setItem("hubq",JSON.stringify(q));}catch(e){}}
+function queueLen(){try{return (JSON.parse(localStorage.getItem("hubq")||"[]")).length;}catch(e){return 0;}}
+async function flushQueue(){
+  var q=[];try{q=JSON.parse(localStorage.getItem("hubq")||"[]");}catch(e){return;}
+  if(!q.length)return;
+  try{var r=await sb.from("attempts").insert(q); if(r&&r.error)throw r.error;
+    try{localStorage.removeItem("hubq");}catch(e){}}catch(e){}
+}
+async function refresh(){
+  var a=await sb.from("settings").select("*").eq("id",1).single();
+  var b=await sb.from("tests").select("*").order("release_order");
+  var c=await sb.from("attempts").select("*").order("created_at");
+  if(a.error)throw a.error; if(b.error)throw b.error; if(c.error)throw c.error;
+  S.settings=a.data; S.tests=b.data||[]; S.attempts=c.data||[];
+  // Jetoanele degradează elegant: dacă migrația 5 n-a fost rulată, hub-ul
+  // funcționează exact ca înainte, fără secțiunea de jetoane. Ordinea de
+  // instalare nu poate strica nimic.
+  S.rewards=[]; S.redemptions=[]; S.recoveries=[];
+  try{
+    var d=await sb.from("rewards").select("*").order("ordine");
+    if(!d.error)S.rewards=d.data||[];
+    var e=await sb.from("redemptions").select("*").order("created_at");
+    if(!e.error)S.redemptions=e.data||[];
+    var f=await sb.from("recoveries").select("*").order("created_at");
+    if(!f.error)S.recoveries=f.data||[];
+  }catch(err){ /* tabelele lipsesc — se merge mai departe fără jetoane */ }
+}
+function jetoane(){return HubLogic.sold(S.attempts,S.recoveries,S.redemptions);}
+function jetoaneActive(){return (S.rewards||[]).filter(function(r){return r.activ!==false;}).length>0;}
+
+/* ---- PROFIL & PIN ---- */
+function goProfiles(){session.role=null;show("screenProfiles");}
+function pickProfile(role){
+  pin={role:role,val:"",need:role==="aron"?S.settings.aron_pin:S.settings.parent_pin};
+  $("pinTitle").textContent=role==="aron"?"PIN-ul lui Aron":"PIN părinte";
+  $("pinMsg").innerHTML="&nbsp;"; renderPin(); show("screenPin");
+}
+function renderPin(){$("pinDisplay").textContent=pin.val.replace(/./g,"●");}
+function pinPress(d){
+  if(pin.val.length>=6)return; pin.val+=d; renderPin();
+  if(pin.val.length===String(pin.need).length){
+    if(pin.val===String(pin.need)){ session.role=pin.role;
+      try{ pin.role==="aron"?showAron():showParent(); }
+      catch(e){ // o eroare de afișare nu trebuie să pară „PIN greșit”
+        $("pinMsg").innerHTML='<span style="color:var(--bad);font-weight:700">PIN corect, dar ecranul nu s-a putut încărca.</span><br><span class="small">'+esc(e.message||e)+'</span>';
+        pin.val=""; setTimeout(renderPin,120); } }
+    else{ $("pinMsg").innerHTML='<span style="color:var(--bad);font-weight:700">PIN greșit, mai încearcă</span>';
+      pin.val=""; setTimeout(renderPin,120); }
+  }
+}
+function pinBack(){pin.val=pin.val.slice(0,-1);renderPin();}
+
+/* ---- ARON ---- */
+function showAron(){
+  session.role="aron";
+  var xp=HubLogic.totalXP(S.attempts), lv=HubLogic.levelFromXP(xp);
+  // zilele cumpărate cu „Pas" se comportă ca zilele libere programate: seria rămâne
+  var libere=(S.settings.freeze_days||[]).concat(HubLogic.zileDePas(S.redemptions));
+  var st=HubLogic.streakDays(S.attempts,todayStr(),libere);
+  $("aLevel").textContent=lv.level; $("aXp").textContent=xp; $("aXpBar").style.width=lv.pct+"%";
+  $("aStreak").textContent=st+"🔥";
+  // subtitlul de sus: data de azi + seria, ca să nu mai stea cifrele în prim-plan
+  var zile=["duminică","luni","marți","miercuri","joi","vineri","sâmbătă"];
+  $("aToday").textContent=zile[new Date().getDay()]+", "+roDate(todayStr())+
+    (st>0?(" · ziua "+st+" la rând"):"");
+  var sold=jetoane();
+  if(jetoaneActive()){
+    $("aJet").textContent=sold+" 🪙";
+    $("aJetSub").textContent=sold===1?"jeton":"jetoane";
+    $("aJetCum").innerHTML=textTarif();
+    // ținta următoare: cea mai ieftină recompensă pe care încă nu și-o permite
+    var nxt=(S.rewards||[]).filter(function(r){return r.activ!==false&&r.cost>sold;})
+      .sort(function(a,b){return a.cost-b.cost;})[0];
+    $("aJetNext").innerHTML = nxt
+      ? ('încă <b>'+(nxt.cost-sold)+'</b> până la „'+esc(nxt.nume)+'”')
+      : 'ai destule pentru orice e în magazin';
     $("aJetCard").classList.remove("hidden");
   }else{$("aJetCard").classList.add("hidden");}
   var pasAzi=HubLogic.zileDePas(S.redemptions).indexOf(todayStr())>=0;
