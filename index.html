@@ -469,7 +469,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-08-09b";
+var APP_VERSION="2026-08-09c";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -642,11 +642,29 @@ var HubLogic=(function(){
       if(r.reward_id!==rewardId||r.stare==="anulat")return;
       if(!last||new Date(r.created_at)>new Date(last.created_at))last=r;});
     return last;}
+  /* Lunea săptămânii în care cade data dată. Duminica aparține săptămânii care
+     tocmai s-a încheiat, ca peste tot în Europa. */
+  function luniSaptamanii(d){
+    var x=toDate(d), z=x.getDay();
+    return addDays(x, z===0 ? -6 : 1-z);}
+  /* „O dată pe săptămână" înseamnă o dată pe săptămâna de CALENDAR, nu la 7 zile
+     de la ultima cumpărare. Diferența e mare pentru un copil: dacă ia „mami doarme"
+     joi, se reîntoarce lunea următoare, nu joia următoare. Regula devine una
+     singură, ținută minte fără efort: LUNEA SE RESETEAZĂ TOT. Cea veche cerea un
+     calendar separat pentru fiecare recompensă.
+     Se aplică la limitele care sunt multiplu de 7 (7 = săptămânal, 14 = la două
+     săptămâni). Restul rămân zile rulante — `ecran_transfer` are 3 și n-are ce
+     căuta într-o săptămână de calendar.
+     Nu poate ieși mai rău decât înainte: lunea următoare vine întotdeauna la 7
+     zile sau mai devreme. */
   function disponibilaDin(reward,redemptions){
     if(!reward||!reward.limita_zile)return null;
     var last=ultimaCumparare(reward.id,redemptions);
     if(!last)return null;
-    return fmt(addDays(toDate(String(last.created_at).slice(0,10)),reward.limita_zile));}
+    var d=toDate(String(last.created_at).slice(0,10));
+    if(reward.limita_zile%7===0)
+      return fmt(addDays(luniSaptamanii(d),reward.limita_zile));
+    return fmt(addDays(d,reward.limita_zile));}
   function poateCumpara(reward,redemptions,today,soldCurent){
     if(!reward||reward.activ===false)return {ok:false,motiv:"inactiv"};
     if(soldCurent<reward.cost)return {ok:false,motiv:"sold",lipsesc:reward.cost-soldCurent};
@@ -860,7 +878,7 @@ var HubLogic=(function(){
     intrebariFolosite:intrebariFolosite,testeIncercate:testeIncercate,
     testeContorizate:testeContorizate,castigate:castigate,cheltuit:cheltuit,sold:sold,
     poateCumpara:poateCumpara,disponibilaDin:disponibilaDin,ultimaCumparare:ultimaCumparare,
-    zileDePas:zileDePas,rambursareActiva:rambursareActiva,deOnorat:deOnorat,
+    zileDePas:zileDePas,rambursareActiva:rambursareActiva,deOnorat:deOnorat,luniSaptamanii:luniSaptamanii,
     recoveryPool:recoveryPool,greseliVechi:greseliVechi,recuperateOk:recuperateOk,
     recuperateAzi:recuperateAzi,cheieRec:cheieRec,
     totalXP:totalXP,xpAlready:xpAlready,levelFromXP:levelFromXP,streakDays:streakDays,topicStats:topicStats,
@@ -1530,7 +1548,11 @@ function textTarif(){
 function showShop(){
   var s=jetoane();
   $("sJet").textContent=s+" 🪙";
-  $("sCum").innerHTML=textTarif();
+  // Regula de cheltuire, spusă o dată și simplu: e singura pe care trebuie s-o
+  // țină minte ca să poată planifica. „La 7 zile de la ultima dată" ar fi cerut
+  // un calendar separat pentru fiecare recompensă.
+  $("sCum").innerHTML=textTarif()+
+    '<div class="small" style="margin-top:6px;opacity:.8">Ce se ia „o dată pe săptămână" se reîncarcă lunea, nu la șapte zile. Luni e zi nouă la tot.</div>';
   var html="";
   var items=(S.rewards||[]).filter(function(r){return r.activ!==false;})
     .sort(function(a,b){return (a.cost-b.cost)||((a.ordine||0)-(b.ordine||0));});
