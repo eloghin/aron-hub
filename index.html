@@ -352,6 +352,8 @@ h1,h2,h3{margin:0}
       <div style="margin-top:16px"><button class="btn" id="iFull" onclick="startQuiz(introId,'full')">Începem</button></div>
       <div style="margin-top:10px"><button class="btn ghost" id="iShort" onclick="startQuiz(introId,'short')"></button></div>
       <div style="margin-top:10px"><button class="btn ghost hidden" id="iRec" onclick="startRecovery()"></button></div>
+      <div style="margin-top:10px"><button class="btn ghost hidden" id="iExtra" onclick="toggleExtra()"></button></div>
+      <div class="hidden" id="iTeme" style="margin-top:10px"></div>
       <div class="hint" style="margin-top:8px" id="iHint"></div>
     </div>
   </div>
@@ -468,7 +470,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-08-05a";
+var APP_VERSION="2026-08-09a";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -603,7 +605,7 @@ var HubLogic=(function(){
      3. Cel mai bine plătită acțiune din economie e corectarea: 2 jetoane pe
         item de recuperare, maximum 3 pe zi. O zi cu recuperare plătește de
         patru ori cât una simplă. */
-  var JETON_TEST=2, JETON_REC=2, REC_MAX_ZI=3, CAIET_MAX_ZI=2;
+  var JETON_TEST=2, JETON_REC=2, JETON_EXTRA=2, REC_MAX_ZI=3, CAIET_MAX_ZI=2, EXTRA_N=3, EXTRA_MAX_ZI=1;
   function testeContorizate(attempts){
     var s={};
     (attempts||[]).forEach(function(a){
@@ -611,9 +613,16 @@ var HubLogic=(function(){
       if(isPartial(a))return;               // se plătește testul dus până la capăt
       s[a.test_id]=true;});
     return Object.keys(s).length;}
+  /* `corecte` din `recoveries` e numărul de UNITĂȚI PLĂTITE, nu de răspunsuri
+     bune: itemi reparați la recuperare, pagini corectate la caiet, 1 sau 0 la
+     „Exersez în plus" (sesiunea se plătește întreagă sau deloc). De aceea sunt
+     numărate separat — ca să se poată schimba un tarif fără să se miște altul. */
   function castigate(attempts,recoveries){
-    var rec=0;(recoveries||[]).forEach(function(r){rec+=(r.corecte||0);});
-    return JETON_TEST*testeContorizate(attempts)+JETON_REC*rec;}
+    var rec=0,ext=0;
+    (recoveries||[]).forEach(function(r){
+      if(r.sursa==="extra"){ext+=(r.corecte||0);return;}
+      rec+=(r.corecte||0);});
+    return JETON_TEST*testeContorizate(attempts)+JETON_REC*rec+JETON_EXTRA*ext;}
   function cheltuit(redemptions){
     var s=0;(redemptions||[]).forEach(function(r){if(r.stare!=="anulat")s+=(r.cost||0);});
     return s;}
@@ -675,6 +684,7 @@ var HubLogic=(function(){
     var d=fmt(toDate(today)),n=0;
     (recoveries||[]).forEach(function(r){
       if(r.sursa==="caiet")return;              // caietul are plafonul lui, separat
+      if(r.sursa==="extra")return;              // „Exersez în plus" la fel — altfel ar mânca plafonul corectării
       if(String(r.created_at).slice(0,10)===d)n+=(r.total||0);});
     return n;}
   /* Caietul de activități de vacanță. Se plătește pagina CORECTATĂ împreună,
@@ -690,6 +700,72 @@ var HubLogic=(function(){
     return n;}
   function maiPoateCaiet(recoveries,today){
     return Math.max(0,CAIET_MAX_ZI-paginiCaietAzi(recoveries,today));}
+
+  /* ---- „EXERSEZ ÎN PLUS" ----
+     Geamănul recuperării, dar fără să ceară greșeli. Repară un defect real al
+     economiei: cine nu greșește deloc e plafonat la 2 jetoane pe zi, în timp ce
+     o zi cu trei recuperări plătește 8. Adică greșeala intenționată devenea
+     rațională economic. Cu butonul ăsta, o zi fără nicio greșeală plătește 4.
+     Trei reguli, în ordinea importanței:
+     1. Plafon 1 sesiune pe zi. Plafonul e singura apărare de care e nevoie —
+        nu se verifică scorul, deci nu există „farmare prin greșeli".
+     2. Plata NU depinde de câte a nimerit. Ar fi plată proporțională cu scorul,
+        interzisă peste tot în sistem. Depinde doar dacă a citit: dacă TOATE
+        răspunsurile vin la viteză de click, sesiunea nu plătește.
+     3. Întrebările vin doar din teste pe care le-a mai deschis, niciodată din
+        cele viitoare — altfel „exersez în plus" ar strica testul de marți. */
+  function intrebariFolosite(recoveries){
+    var s={};
+    (recoveries||[]).forEach(function(r){
+      ((r.items)||[]).forEach(function(it){if(it&&it.q)s[it.q]=true;});});
+    return s;}
+  function testeIncercate(attempts){
+    var s={};
+    (attempts||[]).forEach(function(a){
+      if(a.meta&&a.meta.random)return;
+      s[a.test_id]=true;});
+    return s;}
+  function extraAzi(recoveries,today){
+    var d=fmt(toDate(today)),n=0;
+    (recoveries||[]).forEach(function(r){
+      if(r.sursa!=="extra")return;
+      if(String(r.created_at).slice(0,10)===d)n++;});
+    return n;}
+  function maiPoateExtra(recoveries,today){
+    return Math.max(0,EXTRA_MAX_ZI-extraAzi(recoveries,today));}
+  /* Întâi întrebările nevăzute (rămase din sesiunile „doar 4 azi"), apoi cele
+     văzute — o temă epuizată nu dispare din listă cât timp are ce reda. Ce a
+     fost deja folosit într-o recuperare sau într-un exersat nu se mai servește:
+     altfel aceleași trei întrebări ar plăti la infinit. */
+  function extraPool(attempts,tests,recoveries,topic,max){
+    var lim=(max===undefined?EXTRA_N:max);
+    if(lim<=0)return [];
+    var inc=testeIncercate(attempts),folosite=intrebariFolosite(recoveries);
+    var noi=[],vechi=[];
+    (tests||[]).forEach(function(t){
+      if(!inc[t.id]||t.topic!==topic)return;
+      var vaz=seenIndices(attempts,t.id);
+      (t.questions||[]).forEach(function(q,i){
+        var k=cheieRec(t.id,i);
+        if(folosite[k])return;
+        var it={q:q,testId:t.id,idx:i,topic:t.topic,subject:t.subject,key:k};
+        if(vaz[i])vechi.push(it); else noi.push(it);});});
+    return noi.concat(vechi).slice(0,lim);}
+  function temeExersabile(attempts,tests,recoveries){
+    var inc=testeIncercate(attempts),vaz={},out=[];
+    (tests||[]).forEach(function(t){
+      if(!inc[t.id]||vaz[t.topic])return;
+      vaz[t.topic]=true;
+      var p=extraPool(attempts,tests,recoveries,t.topic,EXTRA_N);
+      if(p.length)out.push({topic:t.topic,subject:t.subject,n:p.length});});
+    return out;}
+  function extraPlatit(test,answers,times){
+    var idx=[],i;times=times||[];
+    for(i=0;i<(test.questions||[]).length;i++){if((answers||[])[i]!==undefined)idx.push(i);}
+    if(!idx.length)return false;
+    var rapide=0;
+    idx.forEach(function(i){if(isFastAnswer(test.questions[i],times[i]))rapide++;});
+    return rapide<idx.length;}
   function greseliVechi(attempts,tests,today){
     var bid={};(tests||[]).forEach(function(t){bid[t.id]=t;});
     var d=fmt(toDate(today)),out=[],vazut={};
@@ -761,8 +837,12 @@ var HubLogic=(function(){
   return{unlockedCount:unlockedCount,isUnlocked:isUnlocked,gradeQuestion:gradeQuestion,scoreAttempt:scoreAttempt,
     IDLE_CAP_MS:IDLE_CAP_MS,SESSION_CAP_MS:SESSION_CAP_MS,minutesOf:minutesOf,
     attemptMinutes:attemptMinutes,minutesByDay:minutesByDay,
-    JETON_TEST:JETON_TEST,JETON_REC:JETON_REC,REC_MAX_ZI:REC_MAX_ZI,CAIET_MAX_ZI:CAIET_MAX_ZI,
+    JETON_TEST:JETON_TEST,JETON_REC:JETON_REC,JETON_EXTRA:JETON_EXTRA,
+    REC_MAX_ZI:REC_MAX_ZI,CAIET_MAX_ZI:CAIET_MAX_ZI,EXTRA_N:EXTRA_N,EXTRA_MAX_ZI:EXTRA_MAX_ZI,
     paginiCaietAzi:paginiCaietAzi,maiPoateCaiet:maiPoateCaiet,
+    extraAzi:extraAzi,maiPoateExtra:maiPoateExtra,extraPool:extraPool,
+    temeExersabile:temeExersabile,extraPlatit:extraPlatit,
+    intrebariFolosite:intrebariFolosite,testeIncercate:testeIncercate,
     testeContorizate:testeContorizate,castigate:castigate,cheltuit:cheltuit,sold:sold,
     poateCumpara:poateCumpara,disponibilaDin:disponibilaDin,ultimaCumparare:ultimaCumparare,
     zileDePas:zileDePas,rambursareActiva:rambursareActiva,deOnorat:deOnorat,
@@ -1039,7 +1119,88 @@ function openTest(testId){
       " (+"+(pool.length*HubLogic.JETON_REC)+" 🪙)";
     $("iRec").classList.remove("hidden");
   }else{$("iRec").classList.add("hidden");}
+  // „Exersez în plus" e a patra alegere. Apare doar dacă mai are voie azi
+  // ȘI dacă există pe ce exersa — un buton care nu face nimic e mai rău decât unul care lipsește.
+  $("iTeme").classList.add("hidden"); $("iTeme").innerHTML="";
+  var teme=(jetoaneActive()&&HubLogic.maiPoateExtra(S.recoveries,todayStr()))
+    ? HubLogic.temeExersabile(S.attempts,S.tests,S.recoveries) : [];
+  extraTeme=teme;
+  if(teme.length){
+    $("iExtra").textContent="➕ Exersez în plus (+"+HubLogic.JETON_EXTRA+" 🪙)";
+    $("iExtra").classList.remove("hidden");
+  }else{$("iExtra").classList.add("hidden");}
   show("screenIntro");
+}
+
+/* ---- „EXERSEZ ÎN PLUS": alegerea temei ----
+   Tema o alege el, din ce a mai lucrat. E a doua alegere reală din aplicație,
+   după „doar 4 azi" — și singura care spune „vreau mai mult", nu „vreau mai puțin". */
+var extraTeme=[];
+function toggleExtra(){
+  var box=$("iTeme");
+  if(!box.classList.contains("hidden")){box.classList.add("hidden");return;}
+  var html='<div class="small" style="margin-bottom:8px">Pe ce vrei să mai exersezi? '+
+    'Fără notă, fără să conteze la nimic — scrie pe fiecare câte întrebări are.</div>';
+  extraTeme.forEach(function(t,i){
+    html+='<div style="margin-top:8px"><button class="btn ghost" style="width:100%" '+
+      'onclick="startExtra('+i+')">'+esc(t.topic)+' · '+t.n+
+      (t.n===1?" întrebare":" întrebări")+'</button></div>';});
+  box.innerHTML=html;
+  box.classList.remove("hidden");
+}
+function startExtra(i){
+  var tema=extraTeme[i]; if(!tema)return;
+  if(!HubLogic.maiPoateExtra(S.recoveries,todayStr()))return;
+  var pool=HubLogic.extraPool(S.attempts,S.tests,S.recoveries,tema.topic,HubLogic.EXTRA_N);
+  if(!pool.length)return;
+  var t={id:"__extra",subject:pool[0].subject||"mate",topic:tema.topic,
+    title:"Exersez în plus",questions:pool.map(function(p){return p.q;})};
+  var qu=[];for(var k=0;k<pool.length;k++)qu.push(k);
+  quiz={test:t,queue:qu,base:qu.length,pos:0,answers:[],given:null,answered:false,requeued:{},
+    sel:null,picked:[],times:[],rushed:0,wrongRun:0,t0:0,activeMs:0,tick:Date.now(),
+    mode:"extra",extra:pool};
+  renderQuestion(); show("screenQuiz");
+}
+async function finishExtra(){
+  var t=quiz.test,pool=quiz.extra,items=[],corecte=0;
+  pool.forEach(function(p,i){
+    var ok=HubLogic.gradeQuestion(t.questions[i],quiz.answers[i]);
+    if(ok)corecte++;
+    items.push({q:p.key,ok:!!ok});});
+  var platit=HubLogic.extraPlatit(t,quiz.answers,quiz.times);
+  var sumaTimpi=0;(quiz.times||[]).forEach(function(x){if(x)sumaTimpi+=x;});
+  var minute=HubLogic.minutesOf(quiz.activeMs||sumaTimpi);
+  // `corecte` = unități plătite (1 sau 0), nu răspunsuri bune. Scorul real stă în meta.
+  var row={student:"aron",items:items,corecte:(platit?1:0),total:1,sursa:"extra",
+    meta:{tema:t.topic,intrebari:items.length,corecte_real:corecte,platit:platit,
+      times:quiz.times,activ_ms:quiz.activeMs||0,minute:minute,v:APP_VERSION}};
+  var saved=true;
+  try{
+    var r=await sb.from("recoveries").insert([row]);
+    if(r&&r.error)throw r.error;
+    await refresh();
+  }catch(e){
+    saved=false;
+    var local={};Object.keys(row).forEach(function(k){local[k]=row[k];});
+    local.created_at=new Date().toISOString();
+    S.recoveries=S.recoveries.concat([local]);
+  }
+  $("rEmoji").textContent="➕";
+  $("rTitle").textContent="Exersat în plus";
+  $("rScore").textContent=corecte+" din "+items.length+" nimerite. Nu contează la nimic — ai vrut tu.";
+  if(platit){$("rXp").textContent="+"+HubLogic.JETON_EXTRA+" 🪙";$("rXp").classList.remove("hidden");}
+  else{$("rXp").classList.add("hidden");}
+  if(minute>0){
+    $("rTime").textContent="⏱ "+minute+(minute===1?" minut":" minute")+
+      " de învățat. Nu se scad din cele 50 — ți le primești înapoi.";
+    $("rTime").classList.remove("hidden");
+  }else{$("rTime").classList.add("hidden");}
+  $("rRetry").classList.add("hidden");
+  if(saved){$("rNote").classList.add("hidden");$("rNote").textContent="";}
+  else{$("rNote").textContent="Salvat pe telefon — se trimite singur când revine internetul.";
+    $("rNote").classList.remove("hidden");}
+  renderMistakes(t,quiz.answers);
+  show("screenResult");
 }
 
 /* ---- QUIZ ---- */
@@ -1240,6 +1401,7 @@ function renderMistakes(t,answers){
 async function finishQuiz(stoppedEarly){
   tickActive();
   if(quiz.rec)return finishRecovery();   // recuperarea are propriul flux și propria tabelă
+  if(quiz.extra)return finishExtra();    // la fel „Exersez în plus" — nu atinge scorurile
   var t=quiz.test;
   var castInainte=HubLogic.castigate(S.attempts,S.recoveries);
   // Dacă din orice motiv ceasul sesiunii n-a pornit, se cade pe suma timpilor
@@ -1338,9 +1500,10 @@ function randTarif(eticheta,limita,plata){
     '<div style="font-weight:800;font-size:15px;white-space:nowrap;margin-left:12px">'+plata+'</div></div>';
 }
 function textTarif(){
-  var p="+"+HubLogic.JETON_TEST+" 🪙", r="+"+HubLogic.JETON_REC+" 🪙";
+  var p="+"+HubLogic.JETON_TEST+" 🪙", r="+"+HubLogic.JETON_REC+" 🪙", e="+"+HubLogic.JETON_EXTRA+" 🪙";
   return randTarif("Termini un test","",p)+
     randTarif("Repari o greșeală veche","cel mult "+HubLogic.REC_MAX_ZI+" pe zi",r)+
+    randTarif("Exersezi în plus, pe o temă aleasă de tine","o dată pe zi",e)+
     randTarif("Lucrezi o pagină nouă de caiet, apoi o corectezi cu mama","cel mult "+HubLogic.CAIET_MAX_ZI+" pe zi",r)+
     '<div class="small" style="margin-top:10px;opacity:.8">Nu contează câte ai nimerit. Contează că ai dus-o până la capăt.</div>';
 }
@@ -1543,9 +1706,13 @@ function buildReport(){
   // economia de jetoane — ce se reglează săptămânal, o singură manetă
   if((S.rewards||[]).length){
     var rid2={};S.rewards.forEach(function(r){rid2[r.id]=r;});
-    var recTot=0,recTotal=0,caiet=0;
+    var recTot=0,recTotal=0,caiet=0,extraN=0,extraPlata=0,extraTeme2={};
     (S.recoveries||[]).forEach(function(r){
       if(r.sursa==="caiet"){caiet+=(r.corecte||0);return;}
+      if(r.sursa==="extra"){
+        extraN++; extraPlata+=(r.corecte||0);
+        var tm=(r.meta&&r.meta.tema)||"?"; extraTeme2[tm]=(extraTeme2[tm]||0)+1;
+        return;}
       recTot+=(r.corecte||0);recTotal+=(r.total||0);});
     out.jetoane={
       sold:HubLogic.sold(S.attempts,S.recoveries,S.redemptions),
@@ -1553,13 +1720,19 @@ function buildReport(){
       cheltuite:HubLogic.cheltuit(S.redemptions),
       teste_platite:HubLogic.testeContorizate(S.attempts),
       itemi_recuperati:recTot, itemi_reluati:recTotal, pagini_caiet:caiet,
+      // „Exersez în plus": sesiuni cerute de el. `neplatite` = trecute la viteză
+      // de click, deci nu au plătit. `pe_teme` arată ce alege singur să repete.
+      exersat_extra:extraN, exersat_platit:extraPlata,
+      exersat_neplatit:(extraN-extraPlata), exersat_pe_teme:extraTeme2,
       cumparaturi:(S.redemptions||[]).map(function(r){
         return {ce:(rid2[r.reward_id]||{}).nume||r.reward_id,
           raft:(rid2[r.reward_id]||{}).raft||null,
           cost:r.cost,stare:r.stare,param:r.param||undefined,
           data:String(r.created_at).slice(0,10)};}),
       de_onorat:HubLogic.deOnorat(S.redemptions).length,
-      recuperare_disponibila:HubLogic.recoveryPool(S.attempts,S.tests,S.recoveries,todayStr()).length};
+      recuperare_disponibila:HubLogic.recoveryPool(S.attempts,S.tests,S.recoveries,todayStr()).length,
+      exersat_disponibil_azi:HubLogic.maiPoateExtra(S.recoveries,todayStr()),
+      teme_de_exersat:HubLogic.temeExersabile(S.attempts,S.tests,S.recoveries).length};
   }
   if(partiale.length)out.sesiuni_neterminate=partiale;
   if(laNimereala.length)out.sesiuni_la_nimereala=laNimereala;
