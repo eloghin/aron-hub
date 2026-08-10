@@ -384,6 +384,10 @@ h1,h2,h3{margin:0}
     <div class="qtext" id="qText"></div>
     <div id="qBody"></div>
     <div id="qFeedback" class="hidden"></div>
+    <!-- Jocherul stă sub întrebare, nu lângă butonul de Continuă: e o ieșire, nu
+         un pas înainte. Dispare în clipa în care a răspuns — nu se aruncă ceva
+         ce a văzut deja cum a ieșit. -->
+    <button class="btn ghost hidden" id="qJocher" style="margin-top:14px" onclick="aruncIntrebarea()">🃏 Arunc întrebarea asta</button>
     <div style="margin-top:18px">
       <button class="btn hidden" id="qNext" onclick="nextQuestion()">Continuă →</button>
       <button class="btn ghost hidden" id="qStop" style="margin-top:10px" onclick="stopEarly()">Ajunge pe azi</button>
@@ -469,7 +473,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-08-09c";
+var APP_VERSION="2026-08-10a";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -690,6 +694,59 @@ var HubLogic=(function(){
   function deOnorat(redemptions){
     return (redemptions||[]).filter(function(r){return r.stare==="cerut"&&!r.efect;});}
 
+  /* ---- VITRINA SĂPTĂMÂNII ----
+     Pe 9 august 2026 rotația era un fișier SQL cu tot calendarul în el și
+     instrucțiunea „rulezi câte un pas pe săptămână". SQL Editor execută tot ce
+     lipești, deci s-au aprins toate recompensele deodată. Un pas săptămânal de
+     care depinde sistemul e o piesă care se va uita într-o săptămână aglomerată,
+     iar când se uită, vitrina îngheață și promisiunea „luni vine altceva" devine
+     minciună. De aceea rotația se CALCULEAZĂ aici, din dată.
+     Ce rămâne în baza de date e doar ordinea: `rewards.vitrina_ordine` = 1..n pe
+     recompensele din rotație, `null` pe cele permanente. Ca să scoți ceva din
+     rotație, pui `null`; ca să adaugi, pui un număr. Nimic săptămânal.
+     Săptămâna începe luni, ca peste tot în sistem („luni e zi nouă la tot"). */
+  var VITRINA_START="2026-08-10";     // lunea din care pornește numărătoarea
+  function rotatieVitrina(rewards){
+    return (rewards||[]).filter(function(r){
+        return r.vitrina_ordine!==null&&r.vitrina_ordine!==undefined&&r.activ!==false;})
+      .sort(function(a,b){return (a.vitrina_ordine-b.vitrina_ordine)||(a.id<b.id?-1:1);});}
+  /* Modulo care se poartă corect și pe negativ: dacă cineva deschide hub-ul cu
+     ceasul telefonului dat înapoi, vitrina trebuie să arate o recompensă, nu să
+     crape. `%` din JavaScript dă -1 pentru (-1 % 6). */
+  function modPozitiv(a,n){return ((a%n)+n)%n;}
+  function vitrina(rewards,today,start){
+    var rot=rotatieVitrina(rewards); if(!rot.length)return null;
+    var luni=luniSaptamanii(today);
+    var k=Math.floor(daysBetween(luniSaptamanii(start||VITRINA_START),luni)/7);
+    var i=modPozitiv(k,rot.length);
+    var dum=addDays(luni,6);
+    return {acum:rot[i], apoi:rot[modPozitiv(i+1,rot.length)],
+      pana:fmt(dum), zile:daysBetween(today,dum)+1, dinCateSaptamani:rot.length};}
+
+  /* ---- JOCHERUL ----
+     A înlocuit „Aleg materia de mâine" pe 10 august 2026: materia nu-l
+     interesează, dificultatea da. Aceeași logică ca la „Pas": Aron își ia deja
+     dreptul de a sări o întrebare grea — apăsând la nimereală, ceea ce îi strică
+     scorul și nu se vede. Aici se vinde pe ușa din față, cu preț, o dată pe zi.
+     Întrebarea aruncată NU devine greșită și NU se marchează ca văzută: rămâne
+     în bazin pentru „Exersez în plus". Jocherul amână, nu șterge — altfel ar fi
+     o unealtă de ocolit exact ce trebuie exersat.
+     Se poate strânge cel mult unul nefolosit (limita e la cumpărare), dar se
+     consumă maximum unul pe zi. Nimic nu expiră: ce a cumpărat rămâne al lui. */
+  function jocherFolositAzi(redemptions,today){
+    var n=0;
+    (redemptions||[]).forEach(function(r){
+      if(r.efect!=="jocher"||r.stare!=="aplicat")return;
+      if(String(r.aplicat_la||r.created_at).slice(0,10)===today)n++;});
+    return n;}
+  function jocherDisponibil(redemptions,today){
+    if(jocherFolositAzi(redemptions,today)>0)return null;
+    var hit=null;
+    (redemptions||[]).forEach(function(r){
+      if(r.efect!=="jocher"||r.stare!=="cerut")return;
+      if(!hit||new Date(r.created_at)<new Date(hit.created_at))hit=r;});
+    return hit;}
+
   /* ---- RECUPERAREA ----
      Regula anti-farming: itemul de recuperare NU e aceeași întrebare reluată,
      ci alta din aceeași temă, când există una neatinsă. Altfel o greșeală
@@ -879,6 +936,8 @@ var HubLogic=(function(){
     testeContorizate:testeContorizate,castigate:castigate,cheltuit:cheltuit,sold:sold,
     poateCumpara:poateCumpara,disponibilaDin:disponibilaDin,ultimaCumparare:ultimaCumparare,
     zileDePas:zileDePas,rambursareActiva:rambursareActiva,deOnorat:deOnorat,luniSaptamanii:luniSaptamanii,
+    VITRINA_START:VITRINA_START,rotatieVitrina:rotatieVitrina,vitrina:vitrina,modPozitiv:modPozitiv,
+    jocherFolositAzi:jocherFolositAzi,jocherDisponibil:jocherDisponibil,
     recoveryPool:recoveryPool,greseliVechi:greseliVechi,recuperateOk:recuperateOk,
     recuperateAzi:recuperateAzi,cheieRec:cheieRec,
     totalXP:totalXP,xpAlready:xpAlready,levelFromXP:levelFromXP,streakDays:streakDays,topicStats:topicStats,
@@ -1323,7 +1382,30 @@ function renderQuestion(){
       '<button class="btn '+(cls==="rom"?"rom":"")+'" onclick="submitNum()">Verifică</button></div>';
   }
   $("qBody").innerHTML=body;
+  randJocher();
   if(q.type==="number")setTimeout(function(){var e=$("numIn");if(e)e.focus();},60);
+}
+/* Jocherul apare doar dacă l-a cumpărat, doar în teste (nu în sesiunea de
+   exersat, care oricum nu se notează) și doar înainte de răspuns. Nu se oferă
+   niciodată din partea aplicației, nu apare ca sugestie după o greșeală: ar
+   deveni un sfat de ocolit, iar ideea e fix invers — el decide, o dată pe zi. */
+function randJocher(){
+  var b=$("qJocher"); if(!b)return;
+  var poate=!!quiz&&!quiz.extra&&!quiz.answered&&jetoaneActive()&&
+    !!HubLogic.jocherDisponibil(S.redemptions,todayStr());
+  if(poate)b.classList.remove("hidden"); else b.classList.add("hidden");
+}
+function aruncIntrebarea(){
+  if(!quiz||quiz.extra||quiz.answered)return;
+  var j=HubLogic.jocherDisponibil(S.redemptions,todayStr()); if(!j)return;
+  // confirmare seacă, cu ce se întâmplă mai departe — fără laudă și fără reproș
+  if(!confirm("Arunci întrebarea asta?\n\nNu se pune la socoteală, nici bine, nici rău. O ai unul pe zi."))return;
+  quiz.aruncate=(quiz.aruncate||[]).concat([curIdx()]);
+  setStareRambursare(j.id,"aplicat");
+  $("qJocher").classList.add("hidden");
+  tickActive();
+  if(quiz.pos+1<quiz.queue.length){quiz.pos++;renderQuestion();return;}
+  return finishQuiz(false);
 }
 function lockChoiceButtons(){var b=$("qBody").querySelectorAll(".opt");b.forEach(function(x){x.disabled=true;});}
 /* --- flashcards --- */
@@ -1387,6 +1469,7 @@ function submitNum(){
 function grade(q,given){
   var i=curIdx();
   quiz.answered=true;
+  randJocher();          // a răspuns: nu se mai aruncă o întrebare al cărei rezultat îl știe
   tickActive();
   var ms=quiz.t0?(Date.now()-quiz.t0):0;
   var rushed=HubLogic.isRushed(q,ms);
@@ -1449,6 +1532,7 @@ async function finishQuiz(stoppedEarly){
   var minuteLucrate=HubLogic.minutesOf(quiz.activeMs||sumaTimpi);
   var sig=HubLogic.randomSignals(t,quiz.answers,quiz.times);
   var random=HubLogic.looksRandom(t,quiz.answers,quiz.times);
+  var aruncate=(quiz.aruncate||[]).length;
   var saveAnswers,answeredCount,partial;
   if(random){
     // nu se amestecă în istoric și nu se pune la socoteală
@@ -1459,12 +1543,19 @@ async function finishQuiz(stoppedEarly){
     // sesiunile scurte se adună: răspunsurile de azi se lipesc peste cele de dinainte
     saveAnswers=HubLogic.mergeAnswers(S.attempts,t,quiz.answers);
     answeredCount=HubLogic.answeredCountOf(saveAnswers,t);
-    partial=stoppedEarly?true:(answeredCount<t.questions.length);
+    partial=stoppedEarly?true:(answeredCount+aruncate<t.questions.length);
   }
-  var res=HubLogic.scoreAttempt(t,saveAnswers,partial?answeredCount:null);
+  /* O întrebare aruncată cu jocherul nu e nici greșită, nici nerăspunsă: iese din
+     numitor. Scorul devine „5 din 7", nu „5 din 8" — altfel jocherul ar fi un
+     răspuns greșit cumpărat cu 2 🪙, adică nimic. Și, esențial, testul rămâne
+     TERMINAT: `partial` ține cont de aruncate, deci cele 2 🪙 pe test se plătesc
+     normal. Dacă n-ar fi așa, jocherul ar fi o capcană care costă bani de două ori. */
+  var res=HubLogic.scoreAttempt(t,saveAnswers,
+    partial?answeredCount:(aruncate?(t.questions.length-aruncate):null));
   var xpEarned=random?0:Math.max(0,res.xp-HubLogic.xpAlready(S.attempts,t.id)); // o singură dată pe test
   var row={test_id:t.id,student:"aron",answers:saveAnswers,score:res.score,max_score:res.max,xp:xpEarned,
     meta:{partial:partial,random:random,mode:quiz.mode,stopped:!!stoppedEarly,
+      aruncate:quiz.aruncate||[],
       times:quiz.times,rushed:quiz.rushed,semnale:sig,
       activ_ms:quiz.activeMs||0,minute:minuteLucrate,v:APP_VERSION}};
   var saved=true;
@@ -1489,9 +1580,12 @@ async function finishQuiz(stoppedEarly){
     $("rEmoji").textContent=partial?"🌱":pct===100?"🏆":pct>=70?"🎉":pct>=40?"💪":"📚";
     $("rTitle").textContent=partial?"Ne oprim aici":
       pct===100?"Perfect!":pct>=70?"Bravo!":pct>=40?"Bun început!":"Ai dus-o până la capăt";
-    $("rScore").textContent=partial
+    $("rScore").textContent=(partial
       ? ("Din "+res.max+" întrebări, "+res.score+" corecte. Restul te așteaptă mâine.")
-      : ("Ai răspuns corect la "+res.score+" din "+res.max+" întrebări.");
+      : ("Ai răspuns corect la "+res.score+" din "+res.max+" întrebări."))+
+      // se spune o dată, sec, ca să se lege cifra de ce a făcut — fără comentariu
+      (aruncate?(" "+(aruncate===1?"Una aruncată cu jocherul":aruncate+" aruncate cu jocherul")+
+        ", nu intră la socoteală."):"");
   }
   // Cât a câștigat ACUM, nu la ce sold a ajuns: dacă nu vede plata, nu există.
   var jetCastigate=HubLogic.castigate(S.attempts,S.recoveries)-castInainte;
@@ -1545,6 +1639,47 @@ function textTarif(){
     randTarif("Lucrezi o pagină nouă de caiet, apoi o corectezi cu mama","cel mult "+HubLogic.CAIET_MAX_ZI+" pe zi",r)+
     '<div class="small" style="margin-top:10px;opacity:.8">Nu contează câte ai nimerit. Contează că ai dus-o până la capăt.</div>';
 }
+/* Vitrina, ca bloc separat deasupra listei. Motivul e că până acum recompensa
+   săptămânii era un rând oarecare într-o listă sortată după preț — nimic nu
+   spunea că se închide duminică, deci fereastra de timp exista doar în capul
+   adultului. Trei lucruri trebuie să fie pe card, în ordinea asta:
+   1. CÂT MAI ARE. Fereastra e tot rostul vitrinei.
+   2. DISTANȚA, dacă nu-și permite — „îți mai trebuie 3" e o țintă, „nu poți" e
+      un refuz. Țintele vizibile dar încă inaccesibile sunt motorul economisirii.
+   3. CE VINE LUNI. Fără asta, o vitrină prea scumpă e o momeală: strânge degeaba
+      și a doua oară nu mai crede. Cu ea, poate decide să sară săptămâna asta.
+   Și, la fel de important: „revine peste n săptămâni". Nimic nu dispare pentru
+   totdeauna — asta face fereastra suportabilă în loc de frustrantă. */
+function randVitrina(){
+  if(!(S.rewards||[]).length)return "";
+  var v=HubLogic.vitrina(S.rewards,todayStr());
+  if(!v||!v.acum)return "";
+  var r=v.acum, s=jetoane();
+  var c=HubLogic.poateCumpara(r,S.redemptions,todayStr(),s);
+  var stare;
+  if(c.ok)stare='<button class="btn" style="width:auto;padding:10px 18px" onclick="buyReward(\''+r.id+'\')">'+r.cost+' 🪙</button>';
+  else if(c.motiv==="sold")stare='<div style="font-weight:800">'+r.cost+' 🪙</div>'+
+    '<div class="small" style="opacity:.8">îți mai trebuie '+c.lipsesc+'</div>';
+  else stare='<div class="small">ai luat-o deja · revine luni</div>';
+  var ic=ICONS[r.id]?'<img src="'+ICONS[r.id]+'" alt="" width="72" height="72" style="border-radius:18px;flex:0 0 auto">':'';
+  var zile=v.zile<=0?"ultima zi":(v.zile===1?"azi e ultima zi":v.zile+" zile rămase");
+  // fundalul violet-pal e singurul din tot magazinul: e semnalul „asta e altfel"
+  return '<div class="section-h">Vitrina săptămânii</div>'+
+    '<div class="card" style="padding:16px;background:var(--v-soft);border-color:var(--v-line)">'+
+      '<div style="display:flex;gap:14px;align-items:center">'+ic+
+        '<div style="flex:1 1 auto;min-width:0">'+
+          '<div style="font-weight:800;font-size:17px;line-height:1.25">'+esc(r.nume)+'</div>'+
+          (r.descriere?'<div style="font-size:13px;color:var(--muted);margin-top:4px;line-height:1.35">'+esc(r.descriere)+'</div>':'')+
+        '</div>'+
+        '<div style="text-align:right;flex:0 0 auto">'+stare+'</div>'+
+      '</div>'+
+      '<div class="small" style="margin-top:12px;opacity:.85">⏳ Doar săptămâna asta, până duminică — '+zile+'.</div>'+
+      (v.apoi&&v.apoi.id!==r.id
+        ? '<div class="small" style="margin-top:4px;opacity:.85">📅 Luni vine: '+esc(v.apoi.nume)+' · '+v.apoi.cost+' 🪙</div>'
+        : '')+
+      '<div class="small" style="margin-top:4px;opacity:.65">Dacă o ratezi, revine peste '+v.dinCateSaptamani+' săptămâni. Nimic nu dispare de tot.</div>'+
+    '</div>';
+}
 function showShop(){
   var s=jetoane();
   $("sJet").textContent=s+" 🪙";
@@ -1553,11 +1688,13 @@ function showShop(){
   // un calendar separat pentru fiecare recompensă.
   $("sCum").innerHTML=textTarif()+
     '<div class="small" style="margin-top:6px;opacity:.8">Ce se ia „o dată pe săptămână" se reîncarcă lunea, nu la șapte zile. Luni e zi nouă la tot.</div>';
-  var html="";
-  var items=(S.rewards||[]).filter(function(r){return r.activ!==false;})
+  var html=randVitrina();
+  // rotația se randează separat, sus: aici rămâne doar raftul permanent
+  var items=(S.rewards||[]).filter(function(r){
+      return r.activ!==false&&(r.vitrina_ordine===null||r.vitrina_ordine===undefined);})
     .sort(function(a,b){return (a.cost-b.cost)||((a.ordine||0)-(b.ordine||0));});
   if(items.length){
-    html+='<div class="section-h">Ce poți lua</div><div class="card" style="padding:6px 16px">';
+    html+='<div class="section-h">'+(html?"Mereu pe raft":"Ce poți lua")+'</div><div class="card" style="padding:6px 16px">';
     items.forEach(function(r){
       var c=HubLogic.poateCumpara(r,S.redemptions,todayStr(),s),stare;
       if(c.ok)stare='<button class="btn" style="width:auto;padding:8px 14px" onclick="buyReward(\''+r.id+'\')">'+r.cost+' 🪙</button>';
@@ -1605,9 +1742,13 @@ async function buyReward(id){
   if(r.efect==="pas"){showAron();return;}
   showShop();
 }
+/* Starea locală se schimbă ÎNAINTE de scrierea în bază, nu după. Altfel, între
+   click și răspunsul serverului, aplicația încă „crede" că jocherul e nefolosit
+   — și butonul de aruncat reapare la întrebarea următoare. Ecranul trebuie să
+   fie adevărat imediat; rețeaua vine când vine. */
 async function setStareRambursare(rid,stare){
-  try{ await sb.from("redemptions").update({stare:stare,aplicat_la:todayStr()}).eq("id",rid); }catch(e){}
   (S.redemptions||[]).forEach(function(r){if(r.id===rid){r.stare=stare;r.aplicat_la=todayStr();}});
+  try{ await sb.from("redemptions").update({stare:stare,aplicat_la:todayStr()}).eq("id",rid); }catch(e){}
 }
 function onoreaza(rid){ setStareRambursare(rid,"onorat").then(showParent,showParent); }
 /* Anularea în aceeași zi, cu jetoanele înapoi — pentru remușcarea de la 11 ani,
@@ -1732,13 +1873,31 @@ function buildReport(){
       de_onorat:HubLogic.deOnorat(S.redemptions).length,
       recuperare_disponibila:HubLogic.recoveryPool(S.attempts,S.tests,S.recoveries,todayStr()).length,
       exersat_disponibil_azi:HubLogic.maiPoateExtra(S.recoveries,todayStr()),
-      teme_de_exersat:HubLogic.temeExersabile(S.attempts,S.tests,S.recoveries).length};
+      teme_de_exersat:HubLogic.temeExersabile(S.attempts,S.tests,S.recoveries).length,
+      /* Jocherul: nu „câte a aruncat", ci PE CE. Dacă aruncă mereu din aceeași
+         temă, ăla e capitolul de reluat cu tine — semnal pe care scorurile nu-l
+         dau, fiindcă întrebarea aruncată nu apare nicăieri ca greșeală. */
+      jocher_aruncate:jocherPeTeme(bid),
+      vitrina:(function(){
+        var v=HubLogic.vitrina(S.rewards,todayStr()); if(!v)return null;
+        return {acum:v.acum.nume,cost:v.acum.cost,pana:v.pana,
+          luni_vine:v.apoi?v.apoi.nume:null};})()};
   }
   if(partiale.length)out.sesiuni_neterminate=partiale;
   if(laNimereala.length)out.sesiuni_la_nimereala=laNimereala;
   if(queueLen())out.netrimise=queueLen();
   return out;
 }
+/* Câte întrebări a aruncat, grupate pe temă. Se citesc din `meta.aruncate` al
+   fiecărei încercări — acolo au rămas indicii, deci se poate reconstitui exact
+   ce a ocolit, chiar dacă în `answers` nu apare nimic. */
+function jocherPeTeme(bid){
+  var acc={};
+  (S.attempts||[]).forEach(function(a){
+    var ar=(a.meta&&a.meta.aruncate)||[]; if(!ar.length)return;
+    var t=bid[a.test_id]; var k=t?t.topic:a.test_id;
+    acc[k]=(acc[k]||0)+ar.length;});
+  return acc;}
 function copyReport(){
   var txt="RAPORT HUB ARON\n"+JSON.stringify(buildReport(),null,1);
   function done(){var b=$("pExport");b.textContent="✓ Copiat!";setTimeout(function(){b.textContent="📋 Copiază raportul pentru Claude";},1800);}
