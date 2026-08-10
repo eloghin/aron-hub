@@ -105,11 +105,18 @@ h1,h2,h3{margin:0}
 .section-h{font-size:12px;font-weight:800;color:#9C98A8;text-transform:uppercase;
   letter-spacing:1.1px;margin:26px 2px 12px}
 .test{display:flex;align-items:center;gap:14px;padding:14px;margin-bottom:11px}
+/* Țiglele: fundal plin, nu pastel. Iconițele recompenselor sunt deja 3D pe
+   violet — emoji pe pastel deschis, în aceeași listă, arătau ca două aplicații
+   diferite lipite una de alta. */
 .test .ico{width:54px;height:54px;border-radius:var(--r-tile);display:flex;align-items:center;
   justify-content:center;font-size:26px;flex:0 0 auto;
-  background:linear-gradient(140deg,#F6F2FF,#EDE4FF)}
-.test.mate .ico{background:linear-gradient(140deg,#EEF3FF,#DFE8FF)}
-.test.rom .ico{background:linear-gradient(140deg,#E9F9F3,#D8F2E8)}
+  background:linear-gradient(140deg,#8B5CF6,#6D28D9);
+  box-shadow:0 5px 13px rgba(109,40,217,.26), inset 0 -2px 7px rgba(0,0,0,.13)}
+.test.mate .ico{background:linear-gradient(140deg,#60A5FA,#2563EB);
+  box-shadow:0 5px 13px rgba(37,99,235,.24), inset 0 -2px 7px rgba(0,0,0,.13)}
+.test.rom .ico{background:linear-gradient(140deg,#34D399,#0E9E74);
+  box-shadow:0 5px 13px rgba(14,158,116,.24), inset 0 -2px 7px rgba(0,0,0,.13)}
+.test.locked .ico{box-shadow:none;filter:saturate(.35)}
 .test .body{flex:1;min-width:0}
 .test .tt{font-weight:700;font-size:15.5px;letter-spacing:-.2px}
 .test .mt{font-size:12.5px;color:var(--muted);margin-top:3px}
@@ -211,6 +218,95 @@ h1,h2,h3{margin:0}
   background:#FFF4E2;color:#B45309;margin-left:6px;vertical-align:middle}
 .det .none{color:var(--good);font-size:13px;padding:8px 0}
 .ver{text-align:center;color:var(--muted);font-size:11px;margin-top:18px}
+
+/* ===== ECRANUL DE PĂRINTE, în trei file ===== */
+
+/* Cardul de acțiune: singurul galben din aplicație. Apare NUMAI când e ceva
+   de onorat, ca să nu devină zgomot de fundal pe care ochiul îl sare. */
+.act{border-radius:var(--r);padding:16px;margin-top:16px;
+  background:linear-gradient(135deg,#FFF9EC,#FFF3DE);border:1px solid #FBE3B8;
+  box-shadow:0 6px 20px rgba(232,147,15,.10)}
+.act .hd{font-size:11.5px;font-weight:800;color:#B45309;text-transform:uppercase;letter-spacing:.9px}
+.act .it{display:flex;align-items:center;gap:12px;margin-top:11px}
+.act .ic{width:44px;height:44px;border-radius:14px;flex:0 0 auto;font-size:22px;
+  display:flex;align-items:center;justify-content:center;background:#fff;
+  box-shadow:0 3px 10px rgba(180,83,9,.14);overflow:hidden}
+.act .ic img{width:44px;height:44px;border-radius:14px;display:block}
+.act .nm{font-weight:700;font-size:15px;line-height:1.3}
+.act .mt{font-size:12.5px;color:#8A6420;margin-top:2px}
+.act + .act{margin-top:10px}
+.btnrow{display:flex;gap:8px;margin-top:12px}
+.mini{padding:10px 16px;border-radius:12px;font-weight:800;font-size:13.5px;
+  border:0;font-family:inherit;cursor:pointer}
+.mini.go{background:linear-gradient(120deg,#7C3AED,#9333EA);color:#fff;
+  box-shadow:0 5px 14px rgba(124,58,237,.26)}
+.mini.gh{background:#fff;color:var(--ink-2);border:1px solid var(--line)}
+
+/* Rezumatul într-o frază, în locul celor patru carduri cumulative */
+.sum{margin-top:14px;padding:16px 18px}
+.sum .dot{display:inline-block;width:9px;height:9px;border-radius:50%;
+  background:var(--good);margin-right:7px;vertical-align:middle}
+.sum .dot.no{background:#C6C2D0}
+.sum .ln{font-size:15.5px;font-weight:700;letter-spacing:-.2px;line-height:1.4}
+.sum .sm{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5}
+
+/* Fâșia celor șapte zile */
+.week{display:flex;gap:6px;margin-top:12px}
+.wd{flex:1;text-align:center}
+.wd .bx{height:38px;border-radius:11px;background:#EFEDF4;display:flex;align-items:flex-end;overflow:hidden}
+.wd .bx>i{display:block;width:100%;border-radius:11px;background:linear-gradient(180deg,#A855F7,#7C3AED)}
+.wd .bx.miss{background:#F6F4FA;border:1px dashed #DCD8E6}
+.wd .bx.free{background:var(--v-soft);border:1px dashed var(--v-line)}
+.wd .dl{font-size:10.5px;color:#9C98A8;font-weight:700;margin-top:5px}
+
+/* O zi din istoric: un rând pliat, nu trei rânduri de încercări */
+.day{width:100%;font-family:inherit;text-align:left;background:none;border:0;cursor:pointer;
+  padding:13px 0;border-bottom:1px solid var(--line);display:flex;
+  justify-content:space-between;align-items:center;gap:10px}
+.day .dt{font-weight:700;font-size:14.5px}
+.day .ds{font-size:12.5px;color:var(--muted);margin-top:2px}
+.day .ch{color:#C6C2D0;font-size:15px;font-weight:700;transition:transform .18s;flex:0 0 auto}
+.day.open .ch{transform:rotate(90deg)}
+.dbody{padding:2px 0 12px;border-bottom:1px solid var(--line)}
+
+/* Bulina de pe „Azi": semnalează că ceva așteaptă o decizie */
+.nvwrap{position:relative;display:inline-block}
+.nvdot{position:absolute;top:-1px;right:-6px;width:9px;height:9px;border-radius:50%;
+  background:var(--gold);border:2px solid #fff}
+
+/* ===== ECRANUL LUI ARON ===== */
+
+/* Bannerul de sus. Înainte ecranul începea cu un titlu de secțiune gri și o
+   listă albă — corect funcțional, dar nimic nu spunea „ăsta e lucrul de azi".
+   Gradientul face exact o treabă: să nu existe îndoială unde se apasă. */
+.hero{margin-top:16px;border-radius:26px;padding:20px 20px 18px;color:#fff;
+  background:linear-gradient(125deg,#6D28D9 0%,#7C3AED 45%,#A855F7 100%);
+  box-shadow:0 10px 30px rgba(92,33,182,.16);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-46px;top:-56px;width:186px;height:186px;
+  border-radius:50%;background:rgba(255,255,255,.10)}
+.hero:before{content:"";position:absolute;right:26px;bottom:-70px;width:130px;height:130px;
+  border-radius:50%;background:rgba(255,255,255,.07)}
+.hero .lab{font-size:12.5px;opacity:.86;font-weight:700;letter-spacing:.2px;
+  text-transform:uppercase;position:relative}
+.hero .big{font-size:26px;font-weight:800;letter-spacing:-.7px;margin-top:3px;
+  line-height:1.18;position:relative}
+.hero .row{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;
+  margin-top:16px;position:relative}
+.hero .meta{font-size:13px;opacity:.9}
+.hero .cta{background:#fff;color:var(--v-deep);font-weight:800;font-size:14.5px;
+  padding:12px 20px;border-radius:999px;white-space:nowrap;border:0;font-family:inherit;
+  box-shadow:0 4px 14px rgba(0,0,0,.13)}
+.hero .foot{margin-top:15px;font-size:12.5px;opacity:.92;position:relative;
+  border-top:1px solid rgba(255,255,255,.22);padding-top:11px}
+.hero.calm{background:linear-gradient(125deg,#4C1D95 0%,#5B21B6 60%,#6D28D9 100%)}
+
+/* Butonul care pliază restul listei */
+.fold{width:100%;font-family:inherit;cursor:pointer;background:#fff;
+  border:1px dashed var(--v-line);border-radius:var(--r-btn);padding:13px;
+  font-size:13.5px;font-weight:700;color:var(--v);text-align:center;margin-bottom:10px}
+
+.pad{padding:6px 16px}
+.pad18{padding:16px 18px}
 </style>
 </head>
 <body>
@@ -289,54 +385,80 @@ h1,h2,h3{margin:0}
   </div>
 
   <!-- ARON DASHBOARD -->
+  <!-- ECRANUL LUI ARON, în trei file. Bara de jos avea patru butoane, dar numai
+       două duceau undeva: „Teste" și „Progres" făceau scroll pe același ecran.
+       Un copil învață în două zile că butoanele alea mint. -->
   <div id="screenAron" class="hidden">
     <div class="topbar">
       <div>
-        <div class="hi">Salut, Aron</div>
+        <div class="hi" id="aTitle">Salut, Aron</div>
         <div class="small" id="aToday" style="margin-top:3px"></div>
       </div>
       <button class="link" onclick="goProfiles()">ieși</button>
     </div>
 
-    <div class="notice small hidden" id="aPas" style="margin-top:12px"></div>
+    <!-- FILA „ACASĂ": un singur lucru de făcut, imposibil de ratat -->
+    <div id="aTabAcasa">
+      <div class="notice small hidden" id="aPas" style="margin-top:12px"></div>
+      <div id="aHero"></div>
 
-    <!-- Primul lucru pe care îl vede: ce are de făcut azi -->
-    <div class="section-h" style="margin-top:20px">De rezolvat</div>
-    <div id="aronTodo"></div>
+      <!-- Jetoanele: card mic, sub banner. Recompensa nu deschide ecranul. -->
+      <button class="jet hidden" id="aJetCard" style="margin-top:13px" onclick="showShop()">
+        <div class="jt">🪙</div>
+        <div class="jb">
+          <div class="jn"><span id="aJet">0 🪙</span> <span id="aJetSub">jetoane</span></div>
+          <div class="js" id="aJetNext"></div>
+        </div>
+        <div class="go" style="font-size:20px;color:#C6C2D0;font-weight:700">›</div>
+      </button>
+      <div class="small hidden" id="aJetCum"></div>
 
-    <!-- Jetoanele: card mic, după listă. Recompensa nu deschide ecranul. -->
-    <button class="jet hidden" id="aJetCard" onclick="showShop()">
-      <div class="jt">🪙</div>
-      <div class="jb">
-        <div class="jn"><span id="aJet">0 🪙</span> <span id="aJetSub">jetoane</span></div>
-        <div class="js" id="aJetNext"></div>
+      <div class="section-h">Unde ai ajuns</div>
+      <div class="card pad18">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <b style="font-size:15px">Recapitulare de vară</b>
+          <span class="small" id="aCovLab">0 din 0</span>
+        </div>
+        <div class="xpbar" style="margin-top:8px"><i id="aCovBar" style="width:0%"></i></div>
+        <div class="small" id="aCovSub" style="margin-top:8px"></div>
       </div>
-      <div class="go" style="font-size:20px;color:#C6C2D0;font-weight:700">›</div>
-    </button>
-    <div class="small hidden" id="aJetCum"></div>
-
-    <div class="section-h">Antrenament liber</div>
-    <div id="aronDone"></div>
-
-    <div class="section-h">Unde ai ajuns</div>
-    <div class="card" style="padding:16px 18px">
-      <div style="display:flex;justify-content:space-between;align-items:baseline">
-        <b style="font-size:15px">Recapitulare de vară</b>
-        <span class="small" id="aCovLab">0 din 0</span>
-      </div>
-      <div class="xpbar" style="margin-top:8px"><i id="aCovBar" style="width:0%"></i></div>
-      <div class="small" id="aCovSub" style="margin-top:8px"></div>
-    </div>
-    <div class="statgrid">
-      <div class="stat lvl"><div class="big" id="aLevel">1</div><div class="lab">Nivel</div></div>
-      <div class="stat xp">
-        <div class="big" id="aXp">0</div><div class="lab">XP total</div>
-        <div class="xpbar"><i id="aXpBar" style="width:0%"></i></div>
-      </div>
-      <div class="stat streak"><div class="big" id="aStreak">0🔥</div><div class="lab">Zile la rând</div></div>
     </div>
 
-    <div class="foot"><span class="small" id="aronLockInfo"></span></div>
+    <!-- FILA „TESTE": lista întreagă, filtrabilă -->
+    <div id="aTabTeste" class="hidden">
+      <div class="chips" id="aChips"></div>
+      <div class="section-h">De rezolvat</div>
+      <div id="aronTodo"></div>
+      <div id="aronTodoRest"></div>
+      <div class="section-h">Antrenament liber</div>
+      <div id="aronDone"></div>
+      <div class="foot"><span class="small" id="aronLockInfo"></span></div>
+    </div>
+
+    <!-- FILA „PROGRES": cifrele lui, fără procente pe teme.
+         Nivelul, XP-ul și seria cresc și nu judecă nimic. Un procent pe temă,
+         arătat lui, e o notă — exact lucrul la care ridică zid. -->
+    <div id="aTabProgres" class="hidden">
+      <div class="statgrid">
+        <div class="stat lvl"><div class="big" id="aLevel">1</div><div class="lab">Nivel</div></div>
+        <div class="stat xp">
+          <div class="big" id="aXp">0</div><div class="lab">XP total</div>
+          <div class="xpbar"><i id="aXpBar" style="width:0%"></i></div>
+        </div>
+        <div class="stat streak"><div class="big" id="aStreak">0🔥</div><div class="lab">Zile la rând</div></div>
+      </div>
+      <div class="section-h">Recapitularea de vară</div>
+      <div class="card pad18">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <b style="font-size:15px">Teste duse până la capăt</b>
+          <span class="small" id="aCovLab2">0 din 0</span>
+        </div>
+        <div class="xpbar" style="margin-top:8px"><i id="aCovBar2" style="width:0%"></i></div>
+        <div class="small" id="aCovSub2" style="margin-top:8px"></div>
+      </div>
+      <div class="section-h">Ce ai lucrat până acum</div>
+      <div class="card pad" id="aTopics"></div>
+    </div>
   </div>
 
   <!-- INTRO TEST: îi spune la ce să se aștepte și îi lasă o alegere -->
@@ -410,33 +532,51 @@ h1,h2,h3{margin:0}
   </div>
 
   <!-- PARENT DASHBOARD -->
+  <!-- ECRANUL DE PĂRINTE, în trei file.
+       Până pe 10 august toate cele șapte secțiuni stăteau într-un singur scroll,
+       cu aceeași greutate vizuală. Problema nu era lungimea, ci că „De onorat" —
+       singurul loc unde trebuie luată o decizie — era al șaselea, sub patru
+       secțiuni informative. Acum fiecare filă răspunde la o singură întrebare. -->
   <div id="screenParent" class="hidden">
     <div class="topbar">
-      <div class="hi">Progresul lui Aron</div>
+      <div>
+        <div class="hi" id="pTitle">Azi</div>
+        <div class="small" id="pSub" style="margin-top:3px"></div>
+      </div>
       <button class="link" onclick="goProfiles()">ieși</button>
     </div>
-    <div class="pgrid">
-      <div class="card pcard"><div class="big" id="pDone">0</div><div class="lab">teste rezolvate</div></div>
-      <div class="card pcard"><div class="big" id="pAvg">–</div><div class="lab">scor mediu</div></div>
-      <div class="card pcard"><div class="big" id="pXp">0</div><div class="lab">XP total</div></div>
-      <div class="card pcard"><div class="big" id="pStreak">0</div><div class="lab">zile la rând</div></div>
+
+    <!-- FILA „AZI": trebuie să încapă fără scroll -->
+    <div id="tabAzi">
+      <div id="pOnorat"></div>
+      <div id="pAziSum"></div>
+      <div class="section-h">Timp de compensat azi</div>
+      <div class="card pad18" id="pTimeAzi"></div>
+      <div style="margin-top:20px"><button class="btn" id="pExport" onclick="copyReport()">📋 Copiază raportul pentru Claude</button></div>
+      <div class="hint" style="margin-top:6px">Lipește-l în conversație ca să primești analiza și testele următoare.</div>
     </div>
-    <div class="section-h">Pe teme (procent corect)</div>
-    <div class="card" style="padding:8px 16px" id="pTopics"></div>
-    <div class="section-h">Activitate recentă</div>
-    <div class="hint" style="text-align:left;margin:-4px 4px 8px">Atinge un test ca să vezi exact ce a greșit.</div>
-    <div class="card" style="padding:8px 16px" id="pRecent"></div>
-    <div class="section-h">Jetoane</div>
-    <div class="card" style="padding:8px 16px" id="pJet"></div>
-    <div class="section-h">Caietul de vacanță</div>
-    <div class="card" style="padding:12px 16px" id="pCaiet"></div>
-    <div class="section-h">De onorat</div>
-    <div class="card" style="padding:8px 16px" id="pOnorat"></div>
-    <div class="section-h">Timp de compensat</div>
-    <div class="card" style="padding:8px 16px" id="pTime"></div>
-    <div style="margin-top:16px"><button class="btn" id="pExport" onclick="copyReport()">📋 Copiază raportul pentru Claude</button></div>
-    <div class="hint" style="margin-top:6px">Lipește-l în conversație ca să primești analiza și testele următoare.</div>
-    <div class="ver" id="pVer"></div>
+
+    <!-- FILA „PROGRES": verificarea săptămânală -->
+    <div id="tabProgres" class="hidden">
+      <div class="card sum" id="pWeek"></div>
+      <div class="section-h">Teme — cele slabe sus</div>
+      <div class="card pad" id="pTopics"></div>
+      <div class="section-h">Acoperirea planului</div>
+      <div class="card pad18" id="pPlan"></div>
+      <div class="section-h">Minute pe zi</div>
+      <div class="card pad" id="pTime"></div>
+    </div>
+
+    <!-- FILA „ISTORIC": pentru când chiar vrei detalii -->
+    <div id="tabIstoric" class="hidden">
+      <div class="card pad" style="margin-top:16px" id="pRecent"></div>
+      <div id="pMaiMulte"></div>
+      <div class="section-h">Jetoane</div>
+      <div class="card pad" id="pJet"></div>
+      <div class="section-h">Caietul de vacanță</div>
+      <div class="card" style="padding:12px 16px" id="pCaiet"></div>
+      <div class="ver" id="pVer"></div>
+    </div>
   </div>
 
   <div id="fatal" class="hidden"></div>
@@ -445,11 +585,11 @@ h1,h2,h3{margin:0}
 <!-- Bara de jos: apare doar pe ecranele lui Aron, nu în timpul unui test -->
 <div class="navbar" id="navbar">
   <div class="in">
-    <button class="nv" id="nvHome" onclick="showAron()">
+    <button class="nv" id="nvHome" onclick="aronGo('acasa')">
       <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/></svg>
       Acasă
     </button>
-    <button class="nv" id="nvTests" onclick="navGo('todo')">
+    <button class="nv" id="nvTests" onclick="aronGo('teste')">
       <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8.5 8.5h7M8.5 12.5h7M8.5 16.5h4"/></svg>
       Teste
     </button>
@@ -457,9 +597,31 @@ h1,h2,h3{margin:0}
       <svg viewBox="0 0 24 24"><path d="M4 8h16l-1.2 11.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
       Magazin
     </button>
-    <button class="nv" id="nvProg" onclick="navGo('prog')">
+    <button class="nv" id="nvProg" onclick="aronGo('progres')">
       <svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>
       Progres
+    </button>
+  </div>
+</div>
+
+<!-- Bara părintelui: trei destinații adevărate, nu trei ancore pe același ecran.
+     Bulina de pe „Azi" apare doar când ceva chiar așteaptă o decizie. -->
+<div class="navbar" id="navbarP">
+  <div class="in">
+    <button class="nv" id="pnAzi" onclick="parentGo('azi')">
+      <span class="nvwrap">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <span class="nvdot hidden" id="pnDot"></span>
+      </span>
+      Azi
+    </button>
+    <button class="nv" id="pnProg" onclick="parentGo('progres')">
+      <svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8"/><path d="M16 8h5v5"/></svg>
+      Progres
+    </button>
+    <button class="nv" id="pnIst" onclick="parentGo('istoric')">
+      <svg viewBox="0 0 24 24"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h10"/></svg>
+      Istoric
     </button>
   </div>
 </div>
@@ -473,7 +635,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-08-10a";
+var APP_VERSION="2026-08-10c";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -918,13 +1080,101 @@ var HubLogic=(function(){
     var tm=(m&&m.times)||[],s=0;
     tm.forEach(function(x){if(x)s+=x;});
     return s?minutesOf(s):0;}
-  function minutesByDay(attempts){
+  /* Al doilea argument e opțional ca să nu se schimbe apelurile vechi. Dar sesiunile
+     de exersat sunt tot timp de învățat: ecranul de final îi promite lui Aron că le
+     primește înapoi din cele 50, deci trebuie să apară și în socoteala părintelui. */
+  function minutesByDay(attempts,recoveries){
     var acc={};
     (attempts||[]).forEach(function(a){
       var d=String(a.created_at||"").slice(0,10); if(!d)return;
       acc[d]=(acc[d]||0)+attemptMinutes(a);});
+    (recoveries||[]).forEach(function(r){
+      var d=String(r.created_at||"").slice(0,10); if(!d)return;
+      var m=(r.meta&&Number(r.meta.minute))||0;
+      if(m)acc[d]=(acc[d]||0)+m;});
     return acc;}
-  return{unlockedCount:unlockedCount,isUnlocked:isUnlocked,gradeQuestion:gradeQuestion,scoreAttempt:scoreAttempt,
+
+  /* ================= REZUMATE PENTRU ECRANUL DE PĂRINTE =================
+     Un părinte are trei întrebări, în trei momente diferite: „e ceva de făcut
+     acum?", „cum a fost săptămâna?", „ce anume a greșit marți?". Până acum toate
+     trei stăteau în același scroll. Funcțiile de aici răspund fiecare la una
+     singură, și stau în HubLogic ca să poată fi testate fără DOM. */
+
+  // toate încercările dintr-un interval, capetele incluse
+  function intreDate(attempts,din,pana){
+    return (attempts||[]).filter(function(a){
+      var d=String(a.created_at||"").slice(0,10);
+      return !!d&&d>=din&&d<=pana;});}
+
+  /* „A intrat azi?" — răspuns într-o frază. Cardurile cumulative (23 de teste,
+     1840 XP) nu răspund la asta și oricum nu se mai mișcă după șase săptămâni. */
+  function rezumatAzi(attempts,tests,today,recoveries){
+    var bid={};(tests||[]).forEach(function(t){bid[t.id]=t;});
+    var azi=intreDate(attempts,today,today).slice()
+      .sort(function(x,y){return String(x.created_at)<String(y.created_at)?-1:1;});
+    var rec=intreDate(recoveries,today,today);
+    var minute=0,corecte=0,total=0,teme=[],ora="",oprit=false,nimereala=false;
+    azi.forEach(function(a){
+      minute+=attemptMinutes(a);
+      if(!ora)ora=String(a.created_at||"").slice(11,16);
+      var m=a.meta||{};
+      if(m.random)nimereala=true;
+      if(m.stopped)oprit=true;
+      corecte+=a.score||0; total+=a.max_score||0;
+      teme.push({topic:((bid[a.test_id]||{}).topic)||a.test_id,
+        score:a.score||0,max:a.max_score||0,mod:m.mode||"full",random:!!m.random});});
+    rec.forEach(function(r){
+      var m=(r.meta&&Number(r.meta.minute))||0; minute+=m;
+      if(!ora)ora=String(r.created_at||"").slice(11,16);});
+    return {aIntrat:(azi.length+rec.length)>0,ora:ora,minute:minute,
+      sesiuni:azi.length,exersat:rec.length,
+      corecte:corecte,total:total,greseli:Math.max(0,total-corecte),
+      pct:total?Math.round(corecte/total*100):null,
+      teme:teme,oprit:oprit,nimereala:nimereala};}
+
+  /* Fereastra de șapte zile. Media pe toată vara ascunde complet o săptămână
+     proastă, deci verificarea săptămânală n-are voie să fie cumulativă. */
+  function fereastra7(attempts,today,freeze,recoveries){
+    var fz={};(freeze||[]).forEach(function(d){fz[String(d).slice(0,10)]=true;});
+    var din=fmt(addDays(today,-6));
+    var w=intreDate(attempts,din,today);
+    var minZi=minutesByDay(attempts,recoveries);
+    var zile=[],lucrate=0,libere=0,corecte=0,total=0,minute=0;
+    for(var i=6;i>=0;i--){
+      var k=fmt(addDays(today,-i));
+      var ale=w.filter(function(a){return String(a.created_at).slice(0,10)===k;});
+      var c=0,m=0;
+      ale.forEach(function(a){c+=a.score||0;m+=a.max_score||0;});
+      var min=minZi[k]||0;
+      if(ale.length||min)lucrate++; else if(fz[k])libere++;
+      corecte+=c; total+=m; minute+=min;
+      zile.push({data:k,sesiuni:ale.length,corecte:c,max:m,minute:min,
+        pct:m?Math.round(c/m*100):0,liber:!ale.length&&!min&&!!fz[k]});}
+    return {zile:zile,lucrate:lucrate,libere:libere,dinCate:7,minute:minute,
+      mediePct:total?Math.round(corecte/total*100):null};}
+
+  /* Istoricul se grupează pe ZILE, nu pe încercări. O zi cu trei sesiuni ocupă
+     un rând, nu trei, și rândul stă pliat — deci lista crește de câteva ori mai
+     încet și nu mai trebuie derulată ca să ajungi în altă parte. */
+  function peZile(attempts,recoveries){
+    var acc={};
+    function pune(x,fel){
+      var d=String(x.created_at||"").slice(0,10); if(!d)return;
+      (acc[d]||(acc[d]={data:d,incercari:[],teste:0,exersat:0,corecte:0,max:0,minute:0}));
+      if(fel==="test"){acc[d].incercari.push(x);acc[d].teste++;
+        acc[d].corecte+=x.score||0;acc[d].max+=x.max_score||0;
+        acc[d].minute+=attemptMinutes(x);}
+      else{acc[d].exersat++;acc[d].minute+=(x.meta&&Number(x.meta.minute))||0;}}
+    (attempts||[]).forEach(function(a){pune(a,"test");});
+    (recoveries||[]).forEach(function(r){pune(r,"rec");});
+    return Object.keys(acc).sort().reverse().map(function(d){
+      var z=acc[d];
+      z.incercari.sort(function(x,y){return String(y.created_at)<String(x.created_at)?-1:1;});
+      z.pct=z.max?Math.round(z.corecte/z.max*100):null;
+      return z;});}
+
+  return{unlockedCount:unlockedCount,
+    intreDate:intreDate,rezumatAzi:rezumatAzi,fereastra7:fereastra7,peZile:peZile,isUnlocked:isUnlocked,gradeQuestion:gradeQuestion,scoreAttempt:scoreAttempt,
     IDLE_CAP_MS:IDLE_CAP_MS,SESSION_CAP_MS:SESSION_CAP_MS,minutesOf:minutesOf,
     attemptMinutes:attemptMinutes,minutesByDay:minutesByDay,
     JETON_TEST:JETON_TEST,JETON_REC:JETON_REC,JETON_EXTRA:JETON_EXTRA,
@@ -955,24 +1205,32 @@ function show(id){["screenSetup","loading","screenProfiles","screenPin","screenA
   .forEach(function(s){$(s).classList.add("hidden");});$(id).classList.remove("hidden");
   updateNav(id);}
 
-/* Bara de jos apare doar acasă și în magazin. În timpul unui test dispare,
-   ca să nu existe nicio ieșire accidentală din mijlocul întrebărilor. */
+/* Două bare de jos, câte una pe rol, niciodată amândouă. La Aron apare doar
+   acasă și în magazin — în timpul unui test dispare, ca să nu existe nicio
+   ieșire accidentală din mijlocul întrebărilor. La părinte apare pe tot ecranul
+   lui, unde cele trei butoane chiar duc în trei locuri diferite. */
 function updateNav(id){
-  var nb=$("navbar"); if(!nb)return;
-  var on=(id==="screenAron"||id==="screenShop");
-  nb.classList.toggle("on",on);
-  if(!on)return;
-  $("nvHome").classList.toggle("on",id==="screenAron");
-  $("nvTests").classList.remove("on");
-  $("nvProg").classList.remove("on");
+  var nb=$("navbar"), np=$("navbarP");
+  var aron=(id==="screenAron"||id==="screenShop");
+  var par=(id==="screenParent");
+  if(nb)nb.classList.toggle("on",aron);
+  if(np)np.classList.toggle("on",par);
+  if(par&&np){
+    ["azi","progres","istoric"].forEach(function(f){
+      var b=$(f==="azi"?"pnAzi":f==="progres"?"pnProg":"pnIst");
+      if(b)b.classList.toggle("on",parentTab===f);});
+    // bulina se aprinde doar dacă chiar așteaptă ceva un adult
+    var n=0; try{n=HubLogic.deOnorat(S.redemptions).length;}catch(e){}
+    var d=$("pnDot"); if(d)d.classList.toggle("hidden",n===0);
+  }
+  if(!aron||!nb)return;
+  var acasa=(id==="screenAron");
+  $("nvHome").classList.toggle("on",acasa&&aronTab==="acasa");
+  $("nvTests").classList.toggle("on",acasa&&aronTab==="teste");
+  $("nvProg").classList.toggle("on",acasa&&aronTab==="progres");
   $("nvShop").classList.toggle("on",id==="screenShop");
   var jetOn=false; try{jetOn=jetoaneActive();}catch(e){}
   $("nvShop").classList.toggle("hidden",!jetOn);
-}
-function navGo(unde){
-  if($("screenAron").classList.contains("hidden"))showAron();
-  var t=(unde==="prog")?$("aCovLab"):$("aronTodo");
-  if(t)setTimeout(function(){t.scrollIntoView({behavior:"smooth",block:"center"});},60);
 }
 function todayStr(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function esc(s){return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
@@ -1064,6 +1322,9 @@ function pinPress(d){
   if(pin.val.length>=6)return; pin.val+=d; renderPin();
   if(pin.val.length===String(pin.need).length){
     if(pin.val===String(pin.need)){ session.role=pin.role;
+      // la fiecare intrare cu PIN se pornește din „Azi", nu de unde ai rămas data trecută
+      if(pin.role!=="aron"){parentTab="azi";istoricTot=false;}
+      else{aronTab="acasa";aronFiltru="toate";aronToateTeste=false;}
       try{ pin.role==="aron"?showAron():showParent(); }
       catch(e){ // o eroare de afișare nu trebuie să pară „PIN greșit”
         $("pinMsg").innerHTML='<span style="color:var(--bad);font-weight:700">PIN corect, dar ecranul nu s-a putut încărca.</span><br><span class="small">'+esc(e.message||e)+'</span>';
@@ -1075,18 +1336,86 @@ function pinPress(d){
 function pinBack(){pin.val=pin.val.slice(0,-1);renderPin();}
 
 /* ---- ARON ---- */
-function showAron(){
-  session.role="aron";
-  var xp=HubLogic.totalXP(S.attempts), lv=HubLogic.levelFromXP(xp);
-  // zilele cumpărate cu „Pas" se comportă ca zilele libere programate: seria rămâne
-  var libere=(S.settings.freeze_days||[]).concat(HubLogic.zileDePas(S.redemptions));
-  var st=HubLogic.streakDays(S.attempts,todayStr(),libere);
-  $("aLevel").textContent=lv.level; $("aXp").textContent=xp; $("aXpBar").style.width=lv.pct+"%";
-  $("aStreak").textContent=st+"🔥";
-  // subtitlul de sus: data de azi + seria, ca să nu mai stea cifrele în prim-plan
+/* ---- ECRANUL LUI ARON, în trei file ----
+   Filtrul de materie și fila deschisă se rețin cât ține sesiunea, dar se
+   resetează la fiecare intrare cu PIN: să deschidă aplicația și să găsească
+   altceva decât „Acasă" ar fi exact imprevizibilul care nu-i priește. */
+var aronTab="acasa", aronFiltru="toate", aronToateTeste=false;
+
+function aronGo(f){
+  aronTab=f;
+  if(f!=="teste")aronToateTeste=false;
+  showAron();
+  try{window.scrollTo(0,0);}catch(e){}
+}
+function aronFiltreaza(f){ aronFiltru=f; randAronTeste(); updateNav("screenAron"); }
+function aronToate(){ aronToateTeste=true; randAronTeste(); }
+
+/* Datele de care depind toate cele trei file, calculate o dată. Înainte fiecare
+   bucată își recitea singură `S.attempts`; la 250 de încercări în iunie asta
+   s-ar fi simțit pe telefonul lui. */
+function aronDate(){
+  var t=todayStr();
+  var uc=HubLogic.unlockedCount(S.settings.start_date,S.settings.cadence_days,t);
+  // o sesiune închisă devreme NU marchează testul ca făcut — revine mâine, fără reproș
+  var doneIds={}, bestByTest={};
+  S.attempts.forEach(function(a){
+    if(HubLogic.isPartial(a))return;
+    doneIds[a.test_id]=true;
+    var b=bestByTest[a.test_id]; if(!b||a.score>b.score)bestByTest[a.test_id]=a;});
+  var deFacut=[],blocate=[],facute=[];
+  S.tests.forEach(function(x){
+    if(!HubLogic.isUnlocked(x,uc)){blocate.push(x);return;}
+    if(doneIds[x.id])facute.push(x); else deFacut.push(x);});
+  // „Aleg materia de mâine": se aplică în prima zi de DUPĂ cumpărare, atunci se
+  // și marchează folosită. Materia aleasă trece prima în listă.
+  var am=HubLogic.rambursareActiva("alege_materie",S.redemptions);
+  if(am&&String(am.created_at).slice(0,10)<t&&am.param){
+    var pref=am.param==="mate"?"mate":"romana";
+    var iar=[],rest=[];
+    deFacut.forEach(function(x){
+      ((x.subject==="mate"?"mate":"romana")===pref?iar:rest).push(x);});
+    if(iar.length){deFacut=iar.concat(rest);setStareRambursare(am.id,"aplicat");}
+  }
+  return {azi:t,uc:uc,doneIds:doneIds,bestByTest:bestByTest,
+    deFacut:deFacut,blocate:blocate,facute:facute,
+    pasAzi:HubLogic.zileDePas(S.redemptions).indexOf(t)>=0};
+}
+
+/* FILA „ACASĂ" — un singur lucru de făcut, într-un banner care nu poate fi ratat. */
+function randAronAcasa(d){
+  $("aTitle").textContent="Salut, Aron";
   var zile=["duminică","luni","marți","miercuri","joi","vineri","sâmbătă"];
-  $("aToday").textContent=zile[new Date().getDay()]+", "+roDate(todayStr())+
-    (st>0?(" · ziua "+st+" la rând"):"");
+  var libere=(S.settings.freeze_days||[]).concat(HubLogic.zileDePas(S.redemptions));
+  var st=HubLogic.streakDays(S.attempts,d.azi,libere);
+  $("aToday").textContent=zile[new Date().getDay()]+", "+roDate(d.azi)+
+    (st>0?(" · ziua "+st+" la rând 🔥"):"");
+
+  if(d.pasAzi){
+    $("aPas").textContent="Azi ai luat Pas. Seria ta rămâne. Ne vedem mâine.";
+    $("aPas").classList.remove("hidden");
+    $("aHero").innerHTML='<div class="hero calm"><div class="lab">Zi liberă</div>'+
+      '<div class="big">Azi nu ai nimic de rezolvat</div>'+
+      '<div class="foot">Ai plătit-o cu jetoane. Seria rămâne întreagă.</div></div>';
+  }else if(d.deFacut.length){
+    var t=d.deFacut[0];
+    var ramase=HubLogic.nextIndices(t,S.attempts,t.questions.length).length;
+    var total=t.questions.length;
+    var n=ramase&&ramase<total?ramase:total;
+    $("aPas").classList.add("hidden");
+    $("aHero").innerHTML='<div class="hero"><div class="lab">Testul de azi</div>'+
+      '<div class="big">'+esc(t.topic)+'</div>'+
+      '<div class="row"><div class="meta">'+n+(n===1?" întrebare":" întrebări")+' · '+
+        (t.subject==="mate"?"matematică":"română")+'</div>'+
+        '<button class="cta" onclick="openTest('+JSON.stringify(t.id)+')">Începem →</button></div>'+
+      '<div class="foot">Timpul de aici nu se scade din cele 50 de minute.</div></div>';
+  }else{
+    $("aPas").classList.add("hidden");
+    $("aHero").innerHTML='<div class="hero calm"><div class="lab">Gata pe azi</div>'+
+      '<div class="big">Ai rezolvat tot ce era deschis</div>'+
+      '<div class="foot">'+esc($("aronLockInfo").textContent||"Următorul test vine mâine.")+'</div></div>';
+  }
+
   var sold=jetoane();
   if(jetoaneActive()){
     $("aJet").textContent=sold+" 🪙";
@@ -1100,60 +1429,106 @@ function showAron(){
       : 'ai destule pentru orice e în magazin';
     $("aJetCard").classList.remove("hidden");
   }else{$("aJetCard").classList.add("hidden");}
-  var pasAzi=HubLogic.zileDePas(S.redemptions).indexOf(todayStr())>=0;
-  var uc=HubLogic.unlockedCount(S.settings.start_date,S.settings.cadence_days,todayStr());
-  // o sesiune închisă devreme NU marchează testul ca făcut — revine mâine, fără reproș
-  var doneIds={}; S.attempts.forEach(function(a){if(!HubLogic.isPartial(a))doneIds[a.test_id]=true;});
-  var bestByTest={}; S.attempts.forEach(function(a){if(HubLogic.isPartial(a))return;
-    var b=bestByTest[a.test_id];if(!b||a.score>b.score)bestByTest[a.test_id]=a;});
-  var todo=[],done=[];
-  S.tests.forEach(function(t){
-    var unlocked=HubLogic.isUnlocked(t,uc);
-    if(!unlocked){todo.push(renderLockedCard(t,uc));return;}
-    if(doneIds[t.id])done.push(renderTestCard(t,bestByTest[t.id]));
-    else todo.push(renderTestCard(t,null));
-  });
-  // „Aleg materia de mâine": se aplică în prima zi de DUPĂ cumpărare, atunci
-  // se și marchează folosită. Materia aleasă trece prima în listă.
-  var am=HubLogic.rambursareActiva("alege_materie",S.redemptions);
-  if(am&&String(am.created_at).slice(0,10)<todayStr()&&am.param){
-    var pref=am.param==="mate"?"mate":"romana";
-    done=[];
-    var todoPref=[],todoRest=[];
-    S.tests.forEach(function(t){
-      var unlocked=HubLogic.isUnlocked(t,uc);
-      if(!unlocked){todoRest.push(renderLockedCard(t,uc));return;}
-      if(doneIds[t.id]){done.push(renderTestCard(t,bestByTest[t.id]));return;}
-      var sj=(t.subject==="mate")?"mate":"romana";
-      (sj===pref?todoPref:todoRest).push(renderTestCard(t,null));});
-    todo=todoPref.concat(todoRest);
-    if(todoPref.length)setStareRambursare(am.id,"aplicat");
-  }
-  // teste deblocate nerezolvate primele, apoi cele blocate
-  if(pasAzi){
-    $("aPas").textContent="Azi ai luat Pas. Seria ta rămâne. Ne vedem mâine.";
-    $("aPas").classList.remove("hidden");
-    $("aronTodo").innerHTML='<div class="notice small">Ziua de azi e liberă. Testul te așteaptă mâine.</div>';
-  }else{
-    $("aPas").classList.add("hidden");
-    $("aronTodo").innerHTML=todo.join("")||'<div class="notice small">Nimic de rezolvat acum — bravo! 🎉</div>';
-  }
-  $("aronDone").innerHTML=done.join("")||'<div class="notice small">Aici apar testele deja rezolvate, pentru antrenament.</div>';
-  // progres pe termen lung: raportat la ÎNTREG planul (până la plan_end), nu la câte teste
-  // sunt încărcate momentan în bază — altfel ținta ar tot crește și l-ar induce în eroare.
-  var totalUnits = S.settings.plan_end
-    ? HubLogic.unlockedCount(S.settings.start_date, S.settings.cadence_days, S.settings.plan_end)
+
+  var c=acoperire(d);
+  $("aCovLab").textContent=c.facute+" din "+c.total;
+  $("aCovBar").style.width=c.pct+"%";
+  $("aCovSub").textContent=c.text;
+}
+
+/* Progresul se raportează la ÎNTREG planul (până la plan_end), nu la câte teste
+   sunt încărcate acum în bază — altfel ținta ar tot crește și l-ar induce în eroare. */
+function acoperire(d){
+  var facute=Object.keys(d.doneIds).length;
+  var total=S.settings.plan_end
+    ? HubLogic.unlockedCount(S.settings.start_date,S.settings.cadence_days,S.settings.plan_end)
     : S.tests.length;
-  var doneUnits=Object.keys(doneIds).length;
-  if(doneUnits>totalUnits)totalUnits=doneUnits;
-  var covPct=totalUnits?Math.round(doneUnits/totalUnits*100):0;
-  $("aCovLab").textContent=doneUnits+" din "+totalUnits;
-  $("aCovBar").style.width=covPct+"%";
-  $("aCovSub").textContent=doneUnits>=totalUnits?"Ai terminat toată recapitularea. 🏆"
-    :("Mai ai "+(totalUnits-doneUnits)+" până pe "+roDate(S.settings.plan_end||todayStr())+", când începe școala.");
-  var nextDate=HubLogic.addDays(S.settings.start_date, uc*S.settings.cadence_days);
-  var remaining=S.tests.length-uc;
-  $("aronLockInfo").textContent = remaining>0 ? ("Următorul test se deblochează pe "+roDate(nextDate)) : "Ai deblocat toate testele disponibile.";
+  if(facute>total)total=facute;
+  return {facute:facute,total:total,pct:total?Math.round(facute/total*100):0,
+    text:facute>=total?"Ai terminat toată recapitularea. 🏆"
+      :("Mai ai "+(total-facute)+" până pe "+roDate(S.settings.plan_end||d.azi)+", când începe școala.")};
+}
+
+/* FILA „TESTE" — chips de materie, un singur test în față, restul pliate.
+   Deblocarea e după dată, nu după terminare: dacă folosește des „Doar 4 azi",
+   în „De rezolvat" se strâng două-trei teste. Ținute toate la vedere, arată ca
+   o restanță. Primul rămâne în față, restul intră sub un buton. */
+function randAronTeste(){
+  var d=aronDate();
+  $("aTitle").textContent="Teste";
+  $("aToday").textContent="tot ce ai deschis până acum";
+
+  var f=["toate","mate","romana"], et={toate:"Toate",mate:"Matematică",romana:"Română"};
+  $("aChips").innerHTML=f.map(function(k){
+    return '<button class="chip'+(aronFiltru===k?" on":"")+'" onclick="aronFiltreaza('+
+      JSON.stringify(k)+')">'+et[k]+'</button>';}).join("");
+  function trece(x){ return aronFiltru==="toate" ||
+    (aronFiltru==="mate"?x.subject==="mate":x.subject!=="mate"); }
+
+  var deFacut=d.deFacut.filter(trece), blocate=d.blocate.filter(trece);
+  if(d.pasAzi){
+    $("aronTodo").innerHTML='<div class="notice small">Ziua de azi e liberă. Testul te așteaptă mâine.</div>';
+    $("aronTodoRest").innerHTML="";
+  }else if(!deFacut.length&&!blocate.length){
+    $("aronTodo").innerHTML='<div class="notice small">Nimic de rezolvat aici — bravo! 🎉</div>';
+    $("aronTodoRest").innerHTML="";
+  }else{
+    $("aronTodo").innerHTML=deFacut.length?renderTestCard(deFacut[0],null)
+      :'<div class="notice small">Nimic deschis acum. Următorul vine curând.</div>';
+    var rest=deFacut.slice(1).map(function(x){return renderTestCard(x,null);})
+      .concat(blocate.map(function(x){return renderLockedCard(x,d.uc);}));
+    $("aronTodoRest").innerHTML = !rest.length ? ""
+      : aronToateTeste ? rest.join("")
+      : '<button class="fold" onclick="aronToate()">▾ Încă '+rest.length+
+        (rest.length===1?" test":" teste")+'</button>';
+  }
+
+  var facute=d.facute.filter(trece);
+  $("aronDone").innerHTML=facute.length
+    ? facute.map(function(x){return renderTestCard(x,d.bestByTest[x.id]);}).join("")
+    : '<div class="notice small">Aici apar testele deja rezolvate, pentru antrenament.</div>';
+
+  var nextDate=HubLogic.addDays(S.settings.start_date,d.uc*S.settings.cadence_days);
+  $("aronLockInfo").textContent=(S.tests.length-d.uc)>0
+    ? ("Următorul test se deblochează pe "+roDate(nextDate))
+    : "Ai deblocat toate testele disponibile.";
+}
+
+/* FILA „PROGRES" — nivel, XP, serie, acoperire. Temele apar cu ce a lucrat,
+   fără procent: un procent pe temă, arătat LUI, e o notă. */
+function randAronProgres(d){
+  $("aTitle").textContent="Progresul tău";
+  $("aToday").textContent="";
+  var xp=HubLogic.totalXP(S.attempts), lv=HubLogic.levelFromXP(xp);
+  var libere=(S.settings.freeze_days||[]).concat(HubLogic.zileDePas(S.redemptions));
+  $("aLevel").textContent=lv.level;
+  $("aXp").textContent=xp;
+  $("aXpBar").style.width=lv.pct+"%";
+  $("aStreak").textContent=HubLogic.streakDays(S.attempts,d.azi,libere)+"🔥";
+
+  var c=acoperire(d);
+  $("aCovLab2").textContent=c.facute+" din "+c.total;
+  $("aCovBar2").style.width=c.pct+"%";
+  $("aCovSub2").textContent=c.text;
+
+  var ts=HubLogic.topicStats(S.attempts,S.tests);
+  $("aTopics").innerHTML = ts.length
+    ? ts.slice().sort(function(a,b){return b.tests-a.tests;}).map(function(s){
+        return '<div class="trow"><div style="flex:1;min-width:0;font-size:14px;font-weight:600">'+
+          esc(s.topic)+'</div><div class="small">'+s.tests+
+          (s.tests===1?" test":" teste")+'</div></div>';}).join("")
+    : '<div class="notice small">Aici apar temele pe care le-ai lucrat.</div>';
+}
+
+function showAron(){
+  session.role="aron";
+  var d=aronDate();
+  $("aTabAcasa").classList.toggle("hidden",aronTab!=="acasa");
+  $("aTabTeste").classList.toggle("hidden",aronTab!=="teste");
+  $("aTabProgres").classList.toggle("hidden",aronTab!=="progres");
+  if(aronTab==="teste")randAronTeste();
+  else if(aronTab==="progres")randAronProgres(d);
+  else{ randAronTeste(); randAronAcasa(d); }   // aronLockInfo alimentează bannerul de „gata pe azi"
   show("screenAron");
 }
 function roDate(d){var m=["ian","feb","mar","apr","mai","iun","iul","aug","sep","oct","nov","dec"];
@@ -1906,7 +2281,6 @@ function copyReport(){
 }
 
 /* ---- PĂRINTE ---- */
-var parentRows=[];
 /* Cum se citește răspunsul dat, oricare ar fi tipul întrebării */
 function answerText(q,g){
   if(g===undefined||g===null)return "n-a ajuns la ea";
@@ -1929,12 +2303,9 @@ function correctText(q){
 /* Elena a cerut explicit să vadă unde a greșit, nu doar procentul pe temă.
    Semnul „citit pe fugă” separă neatenția de necunoaștere — distincția care
    îi trebuie ca să știe dacă e de exersat sau de explicat. */
-function toggleAttempt(ix){
-  var box=$("det"+ix); if(!box)return;
-  if(!box.classList.contains("hidden")){box.classList.add("hidden");return;}
-  var a=parentRows[ix]; if(!a)return;
+function detaliiIncercare(a){
   var t=null; S.tests.forEach(function(x){if(x.id===a.test_id)t=x;});
-  if(!t){box.innerHTML='<div class="small">Testul nu mai e în bază.</div>';box.classList.remove("hidden");return;}
+  if(!t)return '<div class="small">Testul nu mai e în bază.</div>';
   var times=(a.meta&&a.meta.times)||[], rows=[];
   (t.questions||[]).forEach(function(q,i){
     var g=(a.answers||[])[i];
@@ -1946,27 +2317,209 @@ function toggleAttempt(ix){
       '<div class="dl good">corect: <b>'+esc(correctText(q))+'</b></div>'+
       (q.explain?'<div class="why">'+esc(q.explain)+'</div>':"")+'</div>');
   });
-  box.innerHTML=rows.length?rows.join(""):'<div class="none">Nimic greșit la acest test.</div>';
-  box.classList.remove("hidden");
+  return rows.length?rows.join(""):'<div class="none">Nimic greșit la acest test.</div>';
 }
-function showParent(){
-  session.role="parent";
-  var fa=HubLogic.firstAttempts(S.attempts);
-  var done=Object.keys(fa).length;
-  var sc=0,mx=0; Object.keys(fa).forEach(function(k){sc+=fa[k].score;mx+=fa[k].max_score;});
-  $("pDone").textContent=done;
-  $("pAvg").textContent=mx?Math.round(sc/mx*100)+"%":"–";
-  $("pXp").textContent=HubLogic.totalXP(S.attempts);
-  $("pStreak").textContent=HubLogic.streakDays(S.attempts,todayStr(),S.settings.freeze_days||[]);
-  // topics
+/* O zi se deschide o dată și arată greșelile din toate încercările ei. Înainte
+   fiecare încercare era un rând separat în listă; acum ziua e rândul, iar
+   încercările sunt titluri înăuntru. */
+function toggleZi(ix){
+  var box=$("zi"+ix), buton=$("ziB"+ix); if(!box)return;
+  if(!box.classList.contains("hidden")){
+    box.classList.add("hidden"); if(buton)buton.classList.remove("open"); return;}
+  var z=istoricZile[ix];
+  if(z){
+    var parti=[];
+    z.incercari.forEach(function(a){
+      var m=a.meta||{};
+      var eticheta=m.random?"trecut pe fugă, necontorizat":
+        m.stopped?"oprit devreme":
+        (m.mode==="short"?"sesiune scurtă":(HubLogic.isPartial(a)?"neterminat":""));
+      var t=null; S.tests.forEach(function(x){if(x.id===a.test_id)t=x;});
+      parti.push('<div class="dq" style="border-top:0;padding-bottom:2px">'+
+        '<div class="dqt">'+esc((t&&t.topic)||a.test_id)+
+        ' <span class="small" style="font-weight:600">'+String(a.created_at).slice(11,16)+
+        ' · '+a.score+"/"+a.max_score+(eticheta?" · "+esc(eticheta):"")+'</span></div></div>'+
+        detaliiIncercare(a));});
+    if(z.exersat)parti.push('<div class="dq"><div class="dqt">'+z.exersat+
+      (z.exersat===1?" sesiune de exersat":" sesiuni de exersat")+
+      '</div><div class="why">Le-a cerut el. Nu intră în scorurile testelor.</div></div>');
+    if(!parti.length)parti.push('<div class="none">Zi liberă. Seria nu s-a rupt.</div>');
+    box.innerHTML=parti.join("");
+  }
+  box.classList.remove("hidden");
+  if(buton)buton.classList.add("open");
+}
+
+/* ---- ECRANUL DE PĂRINTE, în trei file ---- */
+var parentTab="azi", istoricZile=[], istoricTot=false;
+
+function parentGo(f){
+  parentTab=f;
+  if(f==="istoric")istoricTot=false;
+  showParent();
+  try{window.scrollTo(0,0);}catch(e){}
+}
+function istoricMaiMult(){ istoricTot=true; randParentIstoric(); }
+
+function numeZi(d){
+  var z=["duminică","luni","marți","miercuri","joi","vineri","sâmbătă"];
+  return z[new Date(String(d).slice(0,10)+"T12:00:00").getDay()];
+}
+
+/* FILA „AZI" — ordinea e deliberată: întâi ce cere o decizie, apoi o frază care
+   răspunde la „a intrat azi?", apoi minutele. Cardurile cumulative de dinainte
+   (teste rezolvate, XP total) au dispărut de aici: după șase săptămâni cresc
+   monoton și nu mai răspund la nicio întrebare pe care și-o pune cineva azi. */
+function randParentAzi(){
+  var t=todayStr();
+  $("pTitle").textContent="Azi";
+  $("pSub").textContent=numeZi(t)+", "+roDate(t);
+
+  var rid={};(S.rewards||[]).forEach(function(r){rid[r.id]=r;});
+  var onor=[]; try{onor=HubLogic.deOnorat(S.redemptions);}catch(e){}
+  $("pOnorat").innerHTML = onor.map(function(r){
+    var rw=rid[r.reward_id]||{nume:r.reward_id};
+    var ic=ICONS[r.reward_id]?'<img src="'+ICONS[r.reward_id]+'" alt="">':'🎁';
+    return '<div class="act"><div class="hd">⏳ Așteaptă un adult</div>'+
+      '<div class="it"><div class="ic">'+ic+'</div>'+
+      '<div style="flex:1;min-width:0"><div class="nm">'+esc(rw.nume)+'</div>'+
+      '<div class="mt">cerut pe '+ziScurt(r.created_at)+' · '+r.cost+' 🪙'+
+        (r.param?' · '+esc(r.param):'')+'</div></div></div>'+
+      '<div class="btnrow">'+
+        '<button class="mini go" onclick="onoreaza('+JSON.stringify(r.id)+')">Onorat</button>'+
+        '<button class="mini gh" onclick="anuleaza('+JSON.stringify(r.id)+')">Anulează</button>'+
+      '</div></div>';
+  }).join("");
+
+  var rz=HubLogic.rezumatAzi(S.attempts,S.tests,t,S.recoveries);
+  var ln,sm;
+  if(!rz.aIntrat){
+    var libere=(S.settings.freeze_days||[]).concat(HubLogic.zileDePas(S.redemptions));
+    var st=HubLogic.streakDays(S.attempts,t,libere);
+    ln='<span class="dot no"></span>N-a intrat încă azi.';
+    sm=st>0?("Seria e la "+st+(st===1?" zi":" zile")+". Rămâne validă până la miezul nopții.")
+           :"Nicio serie în curs.";
+  }else{
+    ln='<span class="dot"></span>A intrat azi la '+esc(rz.ora)+'.';
+    var buc=[];
+    rz.teme.forEach(function(x){buc.push(esc(x.topic)+" — "+x.score+" din "+x.max);});
+    if(rz.exersat)buc.push(rz.exersat===1?"o sesiune de exersat":rz.exersat+" sesiuni de exersat");
+    sm=buc.join(". ")+".";
+    sm+="<br>"+rz.minute+(rz.minute===1?" minut":" minute")+" de învățat.";
+    if(rz.nimereala)sm+=" O sesiune a fost trecută la nimereală — necontorizată.";
+    else if(rz.oprit)sm+=" A oprit devreme: sesiunea contează pentru serie, testul revine mâine.";
+    else if(rz.total&&rz.greseli===0)sm+=" Fără nicio greșeală.";
+    else if(rz.greseli)sm+=" "+rz.greseli+(rz.greseli===1?" greșeală":" greșeli")+
+      " — detaliul e în Istoric.";
+  }
+  $("pAziSum").innerHTML='<div class="card sum"><div class="ln">'+ln+'</div>'+
+    '<div class="sm">'+sm+'</div></div>';
+
+  var mzi=HubLogic.minutesByDay(S.attempts,S.recoveries), azi=mzi[t]||0;
+  $("pTimeAzi").innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:baseline">'+
+      '<b style="font-size:22px;letter-spacing:-.5px">'+azi+' min</b>'+
+      '<span class="small">din 50</span></div>'+
+    '<div class="xpbar" style="margin-top:9px"><i style="width:'+
+      Math.min(100,Math.round(azi/50*100))+'%;background:linear-gradient(90deg,#F0A32B,#E8930F)"></i></div>'+
+    '<div class="small" style="margin-top:8px">Timp activ, cu pauzele lungi scoase. '+
+    'Atât i se dă înapoi din cele 50 de minute. Sesiunile de exersat intră și ele la socoteală.</div>';
+}
+
+/* FILA „PROGRES" — fereastră de șapte zile, nu tot istoricul: media pe toată
+   vara ascunde complet o săptămână proastă. Temele rămân cumulative, pentru că
+   acolo întrebarea chiar e „unde stă prost", nu „ce a făcut săptămâna asta". */
+function randParentProgres(){
+  var t=todayStr();
+  $("pTitle").textContent="Progres";
+  $("pSub").textContent="ultimele 7 zile";
+
+  var f=HubLogic.fereastra7(S.attempts,t,S.settings.freeze_days||[],S.recoveries);
   var ts=HubLogic.topicStats(S.attempts,S.tests);
+  var slabe=ts.filter(function(x){return x.pct<70;});
+  var cap=f.lucrate+" din 7 zile";
+  if(f.mediePct!==null)cap+=" · "+f.mediePct+"% mediu";
+  cap+=" · "+(slabe.length?slabe.length+(slabe.length===1?" temă sub 70%":" teme sub 70%"):"nicio temă sub 70%");
+  var zn=["D","L","Ma","Mi","J","V","S"];
+  var bare=f.zile.map(function(z){
+    var cls=z.liber?"bx free":((z.sesiuni||z.minute)?"bx":"bx miss");
+    var inner=(z.max&&!z.liber)?'<i style="height:'+Math.max(12,z.pct)+'%"></i>':"";
+    return '<div class="wd"><div class="'+cls+'">'+inner+'</div>'+
+      '<div class="dl">'+zn[new Date(z.data+"T12:00:00").getDay()]+'</div></div>';}).join("");
+  var nota=[];
+  if(f.libere)nota.push(f.libere+(f.libere===1?" zi liberă programată — seria nu s-a rupt.":
+    " zile libere programate — seria nu s-a rupt."));
+  nota.push(f.minute+" minute de învățat în total.");
+  $("pWeek").innerHTML='<div class="ln">'+cap+'</div><div class="week">'+bare+'</div>'+
+    '<div class="sm">'+nota.join(" ")+'</div>';
+
   $("pTopics").innerHTML = ts.length? ts.map(function(s){
     var col=s.pct>=80?"var(--good)":s.pct>=60?"var(--gold)":"var(--bad)";
-    return '<div class="trow"><div style="min-width:120px;font-size:14px;font-weight:600">'+esc(s.topic)+'</div>'+
+    return '<div class="trow"><div style="min-width:118px;font-size:14px;font-weight:600">'+esc(s.topic)+'</div>'+
       '<div class="bar"><i style="width:'+s.pct+'%;background:'+col+'"></i></div>'+
       '<div style="font-weight:800;font-size:14px;color:'+col+'">'+s.pct+'%</div></div>';
   }).join("") : '<div class="notice small">Încă nu sunt teste rezolvate.</div>';
-  // jetoane: câștigat, cheltuit, sold
+
+  var doneIds={}; S.attempts.forEach(function(a){if(!HubLogic.isPartial(a))doneIds[a.test_id]=true;});
+  var facute=Object.keys(doneIds).length;
+  var total=S.settings.plan_end
+    ? HubLogic.unlockedCount(S.settings.start_date,S.settings.cadence_days,S.settings.plan_end)
+    : S.tests.length;
+  if(facute>total)total=facute;
+  $("pPlan").innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:baseline">'+
+      '<b style="font-size:15px">Recapitulare de vară</b>'+
+      '<span class="small">'+facute+' din '+total+'</span></div>'+
+    '<div class="xpbar" style="margin-top:8px"><i style="width:'+
+      (total?Math.round(facute/total*100):0)+'%"></i></div>'+
+    '<div class="small" style="margin-top:8px">'+
+      (facute>=total?"Toată recapitularea e acoperită.":
+        ("Mai are "+(total-facute)+" până pe "+roDate(S.settings.plan_end||todayStr())+
+         ", când începe școala."))+'</div>';
+
+  var zileDesc=f.zile.slice().reverse();
+  $("pTime").innerHTML=zileDesc.map(function(z){
+    return '<div class="trow"><div style="min-width:104px;font-size:13px;opacity:.8">'+
+      ziScurt(z.data)+'</div>'+
+      '<div class="bar"><i style="width:'+Math.min(100,Math.round(z.minute/30*100))+
+        '%;background:var(--gold)"></i></div>'+
+      '<div style="font-size:13px;opacity:.8">'+z.minute+' min</div></div>';}).join("")+
+    '<div class="notice small" style="margin:8px 0">Total 7 zile: <b style="color:var(--ink)">'+
+      f.minute+' min</b></div>';
+  var faraMasura=(S.attempts||[]).filter(function(a){return HubLogic.attemptMinutes(a)===0;}).length;
+  if(faraMasura)$("pTime").innerHTML+='<div class="notice small" style="margin:8px 0">'+faraMasura+
+    ' sesiuni sunt dinainte de contor și n-au timp măsurat.</div>';
+}
+
+/* FILA „ISTORIC" — o zi e un rând, pliat. Lista de zile crește de câteva ori mai
+   încet decât lista de încercări, și nu mai trebuie derulată ca să ajungi altundeva. */
+function randParentIstoric(){
+  $("pTitle").textContent="Istoric";
+  $("pSub").textContent="atinge o zi ca să vezi ce a greșit";
+
+  istoricZile=HubLogic.peZile(S.attempts,S.recoveries);
+  var lim=istoricTot?istoricZile.length:14;
+  var arata=istoricZile.slice(0,lim);
+  $("pRecent").innerHTML = arata.length? arata.map(function(z,ix){
+    var buc=[];
+    if(z.teste)buc.push(z.teste+(z.teste===1?" test":" teste"));
+    if(z.exersat)buc.push(z.exersat+(z.exersat===1?" sesiune":" sesiuni"));
+    if(z.pct!==null)buc.push(z.pct+"%");
+    if(z.minute)buc.push(z.minute+" min");
+    var col=z.pct===null?"var(--muted)":z.pct>=80?"var(--good)":z.pct>=60?"var(--gold)":"var(--bad)";
+    return '<button class="day" id="ziB'+ix+'" onclick="toggleZi('+ix+')">'+
+      '<div><div class="dt">'+numeZi(z.data)+", "+ziScurt(z.data)+'</div>'+
+      '<div class="ds">'+esc(buc.join(" · "))+'</div></div>'+
+      '<div style="display:flex;align-items:center;gap:9px">'+
+      (z.pct===null?"":'<span class="tag" style="background:#f0f1f4;color:'+col+'">'+
+        z.corecte+"/"+z.max+'</span>')+
+      '<span class="ch">›</span></div></button>'+
+      '<div class="dbody hidden" id="zi'+ix+'"></div>';
+  }).join("") : '<div class="notice small">Nicio activitate încă.</div>';
+  $("pMaiMulte").innerHTML = (!istoricTot&&istoricZile.length>lim)
+    ? '<button class="btn ghost" style="margin-top:12px" onclick="istoricMaiMult()">▾ Încă '+
+      (istoricZile.length-lim)+' zile</button>' : "";
+
   if(jetoaneActive()){
     var cst=HubLogic.castigate(S.attempts,S.recoveries),chl=HubLogic.cheltuit(S.redemptions);
     var recTot=0;(S.recoveries||[]).forEach(function(r){recTot+=(r.corecte||0);});
@@ -1976,63 +2529,12 @@ function showParent(){
       '<div class="trow"><div style="min-width:140px;font-size:14px">Câștigate</div>'+
       '<div style="font-size:14px">'+cst+' ('+HubLogic.testeContorizate(S.attempts)+' teste, '+recTot+' recuperări)</div></div>'+
       '<div class="trow"><div style="min-width:140px;font-size:14px">Cheltuite</div>'+
-      '<div style="font-size:14px">'+chl+'</div></div>';
-    $("pJet").innerHTML+='<div class="small" style="margin:10px 0 2px;opacity:.75">Tarif</div>'+textTarif();
+      '<div style="font-size:14px">'+chl+'</div></div>'+
+      '<div class="small" style="margin:10px 0 2px;opacity:.75">Tarif</div>'+textTarif();
   }else{$("pJet").innerHTML='<div class="notice small">Sistemul de jetoane nu e instalat încă.</div>';}
   renderCaiet();
-  // cumpărături care așteaptă un adult
-  var rid={};(S.rewards||[]).forEach(function(r){rid[r.id]=r;});
-  var onor=HubLogic.deOnorat(S.redemptions);
-  $("pOnorat").innerHTML = onor.length ? onor.map(function(r){
-    var rw=rid[r.reward_id]||{nume:r.reward_id};
-    var ic2=ICONS[r.reward_id]?'<img src="'+ICONS[r.reward_id]+'" alt="" width="34" height="34" style="border-radius:10px;vertical-align:middle;margin-right:8px">':'';
-    return '<div class="mist"><div class="mq">'+ic2+esc(rw.nume)+'</div>'+
-      '<div class="mx">cerut pe '+ziScurt(r.created_at)+' · '+r.cost+' 🪙'+
-      (r.param?' · '+esc(r.param):'')+'</div>'+
-      '<div style="display:flex;gap:8px;margin:8px 0">'+
-      '<button class="btn" style="width:auto;padding:8px 14px" onclick="onoreaza('+JSON.stringify(r.id)+')">Onorat</button>'+
-      '<button class="btn ghost" style="width:auto;padding:8px 14px" onclick="anuleaza('+JSON.stringify(r.id)+')">Anulează</button>'+
-      '</div></div>';
-  }).join("") : '<div class="notice small">Nimic de onorat acum.</div>';
-  // minutele de ecran consumate cu învățatul — ce i se dă înapoi din cele 50
-  var mzi=HubLogic.minutesByDay(S.attempts);
-  var zile=Object.keys(mzi).sort().reverse().slice(0,7);
-  var azi=mzi[todayStr()]||0;
-  var sapt=zile.reduce(function(s,d){return s+mzi[d];},0);
-  $("pTime").innerHTML = zile.length
-    ? '<div class="trow"><div style="min-width:120px;font-size:14px;font-weight:600">Azi</div>'+
-      '<div style="font-weight:800;font-size:14px">'+azi+' min</div></div>'+
-      '<div class="trow"><div style="min-width:120px;font-size:14px;font-weight:600">Ultimele 7 zile</div>'+
-      '<div style="font-weight:800;font-size:14px">'+sapt+' min</div></div>'+
-      zile.map(function(d){
-        return '<div class="trow"><div style="min-width:120px;font-size:13px;opacity:.75">'+esc(d)+'</div>'+
-          '<div class="bar"><i style="width:'+Math.min(100,Math.round(mzi[d]/30*100))+'%;background:var(--gold)"></i></div>'+
-          '<div style="font-size:13px;opacity:.75">'+mzi[d]+' min</div></div>';
-      }).join("")+
-      '<div class="notice small" style="margin:8px 0">Timp activ, cu pauzele lungi scoase. Atât i se dă înapoi din cele 50 de minute.</div>'
-    : '<div class="notice small">Încă nu sunt sesiuni măsurate.</div>';
-  var faraMasura=(S.attempts||[]).filter(function(a){return HubLogic.attemptMinutes(a)===0;}).length;
-  if(faraMasura)$("pTime").innerHTML+='<div class="notice small" style="margin:8px 0">'+faraMasura+
-    ' sesiuni sunt dinainte de contor și n-au timp măsurat.</div>';
-  // recent — fiecare rând se deschide și arată exact ce a greșit
-  var rec=S.attempts.slice().sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at);}).slice(0,10);
+
   var byId={}; S.tests.forEach(function(t){byId[t.id]=t;});
-  parentRows=rec;
-  $("pRecent").innerHTML = rec.length? rec.map(function(a,ix){
-    var t=byId[a.test_id]||{topic:a.test_id,subject:"mate"};
-    var pct=a.max_score?Math.round(a.score/a.max_score*100):0;
-    var col=pct>=80?"var(--good)":pct>=60?"var(--gold)":"var(--bad)";
-    var d=new Date(a.created_at);
-    var m=a.meta||{};
-    var lbl=m.random?" · trecut pe fugă, necontorizat":
-      m.stopped?" · oprit devreme":
-      (m.mode==="short"?" · sesiune scurtă":(HubLogic.isPartial(a)?" · neterminat":""));
-    return '<button class="trow tap" onclick="toggleAttempt('+ix+')">'+
-      '<div><div style="font-weight:600;font-size:14px">'+esc(t.topic)+'</div>'+
-      '<div class="small">'+d.getDate()+" "+roDate(d).split(" ")[1]+", "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+esc(lbl)+'</div></div>'+
-      '<span class="tag" style="background:#f0f1f4;color:'+col+'">'+a.score+"/"+a.max_score+'</span></button>'+
-      '<div class="det hidden" id="det'+ix+'"></div>';
-  }).join("") : '<div class="notice small">Nicio activitate încă.</div>';
   var rush=0,seen=0;
   S.attempts.forEach(function(a){var t=byId[a.test_id];if(!t)return;var tm=(a.meta&&a.meta.times)||[];
     (t.questions||[]).forEach(function(q,i){if(tm[i]){seen++;if(HubLogic.isRushed(q,tm[i]))rush++;}});});
@@ -2040,6 +2542,17 @@ function showParent(){
   if(seen)extra.push("citite pe fugă: "+rush+" din "+seen+" enunțuri lungi");
   if(queueLen())extra.push(queueLen()+" încercări încă netrimise (se trimit singure)");
   $("pVer").textContent=(extra.length?extra.join(" · ")+" · ":"")+"versiune "+APP_VERSION;
+}
+/* Dispecerul: comută fila și randează doar filă activă. Fiecare randare e
+   independentă — dacă una crapă, celelalte două rămân în picioare. */
+function showParent(){
+  session.role="parent";
+  $("tabAzi").classList.toggle("hidden",parentTab!=="azi");
+  $("tabProgres").classList.toggle("hidden",parentTab!=="progres");
+  $("tabIstoric").classList.toggle("hidden",parentTab!=="istoric");
+  if(parentTab==="progres")randParentProgres();
+  else if(parentTab==="istoric")randParentIstoric();
+  else randParentAzi();
   show("screenParent");
 }
 
