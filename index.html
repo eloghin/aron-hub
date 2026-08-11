@@ -300,6 +300,30 @@ h1,h2,h3{margin:0}
   border-top:1px solid rgba(255,255,255,.22);padding-top:11px}
 .hero.calm{background:linear-gradient(125deg,#4C1D95 0%,#5B21B6 60%,#6D28D9 100%)}
 
+/* ===== ÎNTREBĂRI DE TIP „LABEL” =====
+   Desen cu zone de etichetat. Atinge un cuvânt, apoi locul lui; a doua atingere
+   pe o casetă plină îl scoate înapoi. Fără tras cu degetul: pe telefon e nesigur,
+   iar aplicația folosește deja atingere-atingere la potriviri. */
+.fig{position:relative;width:100%;background:#fff;border:1px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.fig svg{display:block;width:100%;height:auto}
+.zone{position:absolute;border:2px dashed #C9BFEA;border-radius:12px;background:#FBFAFF;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:inherit;font-size:13px;font-weight:700;color:#B6B0C6;
+  padding:2px 4px;line-height:1.2;transition:background .12s,border-color .12s}
+.zone.armed{border-color:var(--v);background:var(--v-soft);color:var(--v)}
+.zone.full{border-style:solid;border-color:var(--v-line);background:var(--v-soft);color:var(--v-deep)}
+.zone.ok{border-style:solid;border-color:var(--good);background:#EEFAF0;color:#166534}
+.zone.no{border-style:solid;border-color:var(--bad);background:#FDECEC;color:#991b1b}
+.pool{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.pool.locked{opacity:.45;pointer-events:none}
+.word{padding:11px 16px;border-radius:999px;font-size:14.5px;font-weight:700;
+  background:#fff;border:1.5px solid var(--line);color:var(--ink-2);
+  font-family:inherit;box-shadow:var(--shadow)}
+.word.sel{background:var(--v);border-color:var(--v);color:#fff;
+  box-shadow:0 5px 14px rgba(124,58,237,.28)}
+.word.used{opacity:.28;pointer-events:none}
+
 /* Butonul care pliază restul listei */
 .fold{width:100%;font-family:inherit;cursor:pointer;background:#fff;
   border:1px dashed var(--v-line);border-radius:var(--r-btn);padding:13px;
@@ -635,7 +659,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-08-10c";
+var APP_VERSION="2026-08-11a";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -672,7 +696,17 @@ var HubLogic=(function(){
     if(q.type==="number")return normalizeNum(g)===normalizeNum(q.answer);
     if(q.type==="flash")return g===true;
     if(q.type==="match")return seqOK(g,(q.pairs||[]).length);
-    if(q.type==="order")return seqOK(g,(q.items||[]).length);return false;}
+    if(q.type==="order")return seqOK(g,(q.items||[]).length);
+    /* label: g[i] = indicele cuvântului pus în caseta i, din q.options.
+       Se compară TEXTUL, nu poziția — bazinul de cuvinte se amestecă la fiecare
+       randare, iar o întrebare poate avea mai multe cuvinte decât casete. */
+    if(q.type==="label"){
+      var zs=q.zones||[]; if(!g||g.length!==zs.length)return false;
+      for(var zi=0;zi<zs.length;zi++){
+        var w=(q.options||[])[Number(g[zi])];
+        if(w===undefined||w!==zs[zi].answer)return false;}
+      return true;}
+    return false;}
   /* answeredCount lipsă = test dus până la capăt. Prezent = sesiune închisă mai devreme:
      scorul se raportează la câte întrebări a văzut, nu la câte avea testul. */
   function scoreAttempt(test,answers,answeredCount){
@@ -1743,6 +1777,21 @@ function renderQuestion(){
       return '<button class="opt" id="oi'+pos+'" onclick="orderPick('+pos+')"><span class="lt">·</span><span>'+esc(q.items[orig])+'</span></button>';
     }).join("")+'</div><div style="margin-top:12px"><button class="btn '+(cls==="rom"?"rom":"")+'" id="orderGo" onclick="orderSubmit()" disabled>Verifică</button>'+
       '<button class="btn ghost" style="margin-top:8px" onclick="orderReset()">Reia ordinea</button></div>';
+  }else if(q.type==="label"){
+    // SVG-ul vine din `tests`, tabelă în care nu se poate insera public — de aceea
+    // se pune în pagină ca atare. Cuvintele, în schimb, trec prin esc().
+    var ordL=shuffled(q.options.length,curIdx()+23);
+    quiz.lmap=ordL; quiz.picked=[];
+    body='<div class="fig" id="labFig">'+(q.svg||"")+
+      (q.zones||[]).map(function(z,i){
+        return '<button class="zone" id="lz'+i+'" onclick="labelZone('+i+')" style="left:'+
+          z.x+'%;top:'+z.y+'%;width:'+z.w+'%;height:'+z.h+'%">?</button>';}).join("")+'</div>'+
+      '<div class="pool" id="labPool">'+ordL.map(function(orig,pos){
+        return '<button class="word" id="lw'+pos+'" onclick="labelWord('+pos+')">'+
+          esc(q.options[orig])+'</button>';}).join("")+'</div>'+
+      '<div class="hint" id="labHint" style="margin-top:12px"></div>'+
+      '<div style="margin-top:12px"><button class="btn '+(cls==="rom"?"rom":"")+
+      '" id="labGo" onclick="labelSubmit()" disabled>Verifică</button></div>';
   }else if(q.type==="choice"){
     body='<div class="opts">'+q.options.map(function(o,idx){
       return '<button class="opt" id="opt'+idx+'" onclick="answerChoice('+idx+')">'+
@@ -1757,8 +1806,65 @@ function renderQuestion(){
       '<button class="btn '+(cls==="rom"?"rom":"")+'" onclick="submitNum()">Verifică</button></div>';
   }
   $("qBody").innerHTML=body;
+  if(q.type==="label")randLabel();
   randJocher();
   if(q.type==="number")setTimeout(function(){var e=$("numIn");if(e)e.focus();},60);
+}
+
+/* ---- LABEL: atinge un cuvânt, apoi locul lui ----
+   `quiz.sel` = poziția din bazinul amestecat, `quiz.picked[i]` = indicele
+   ORIGINAL din q.options pus în caseta i. Se ține originalul, nu poziția
+   amestecată, ca răspunsul salvat să însemne același lucru și peste o lună. */
+function labelWord(pos){
+  if(quiz.answered)return;
+  quiz.sel=(quiz.sel===pos)?null:pos;
+  randLabel();
+}
+function labelZone(i){
+  if(quiz.answered)return;
+  // a doua atingere pe o casetă plină scoate cuvântul: o atingere greșită pe
+  // telefon nu trebuie să însemne răspuns greșit garantat
+  if(quiz.picked[i]!==undefined){quiz.picked[i]=undefined;quiz.sel=null;randLabel();return;}
+  if(quiz.sel===null||quiz.sel===undefined)return;
+  quiz.picked[i]=quiz.lmap[quiz.sel];
+  quiz.sel=null; randLabel();
+}
+function randLabel(){
+  var q=quiz.test.questions[curIdx()], zs=q.zones||[];
+  /* `reuse` = același cuvânt intră în mai multe casete. La „subiect / predicat"
+     e obligatoriu: o propoziție are și una, și alta, iar două propoziții în
+     aceeași întrebare le cer de două ori. Fără steag, cuvântul s-ar consuma. */
+  var folosite={};
+  if(!q.reuse)zs.forEach(function(_,i){if(quiz.picked[i]!==undefined)folosite[quiz.picked[i]]=true;});
+  (quiz.lmap||[]).forEach(function(orig,pos){
+    var e=$("lw"+pos); if(!e)return;
+    e.classList.toggle("sel",quiz.sel===pos);
+    e.classList.toggle("used",!!folosite[orig]);});
+  var gata=true, armat=(quiz.sel!==null&&quiz.sel!==undefined);
+  zs.forEach(function(z,i){
+    var e=$("lz"+i); if(!e)return;
+    e.classList.remove("armed","full");
+    if(quiz.picked[i]!==undefined){e.classList.add("full");e.textContent=q.options[quiz.picked[i]];}
+    else{gata=false; if(armat)e.classList.add("armed");
+      e.textContent=armat?"aici?":"?";}});
+  var b=$("labGo"); if(b)b.disabled=!gata||quiz.answered;
+  var h=$("labHint"); if(h)h.textContent=quiz.answered?""
+    :(armat?"Acum atinge locul lui.":"Atinge un cuvânt, apoi locul lui.");
+}
+function labelSubmit(){
+  if(quiz.answered)return;
+  var q=quiz.test.questions[curIdx()], g=quiz.picked.slice();
+  grade(q,g);
+  var zs=q.zones||[];
+  zs.forEach(function(z,i){
+    var e=$("lz"+i); if(!e)return;
+    e.classList.remove("full","armed");
+    e.classList.add((q.options||[])[g[i]]===z.answer?"ok":"no");});
+  var b=$("labGo"); if(b)b.disabled=true;
+  var p=$("labPool"); if(p)p.classList.add("locked");
+  var h=$("labHint"); if(h)h.textContent="";
+  if(!HubLogic.gradeQuestion(q,g))
+    $("qFeedback").innerHTML+="<br><i>Corect: "+esc(correctText(q))+"</i>";
 }
 /* Jocherul apare doar dacă l-a cumpărat, doar în teste (nu în sesiunea de
    exersat, care oricum nu se notează) și doar înainte de răspuns. Nu se oferă
@@ -2291,6 +2397,9 @@ function answerText(q,g){
   if(q.type==="match"){var P=q.pairs||[];return (g||[]).map(function(r,i){
     return ((P[i]&&P[i][0])||("#"+(i+1)))+" → "+((P[r]&&P[r][1])||"?");}).join("; ");}
   if(q.type==="order")return (g||[]).map(function(r){return (q.items||[])[r];}).join(" → ");
+  if(q.type==="label")return (q.zones||[]).map(function(z,i){
+    var w=(q.options||[])[Number((g||[])[i])];
+    return (z.nume||("locul "+(i+1)))+": "+(w===undefined?"gol":w);}).join("; ");
   return String(g);
 }
 function correctText(q){
@@ -2298,6 +2407,8 @@ function correctText(q){
   if(q.type==="truefalse")return q.answer?"Adevărat":"Fals";
   if(q.type==="match")return (q.pairs||[]).map(function(p){return p[0]+" → "+p[1];}).join("; ");
   if(q.type==="order")return (q.items||[]).join(" → ");
+  if(q.type==="label")return (q.zones||[]).map(function(z,i){
+    return (z.nume||("locul "+(i+1)))+": "+z.answer;}).join("; ");
   return String(q.answer===undefined?"":q.answer);
 }
 /* Elena a cerut explicit să vadă unde a greșit, nu doar procentul pe temă.
