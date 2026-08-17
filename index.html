@@ -494,6 +494,7 @@ h1,h2,h3{margin:0}
     <div class="card" style="padding:20px;margin-top:10px">
       <div style="font-weight:700;font-size:17px" id="iTitle"></div>
       <div class="small" id="iMeta" style="margin-top:8px"></div>
+      <div class="small" id="iCurat" style="margin-top:6px;opacity:.85"></div>
       <div class="feedback ok" style="margin-top:14px">Timpul petrecut aici nu intră în cele 50 de minute de telefon.</div>
       <div style="margin-top:16px"><button class="btn" id="iFull" onclick="startQuiz(introId,'full')">Începem</button></div>
       <div style="margin-top:10px"><button class="btn ghost" id="iShort" onclick="startQuiz(introId,'short')"></button></div>
@@ -659,7 +660,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-08-11a";
+var APP_VERSION="2026-08-17a";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -811,6 +812,16 @@ var HubLogic=(function(){
      rândurile vechi din `recoveries` (33 de itemi, 66 de jetoane, deja în soldul lui).
      Dacă îl schimbi, îi rescrii istoria și îi dispar jetoane din sold. Nu-l atinge. */
   var JETON_TEST=2, JETON_REC=2, JETON_EXTRA=4, REC_MAX_ZI=3, CAIET_MAX_ZI=2, EXTRA_N=3, EXTRA_MAX_ZI=1;
+  /* JETON_CURAT — bonus pentru testul dus până la capăt fără nicio greșeală.
+     Adăugat 17 august 2026, la cererea Elenei. De ce se poate abia acum: până
+     pe 9 august, greșeala era plătită (recuperarea aducea 6 🪙/zi), deci un
+     bonus de test perfect ar fi trebuit să depășească 6 ca să conteze — iar la
+     valoarea aia plata devine proporțională cu scorul pe ușa din dos și o zi
+     slabă redevine pedeapsă. După unificarea recuperării cu „Exersez în plus",
+     greșeala aduce exact zero, deci bonusul n-are ce să bată: 2 e destul.
+     Nu e o penalizare: nimic nu se scade, iar când nu-l ia ecranul nu scrie
+     nimic despre el. */
+  var JETON_CURAT=2;
   function testeContorizate(attempts){
     var s={};
     (attempts||[]).forEach(function(a){
@@ -818,6 +829,30 @@ var HubLogic=(function(){
       if(isPartial(a))return;               // se plătește testul dus până la capăt
       s[a.test_id]=true;});
     return Object.keys(s).length;}
+  /* ---- TESTUL CURAT ----
+     `meta.curat` se calculează la salvare, în finishQuiz, nu aici. Trei motive,
+     toate importante:
+
+     1. CARTONAȘELE DE MEMORARE NU SE PUNCTEAZĂ SINGURE. La `type:"flash"`,
+        `gradeQuestion` returnează `g===true`, adică scorul e ce declară el
+        („am știut" / „n-am știut"). Un bonus pe scor la un test de cartonașe ar
+        plăti apăsatul pe „am știut" — exact invers decât vrem. Dovada e în date:
+        pe 1 august a făcut 8/8 la Părți de vorbire în 32 de secunde, iar pe 12
+        august 4/10 la aceeași temă în 7 minute. A doua e cea onestă. Bonusul nu
+        se dă pe teste care conțin cartonașe, iar la intro nici nu se anunță.
+     2. NU E RETROACTIV. Regula se anunță azi, deci se aplică de azi. Un +18 🪙
+        apărut peste noapte pentru teste vechi ar fi exact „bonus surpriză dat de
+        adult", lucrul pe care economia nu-l face niciodată — și n-ar schimba
+        niciun comportament viitor, doar soldul.
+     3. Testul se poate relua, `meta.curat` nu se poate re-arunca: se numără
+        `test_id` distincte, o dată. */
+  function areFlash(test){
+    return (((test||{}).questions)||[]).some(function(q){return q.type==="flash";});}
+  function testeCurate(attempts){
+    var b={};
+    (attempts||[]).forEach(function(a){
+      if(a&&a.meta&&a.meta.curat)b[a.test_id]=true;});
+    return Object.keys(b).length;}
   /* `corecte` din `recoveries` e numărul de UNITĂȚI PLĂTITE, nu de răspunsuri
      bune: itemi reparați la recuperare, pagini corectate la caiet, 1 sau 0 la
      „Exersez în plus" (sesiunea se plătește întreagă sau deloc). De aceea sunt
@@ -827,7 +862,8 @@ var HubLogic=(function(){
     (recoveries||[]).forEach(function(r){
       if(r.sursa==="extra"){ext+=(r.corecte||0);return;}
       rec+=(r.corecte||0);});
-    return JETON_TEST*testeContorizate(attempts)+JETON_REC*rec+JETON_EXTRA*ext;}
+    return JETON_TEST*testeContorizate(attempts)+JETON_REC*rec+JETON_EXTRA*ext
+         + JETON_CURAT*testeCurate(attempts);}
   function cheltuit(redemptions){
     var s=0;(redemptions||[]).forEach(function(r){if(r.stare!=="anulat")s+=(r.cost||0);});
     return s;}
@@ -1211,7 +1247,8 @@ var HubLogic=(function(){
     intreDate:intreDate,rezumatAzi:rezumatAzi,fereastra7:fereastra7,peZile:peZile,isUnlocked:isUnlocked,gradeQuestion:gradeQuestion,scoreAttempt:scoreAttempt,
     IDLE_CAP_MS:IDLE_CAP_MS,SESSION_CAP_MS:SESSION_CAP_MS,minutesOf:minutesOf,
     attemptMinutes:attemptMinutes,minutesByDay:minutesByDay,
-    JETON_TEST:JETON_TEST,JETON_REC:JETON_REC,JETON_EXTRA:JETON_EXTRA,
+    JETON_TEST:JETON_TEST,JETON_REC:JETON_REC,JETON_EXTRA:JETON_EXTRA,JETON_CURAT:JETON_CURAT,
+    areFlash:areFlash,testeCurate:testeCurate,
     REC_MAX_ZI:REC_MAX_ZI,CAIET_MAX_ZI:CAIET_MAX_ZI,EXTRA_N:EXTRA_N,EXTRA_MAX_ZI:EXTRA_MAX_ZI,
     paginiCaietAzi:paginiCaietAzi,maiPoateCaiet:maiPoateCaiet,
     extraAzi:extraAzi,maiPoateExtra:maiPoateExtra,extraPool:extraPool,
@@ -1602,6 +1639,12 @@ function openTest(testId){
   var total=t.questions.length;
   $("iTopic").textContent=t.topic;
   $("iTitle").textContent=t.title;
+  /* Bonusul se anunță ÎNAINTE, nu se descoperă după. O economie în care apar
+     plăți neanunțate nu se poate planifica, iar planificarea e tot rostul ei.
+     Pe testele cu cartonașe nu se anunță, fiindcă nu se dă. */
+  $("iCurat").textContent=(jetoaneActive()&&!HubLogic.areFlash(t))
+    ? ("Fără nicio greșeală: +"+HubLogic.JETON_CURAT+" 🪙 în plus.")
+    : "";
   $("iMeta").textContent=(rest<total)
     ? (rest+" întrebări rămase din "+total+" · vreo "+Math.max(1,Math.round(rest*0.8))+" minute")
     : (total+" întrebări · vreo "+Math.max(1,Math.round(total*0.8))+" minute");
@@ -2007,6 +2050,7 @@ async function finishQuiz(stoppedEarly){
   if(quiz.extra)return finishExtra();    // sesiunea de exersat are propria tabelă, nu atinge scorurile
   var t=quiz.test;
   var castInainte=HubLogic.castigate(S.attempts,S.recoveries);
+  var curatInainte=HubLogic.testeCurate(S.attempts);
   // Dacă din orice motiv ceasul sesiunii n-a pornit, se cade pe suma timpilor
   // pe întrebare — mai mică decât realitatea, dar niciodată zero pe o sesiune reală.
   var sumaTimpi=0;(quiz.times||[]).forEach(function(x){if(x)sumaTimpi+=x;});
@@ -2034,8 +2078,15 @@ async function finishQuiz(stoppedEarly){
   var res=HubLogic.scoreAttempt(t,saveAnswers,
     partial?answeredCount:(aruncate?(t.questions.length-aruncate):null));
   var xpEarned=random?0:Math.max(0,res.xp-HubLogic.xpAlready(S.attempts,t.id)); // o singură dată pe test
+  /* Testul curat: dus până la capăt, fără nicio greșeală, fără jocher, fără
+     cartonașe de memorare (acelea se punctează singure — vezi HubLogic).
+     Se scrie în `meta` acum, cât timp avem obiectul testului în mână; soldul
+     doar îl citește. Un test terminat mai demult, fără câmpul ăsta, nu plătește
+     nimic retroactiv. */
+  var curat=!random&&!partial&&!aruncate&&res.max>0&&res.score===res.max&&!HubLogic.areFlash(t);
   var row={test_id:t.id,student:"aron",answers:saveAnswers,score:res.score,max_score:res.max,xp:xpEarned,
     meta:{partial:partial,random:random,mode:quiz.mode,stopped:!!stoppedEarly,
+      curat:curat,
       aruncate:quiz.aruncate||[],
       times:quiz.times,rushed:quiz.rushed,semnale:sig,
       activ_ms:quiz.activeMs||0,minute:minuteLucrate,v:APP_VERSION}};
@@ -2070,8 +2121,14 @@ async function finishQuiz(stoppedEarly){
   }
   // Cât a câștigat ACUM, nu la ce sold a ajuns: dacă nu vede plata, nu există.
   var jetCastigate=HubLogic.castigate(S.attempts,S.recoveries)-castInainte;
+  var jetCurat=HubLogic.JETON_CURAT*Math.max(0,HubLogic.testeCurate(S.attempts)-curatInainte);
   var bucati=[];
-  if(jetCastigate>0)bucati.push("+"+jetCastigate+" 🪙");
+  if(jetCastigate-jetCurat>0)bucati.push("+"+(jetCastigate-jetCurat)+" 🪙");
+  /* Bonusul se numește, nu se topește în total: altfel cifra crește și el nu
+     știe de ce, deci nu are ce să repete. Iar când NU l-a luat, aici nu se
+     scrie nimic — niciun „ai pierdut", niciun „de puțin". Asta e toată
+     diferența dintre un bonus și o penalizare la un copil care ridică zid. */
+  if(jetCurat>0)bucati.push("+"+jetCurat+" 🪙 test curat");
   if(xpEarned>0)bucati.push("+"+xpEarned+" XP");
   if(bucati.length){$("rXp").textContent=bucati.join(" · ");$("rXp").classList.remove("hidden");}
   else{$("rXp").classList.add("hidden");}
@@ -2116,9 +2173,11 @@ function randTarif(eticheta,limita,plata){
 function textTarif(){
   var p="+"+HubLogic.JETON_TEST+" 🪙", r="+"+HubLogic.JETON_REC+" 🪙", e="+"+HubLogic.JETON_EXTRA+" 🪙";
   return randTarif("Termini un test","",p)+
+    randTarif("Test fără nicio greșeală","peste cele 2 🪙 · jocherul anulează bonusul",
+      "+"+HubLogic.JETON_CURAT+" 🪙")+
     randTarif("Exersezi — greșelile vechi intră aici","o dată pe zi",e)+
     randTarif("Lucrezi o pagină nouă de caiet, apoi o corectezi cu mama","cel mult "+HubLogic.CAIET_MAX_ZI+" pe zi",r)+
-    '<div class="small" style="margin-top:10px;opacity:.8">Nu contează câte ai nimerit. Contează că ai dus-o până la capăt.</div>';
+    '<div class="small" style="margin-top:10px;opacity:.8">Cele 2 🪙 pe test le primești oricum, câte ai nimerit. Bonusul vine peste ele, dacă n-ai nicio greșeală.</div>';
 }
 /* Vitrina, ca bloc separat deasupra listei. Motivul e că până acum recompensa
    săptămânii era un rând oarecare într-o listă sortată după preț — nimic nu
@@ -2341,6 +2400,7 @@ function buildReport(){
       castigate:HubLogic.castigate(S.attempts,S.recoveries),
       cheltuite:HubLogic.cheltuit(S.redemptions),
       teste_platite:HubLogic.testeContorizate(S.attempts),
+      teste_curate:HubLogic.testeCurate(S.attempts),
       itemi_recuperati:recTot, itemi_reluati:recTotal, pagini_caiet:caiet,
       // „Exersez în plus": sesiuni cerute de el. `neplatite` = trecute la viteză
       // de click, deci nu au plătit. `pe_teme` arată ce alege singur să repete.
