@@ -203,6 +203,31 @@ h1,h2,h3{margin:0}
 .mist .mx{font-size:13px;color:var(--muted);margin-top:4px}
 .softnote{margin-top:10px;font-size:13px;color:var(--muted);line-height:1.4}
 
+/* Raftul de recompense: grilă de trei coloane, iconița în prim-plan.
+   Lista pe un rând ajunsese la peste 1000px pentru zece recompense — trebuia
+   derulată ca să vezi ce e scump, adică exact ținta pentru care merită să
+   strângă stătea sub marginea ecranului. Aici tot raftul intră în patru rânduri.
+   Iconițele duc identitatea (de-aia sunt mari), titlul doar confirmă, iar
+   descrierea lungă s-a mutat în fereastra de cumpărare — la atingere. */
+.mgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.mcard{background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:11px 6px 10px;display:flex;flex-direction:column;align-items:center;
+  text-align:center;gap:6px;box-shadow:var(--shadow);width:100%;
+  font-family:inherit;color:var(--ink);cursor:pointer}
+.mcard:active{transform:translateY(1px)}
+/* ce nu poate lua acum rămâne vizibil, doar stins: ținta inaccesibilă e motorul
+   economisirii, deci nu se ascunde și nu se scoate din raft */
+.mcard.off{opacity:.62}
+.mcard img,.mcard .memo{border-radius:16px;flex:0 0 auto}
+.mcard .memo{width:54px;height:54px;background:var(--v-soft);display:flex;
+  align-items:center;justify-content:center;font-size:28px}
+.mnume{font-size:12px;font-weight:700;line-height:1.2;min-height:29px;
+  display:flex;align-items:center;justify-content:center}
+.mpret{background:linear-gradient(120deg,#7C3AED,#9333EA);color:#fff;font-weight:800;
+  font-size:12.5px;border-radius:999px;padding:6px 13px;white-space:nowrap;box-shadow:var(--sh-v)}
+.mpret.off{background:var(--fill);color:var(--muted);box-shadow:none;font-size:12px}
+.msub{font-size:10.5px;color:var(--muted);margin-top:-2px;white-space:nowrap}
+
 /* Detaliul unei încercări, în ecranul de părinte */
 .trow.tap{cursor:pointer;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);font-family:inherit}
 .det{padding:2px 0 14px}
@@ -660,7 +685,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-08-17b";
+var APP_VERSION="2026-08-18a";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -2158,6 +2183,18 @@ function ziScurt(s){
   var p=String(s).slice(0,10).split("-");
   if(p.length<3)return String(s);
   return Number(p[2])+" "+(LUNI_SCURT[Number(p[1])-1]||"");}
+/* Numele de pe raft e scurt („Mami doarme"), numele întreg apare la atingere și
+   în raport. Pe trei coloane un titlu de patru cuvinte se rupe pe trei rânduri
+   de 12px și nu se mai citește dintr-o privire — iar raftul se citește dintr-o
+   privire sau nu se citește deloc. Dacă nu s-a rulat migrația, cade pe `nume`. */
+function numeRaft(r){return (r&&r.nume_scurt)?r.nume_scurt:(r?r.nume:"");}
+/* Recompensele fără iconiță WEBP (jocherul, deocamdată) își iau emoji-ul din
+   fața numelui — „🃏 Jocher" avea deja simbolul acolo, ca prefix în bază. Fără
+   asta ar rămâne cu un 🎁 generic, adică singurul card din raft pe care Aron nu
+   l-ar recunoaște din imagine, exact ce voiam să evităm cu grila. */
+function emojiRaft(r){
+  var n=String((r&&r.nume)||""),cp=n.codePointAt(0)||0;
+  return cp>0x2000?String.fromCodePoint(cp):"🎁";}
 /* O singură listă, ordonată după preț. Cu cinci recompense, trei titluri de raft
    erau mai mult zgomot decât structură; iar ordonarea după cost pune sus ce-și
    permite azi și jos ținta pentru care merită să strângă. `raft` rămâne în bază,
@@ -2235,21 +2272,43 @@ function showShop(){
       return r.activ!==false&&(r.vitrina_ordine===null||r.vitrina_ordine===undefined);})
     .sort(function(a,b){return (a.cost-b.cost)||((a.ordine||0)-(b.ordine||0));});
   if(items.length){
-    html+='<div class="section-h">'+(html?"Mereu pe raft":"Ce poți lua")+'</div><div class="card" style="padding:6px 16px">';
+    html+='<div class="section-h">'+(html?"Mereu pe raft":"Ce poți lua")+'</div><div class="mgrid">';
     items.forEach(function(r){
-      var c=HubLogic.poateCumpara(r,S.redemptions,todayStr(),s),stare;
-      if(c.ok)stare='<button class="btn" style="width:auto;padding:8px 14px" onclick="buyReward(\''+r.id+'\')">'+r.cost+' 🪙</button>';
-      else if(c.motiv==="sold")stare='<span class="small">'+r.cost+' 🪙 · îți mai trebuie '+c.lipsesc+'</span>';
-      else stare='<span class="small">iar de pe '+ziScurt(c.din)+'</span>';
-      var ic=ICONS[r.id]?'<img src="'+ICONS[r.id]+'" alt="" width="46" height="46" style="border-radius:13px;flex:0 0 auto">':'';
-      html+='<div class="mist" style="display:flex;gap:12px;align-items:center">'+ic+
-        '<div style="flex:1 1 auto;min-width:0">'+
-        '<div class="mq" style="display:flex;justify-content:space-between;gap:12px;align-items:center">'+
-        '<span>'+esc(r.nume)+'</span>'+stare+'</div>'+
-        (r.descriere?'<div class="mx">'+esc(r.descriere)+'</div>':'')+'</div></div>';});
+      var c=HubLogic.poateCumpara(r,S.redemptions,todayStr(),s),pret,sub="",off="";
+      if(c.ok){
+        pret='<div class="mpret">'+r.cost+' 🪙</div>';
+      }else if(c.motiv==="sold"){
+        // prețul rămâne scris, cu distanța sub el: „mai strângi 2" e o țintă,
+        // un card fără preț e un refuz
+        off=" off";pret='<div class="mpret off">'+r.cost+' 🪙</div>';
+        sub='<div class="msub">mai strângi '+c.lipsesc+'</div>';
+      }else{
+        off=" off";pret='<div class="mpret off">🔒 '+ziScurt(c.din)+'</div>';
+        // la cele săptămânale spunem regula, nu data: „luni e zi nouă la tot"
+        if(r.limita_zile&&r.limita_zile%7===0)sub='<div class="msub">revine luni</div>';
+      }
+      var ic=ICONS[r.id]
+        ?'<img src="'+ICONS[r.id]+'" alt="" width="54" height="54">'
+        :'<div class="memo">'+emojiRaft(r)+'</div>';
+      html+='<button class="mcard'+off+'" onclick="tapReward(\''+r.id+'\')">'+ic+
+        '<div class="mnume">'+esc(numeRaft(r))+'</div>'+pret+sub+'</button>';});
     html+='</div>';}
   $("shopBody").innerHTML=html||'<div class="notice small">Magazinul se deschide în curând.</div>';
   show("screenShop");
+}
+/* Cardul din raft e mic și nu mai încape descrierea pe el. Atingerea lui e
+   singurul loc unde se vede regula întreagă („Nu marți — marțea e oricum") —
+   deci trebuie să răspundă și când NU poate cumpăra. Un card care nu face nimic
+   la atingere învață copilul că raftul e o poză, nu un magazin. */
+function tapReward(id){
+  var r=(S.rewards||[]).find(function(x){return x.id===id;}); if(!r)return;
+  var c=HubLogic.poateCumpara(r,S.redemptions,todayStr(),jetoane());
+  if(c.ok)return buyReward(id);
+  var t=r.nume+" — "+r.cost+" 🪙";
+  if(r.descriere)t+="\n\n"+r.descriere;
+  if(c.motiv==="sold")t+="\n\nÎți mai trebuie "+c.lipsesc+" 🪙.";
+  else if(c.motiv==="limita")t+="\n\nAi luat-o deja. O poți lua iar de pe "+ziScurt(c.din)+".";
+  alert(t);
 }
 async function buyReward(id){
   var r=(S.rewards||[]).find(function(x){return x.id===id;}); if(!r)return;
@@ -2264,8 +2323,12 @@ async function buyReward(id){
     if(param===null||!String(param).trim())return;
     param=String(param).trim().slice(0,120);
   }
-  // confirmarea arată soldul rămas: apasă repede, nu vrem cumpărături din greșeală
-  if(!confirm(r.nume+" — "+r.cost+" 🪙\nÎți rămân "+(s-r.cost)+"."))return;
+  // confirmarea arată soldul rămas: apasă repede, nu vrem cumpărături din greșeală.
+  // Tot aici a ajuns descrierea, scoasă de pe cardul din raft — ultimul ecran
+  // dinainte de plată e locul unde trebuie citită regula, nu la răsfoit.
+  if(!confirm(r.nume+" — "+r.cost+" 🪙"+
+      (r.descriere?"\n\n"+r.descriere:"")+
+      "\n\nÎți rămân "+(s-r.cost)+"."))return;
   var row={reward_id:r.id,student:"aron",cost:r.cost,efect:r.efect||null,param:param,
     stare:(r.efect==="pas")?"aplicat":"cerut"};
   if(r.efect==="pas")row.aplicat_la=todayStr();
