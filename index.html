@@ -539,9 +539,13 @@ h1,h2,h3{margin:0}
       <div style="font-size:1.6rem;font-weight:800" id="sJet">0 🪙</div>
       <div class="small">jetoanele tale</div>
     </div>
+    <!-- Rafturile vin primele: magazinul se deschide pe ce poate lua, nu pe
+         regulamentul de câștig. „Cum câștigi" rămâne jos, ca răspuns la
+         întrebarea care apare DUPĂ ce a văzut ceva ce vrea („de unde iau
+         atâtea?"), nu ca poartă prin care trece de fiecare dată. -->
+    <div id="shopBody"></div>
     <div class="section-h">Cum câștigi</div>
     <div class="card" style="padding:12px 16px"><div class="small" id="sCum"></div></div>
-    <div id="shopBody"></div>
     <div style="margin-top:16px"><button class="btn ghost" onclick="showAron()">Înapoi la hub</button></div>
   </div>
 
@@ -685,7 +689,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-08-18a";
+var APP_VERSION="2026-08-19a";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
