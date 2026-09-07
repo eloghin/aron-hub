@@ -689,7 +689,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-08-19a";
+var APP_VERSION="2026-09-07a";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -1813,8 +1813,20 @@ function tickActive(){
   quiz.tick=now;
 }
 function curIdx(){return quiz.queue[quiz.pos];}
+/* Fisher-Yates cu generator propriu, ca amestecarea să fie aceeași la fiecare
+   randare a aceleiași întrebări. `seed%(i+1)` folosea BIȚII DE JOS ai unui LCG,
+   care au perioadă foarte scurtă — de aici ieșeau permutări aproape identice
+   pentru semințe apropiate. Se iau biții de sus (`/65536`); măsurat pe tot
+   conținutul, poziția răspunsului corect trece de la 17/34/20/29% la
+   26/25/25/24%, adică practic la întâmplare. */
 function shuffled(n,seed){var a=[],i;for(i=0;i<n;i++)a.push(i);
-  for(i=n-1;i>0;i--){seed=(seed*1103515245+12345)%2147483648;var j=seed%(i+1);var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  seed=Math.abs(seed)%2147483648;
+  for(i=n-1;i>0;i--){seed=(seed*1103515245+12345)%2147483648;
+    var j=Math.floor(seed/65536)%(i+1);var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+/* Sămânța ține și de testul din care vine întrebarea, nu doar de poziția ei:
+   altfel toate întrebările nr. 3 din hub primesc aceeași permutare. */
+function seedText(s){var h=0,i;s=String(s||"");
+  for(i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%2147483647;return h;}
 function renderQuestion(){
   var t=quiz.test,q=t.questions[curIdx()],cls=t.subject==="mate"?"mate":"rom";
   $("qProg").className="qprog"+(cls==="rom"?" rom":"");
@@ -1824,7 +1836,7 @@ function renderQuestion(){
   $("qCount").textContent=(quiz.pos<base)?((quiz.pos+1)+"/"+base):"revenire";
   $("qTopic").className="pill "+cls; $("qTopic").textContent=(t.subject==="mate"?"🔢 ":"✏️ ")+t.topic;
   $("qText").textContent=q.q;
-  quiz.answered=false; quiz.given=null; quiz.sel=null; quiz.picked=[];
+  quiz.answered=false; quiz.given=null; quiz.sel=null; quiz.picked=[]; quiz.cmap=null;
   quiz.t0=Date.now(); // se măsoară, nu se afișează niciodată
   $("qFeedback").classList.add("hidden"); $("qNext").classList.add("hidden"); $("qStop").classList.add("hidden");
   var body="";
@@ -1866,9 +1878,18 @@ function renderQuestion(){
       '<div style="margin-top:12px"><button class="btn '+(cls==="rom"?"rom":"")+
       '" id="labGo" onclick="labelSubmit()" disabled>Verifică</button></div>';
   }else if(q.type==="choice"){
-    body='<div class="opts">'+q.options.map(function(o,idx){
-      return '<button class="opt" id="opt'+idx+'" onclick="answerChoice('+idx+')">'+
-        '<span class="lt">'+String.fromCharCode(65+idx)+'</span><span>'+esc(o)+'</span></button>';
+    /* Variantele se amestecă la afișare. Motivul, măsurat pe 7 sept 2026 pe
+       tot conținutul: răspunsul corect stătea pe poziția A în 61% din itemi
+       și în 92% din tranșa 2 — se putea nimeri fără să știi materia.
+       `quiz.cmap[pos]` = indicele ORIGINAL din q.options. Se salvează
+       originalul, nu poziția amestecată, ca răspunsul din `attempts` să
+       însemne același lucru și peste o lună (la fel ca la `label`).
+       Sămânța ține de întrebare, deci ordinea e stabilă la re-randare. */
+    var ordC=shuffled(q.options.length,(curIdx()*97+seedText(t.id))%2147483647);
+    quiz.cmap=ordC;
+    body='<div class="opts">'+ordC.map(function(orig,pos){
+      return '<button class="opt" id="opt'+pos+'" onclick="answerChoice('+pos+')">'+
+        '<span class="lt">'+String.fromCharCode(65+pos)+'</span><span>'+esc(q.options[orig])+'</span></button>';
     }).join("")+'</div>';
   }else if(q.type==="truefalse"){
     body='<div class="opts"><button class="opt" onclick="answerTF(true)"><span class="lt">A</span>Adevărat</button>'+
@@ -2005,12 +2026,20 @@ function orderSubmit(){
   grade(q,g); lockChoiceButtons(); $("orderGo").disabled=true;
   if(!HubLogic.gradeQuestion(q,g))$("qFeedback").innerHTML+="<br><i>Ordinea corectă: "+esc(q.items.join(" → "))+"</i>";
 }
-function answerChoice(idx){
+/* `pos` = butonul atins (poziția de pe ecran); `idx` = indicele original din
+   q.options. Tot ce iese din funcția asta — notare, salvare, istoric — merge
+   pe `idx`. Culorile, singurele legate de ecran, merg pe `pos`. */
+function answerChoice(pos){
   if(quiz.answered)return; var q=quiz.test.questions[curIdx()];
+  var idx=(quiz.cmap&&quiz.cmap[pos]!==undefined)?quiz.cmap[pos]:pos;
   quiz.given=idx; grade(q,idx);
   lockChoiceButtons();
-  $("opt"+idx).classList.add(HubLogic.gradeQuestion(q,idx)?"correct":"wrong");
-  if(!HubLogic.gradeQuestion(q,idx)) $("opt"+q.correct).classList.add("correct");
+  var ok=HubLogic.gradeQuestion(q,idx);
+  var b=$("opt"+pos); if(b)b.classList.add(ok?"correct":"wrong");
+  if(!ok){
+    var poz=quiz.cmap?quiz.cmap.indexOf(Number(q.correct)):Number(q.correct);
+    var c=$("opt"+poz); if(c)c.classList.add("correct");
+  }
 }
 function answerTF(v){
   if(quiz.answered)return; var q=quiz.test.questions[curIdx()];
