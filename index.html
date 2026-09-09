@@ -17,6 +17,12 @@
   /* ——— MATERII: doar ca pastilă și fundal de iconiță ——— */
   --mate:#3B6FF0; --mate-soft:#EDF2FF;
   --rom:#0EA47A;  --rom-soft:#E6F7F1;
+  --ist:#B4530A;  --ist-soft:#FBEEE3;
+  --geo:#0E7490;  --geo-soft:#E3F3F7;
+  --bio:#4F7A0B;  --bio-soft:#F0F6E2;
+  --eng:#7C3AED;  --eng-soft:#F2ECFE;
+  --ger:#BE185D;  --ger-soft:#FCEBF2;
+  --mix:#B45309;  --mix-soft:#FBF0DF;
   --gold:#E8930F; --good:#12854A; --bad:#DC2F35;
 
   /* ——— FORMĂ ——— */
@@ -44,6 +50,12 @@ h1,h2,h3{margin:0}
   padding:5px 10px;border-radius:999px;letter-spacing:.3px}
 .pill.mate{background:var(--mate-soft);color:var(--mate)}
 .pill.rom{background:var(--rom-soft);color:var(--rom)}
+.pill.ist{background:var(--ist-soft);color:var(--ist)}
+.pill.geo{background:var(--geo-soft);color:var(--geo)}
+.pill.bio{background:var(--bio-soft);color:var(--bio)}
+.pill.eng{background:var(--eng-soft);color:var(--eng)}
+.pill.ger{background:var(--ger-soft);color:var(--ger)}
+.pill.mix{background:var(--mix-soft);color:var(--mix)}
 .small{color:var(--muted);font-size:13px}
 
 /* Profile picker */
@@ -116,6 +128,21 @@ h1,h2,h3{margin:0}
   box-shadow:0 5px 13px rgba(37,99,235,.24), inset 0 -2px 7px rgba(0,0,0,.13)}
 .test.rom .ico{background:linear-gradient(140deg,#34D399,#0E9E74);
   box-shadow:0 5px 13px rgba(14,158,116,.24), inset 0 -2px 7px rgba(0,0,0,.13)}
+.test.ist .ico{background:linear-gradient(140deg,#E1934F,#B4530A);
+  box-shadow:0 5px 13px rgba(180,83,10,.24), inset 0 -2px 7px rgba(0,0,0,.13)}
+.test.geo .ico{background:linear-gradient(140deg,#38BDF8,#0E7490);
+  box-shadow:0 5px 13px rgba(14,116,144,.24), inset 0 -2px 7px rgba(0,0,0,.13)}
+.test.bio .ico{background:linear-gradient(140deg,#A3D14A,#4F7A0B);
+  box-shadow:0 5px 13px rgba(79,122,11,.24), inset 0 -2px 7px rgba(0,0,0,.13)}
+.test.eng .ico{background:linear-gradient(140deg,#A78BFA,#6D28D9);
+  box-shadow:0 5px 13px rgba(109,40,217,.24), inset 0 -2px 7px rgba(0,0,0,.13)}
+.test.ger .ico{background:linear-gradient(140deg,#F472B6,#BE185D);
+  box-shadow:0 5px 13px rgba(190,24,93,.24), inset 0 -2px 7px rgba(0,0,0,.13)}
+.test.mix .ico{background:linear-gradient(140deg,#FBBF24,#B45309);
+  box-shadow:0 5px 13px rgba(180,83,9,.24), inset 0 -2px 7px rgba(0,0,0,.13)}
+/* Eticheta grupului „pentru școală" din fila Teste */
+.grup{font-size:12px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
+  color:var(--muted);margin:2px 4px 8px}
 .test.locked .ico{box-shadow:none;filter:saturate(.35)}
 .test .body{flex:1;min-width:0}
 .test .tt{font-weight:700;font-size:15.5px;letter-spacing:-.2px}
@@ -689,7 +716,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-09-07a";
+var APP_VERSION="2026-09-09a";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -822,10 +849,34 @@ var HubLogic=(function(){
   /* Graba se măsoară, nu se arată. Prag conservator: sub o treime din timpul
      necesar unei citiri normale la 11 ani (~66ms/caracter). */
   function isRushed(q,ms){var L=stemLen(q);if(!ms||L<RUSH_MIN_STEM)return false;return ms<L*RUSH_MS_PER_CHAR;}
+  /* ---- COADA DE MATERII SECUNDARE (7 sept 2026) ----
+     Un test zilnic de mate sau română se termină cu 2 întrebări dintr-o materie
+     de memorare (istorie, geografie, biologie, germană). Motivul e pedagogic,
+     nu de calendar: mate și româna sunt materii de DEPRINDERE, se rezolvă prin
+     exercițiu susținut; istoria și vocabularul de germană se rezolvă prin
+     reîntâlnire deasă și scurtă. Două întrebări de trei ori pe săptămână bat un
+     test întreg o dată pe lună. Iar Aron nu cere niciodată singur o materie —
+     dacă mecanismul îi cere inițiativa, materia aia nu există.
+     Itemul își poartă propria etichetă: `"subject":"istorie","topic":"Egiptul
+     antic"`. Fără ea, întrebările de istorie s-ar raporta ca matematică. */
+  function qTema(t,q){return (q&&q.topic)||(t&&t.topic)||"";}
+  function qMaterie(t,q){return (q&&q.subject)||(t&&t.subject)||"";}
+  /* Statistica merge pe ITEM, nu pe test: un test poate acum să conțină două
+     materii. Încercările vechi, salvate fără `answers`, se numără ca înainte,
+     pe test — altfel istoria raportului ar sări. */
   function topicStats(a,tests){var bid={};tests.forEach(function(t){bid[t.id]=t;});var f=firstAttempts(a),acc={};
+    function slot(tema,materie){return acc[tema]||(acc[tema]={topic:tema,subject:materie,correct:0,max:0,tests:0});}
     Object.keys(f).forEach(function(k){var x=f[k],t=bid[x.test_id];if(!t)return;
-      var s=acc[t.topic]||(acc[t.topic]={topic:t.topic,subject:t.subject,correct:0,max:0,tests:0});
-      s.correct+=x.score;s.max+=x.max_score;s.tests+=1;});
+      var qs=t.questions||[],ans=x.answers;
+      if(!qs.length||!ans||typeof ans.length!=="number"){
+        var s0=slot(t.topic,t.subject);s0.correct+=x.score;s0.max+=x.max_score;s0.tests+=1;return;}
+      var atins={};
+      qs.forEach(function(q,i){var g=ans[i];
+        if(g===undefined||g===null)return;
+        var tema=qTema(t,q),s=slot(tema,qMaterie(t,q));
+        s.max+=1; if(gradeQuestion(q,g))s.correct+=1;
+        atins[tema]=true;});
+      Object.keys(atins).forEach(function(tema){acc[tema].tests+=1;});});
     return Object.keys(acc).map(function(k){var s=acc[k];s.pct=s.max?Math.round((s.correct/s.max)*100):0;return s;})
       .sort(function(a,b){return a.pct-b.pct;});}
   /* ================= ECONOMIA DE JETOANE =================
@@ -1095,21 +1146,24 @@ var HubLogic=(function(){
     var inc=testeIncercate(attempts),folosite=intrebariFolosite(recoveries);
     var noi=[],vechi=[];
     (tests||[]).forEach(function(t){
-      if(!inc[t.id]||t.topic!==topic)return;
+      if(!inc[t.id])return;
       var vaz=seenIndices(attempts,t.id);
       (t.questions||[]).forEach(function(q,i){
+        if(qTema(t,q)!==topic)return;   // tema se citește de pe item, nu de pe test
         var k=cheieRec(t.id,i);
         if(folosite[k])return;
-        var it={q:q,testId:t.id,idx:i,topic:t.topic,subject:t.subject,key:k};
+        var it={q:q,testId:t.id,idx:i,topic:qTema(t,q),subject:qMaterie(t,q),key:k};
         if(vaz[i])vechi.push(it); else noi.push(it);});});
     return noi.concat(vechi).slice(0,lim);}
   function temeExersabile(attempts,tests,recoveries){
     var inc=testeIncercate(attempts),vaz={},out=[];
     (tests||[]).forEach(function(t){
-      if(!inc[t.id]||vaz[t.topic])return;
-      vaz[t.topic]=true;
-      var p=extraPool(attempts,tests,recoveries,t.topic,EXTRA_N);
-      if(p.length)out.push({topic:t.topic,subject:t.subject,n:p.length});});
+      if(!inc[t.id])return;
+      (t.questions||[]).forEach(function(q){
+        var tema=qTema(t,q); if(!tema||vaz[tema])return;
+        vaz[tema]=true;
+        var p=extraPool(attempts,tests,recoveries,tema,EXTRA_N);
+        if(p.length)out.push({topic:tema,subject:qMaterie(t,q),n:p.length});});});
     return out;}
   function extraPlatit(test,answers,times){
     var idx=[],i;times=times||[];
@@ -1282,7 +1336,7 @@ var HubLogic=(function(){
     REC_MAX_ZI:REC_MAX_ZI,CAIET_MAX_ZI:CAIET_MAX_ZI,EXTRA_N:EXTRA_N,EXTRA_MAX_ZI:EXTRA_MAX_ZI,
     paginiCaietAzi:paginiCaietAzi,maiPoateCaiet:maiPoateCaiet,
     extraAzi:extraAzi,maiPoateExtra:maiPoateExtra,extraPool:extraPool,
-    temeExersabile:temeExersabile,extraPlatit:extraPlatit,
+    temeExersabile:temeExersabile,extraPlatit:extraPlatit,qTema:qTema,qMaterie:qMaterie,
     intrebariFolosite:intrebariFolosite,testeIncercate:testeIncercate,
     testeContorizate:testeContorizate,castigate:castigate,cheltuit:cheltuit,sold:sold,
     poateCumpara:poateCumpara,disponibilaDin:disponibilaDin,ultimaCumparare:ultimaCumparare,
@@ -1464,22 +1518,22 @@ function aronDate(){
     if(HubLogic.isPartial(a))return;
     doneIds[a.test_id]=true;
     var b=bestByTest[a.test_id]; if(!b||a.score>b.score)bestByTest[a.test_id]=a;});
-  var deFacut=[],blocate=[],facute=[];
+  var deFacut=[],blocate=[],facute=[],cerute=[];
   S.tests.forEach(function(x){
     if(!HubLogic.isUnlocked(x,uc)){blocate.push(x);return;}
-    if(doneIds[x.id])facute.push(x); else deFacut.push(x);});
+    if(doneIds[x.id]){facute.push(x);return;}
+    (laCerere(x)?cerute:deFacut).push(x);});
   // „Aleg materia de mâine": se aplică în prima zi de DUPĂ cumpărare, atunci se
   // și marchează folosită. Materia aleasă trece prima în listă.
   var am=HubLogic.rambursareActiva("alege_materie",S.redemptions);
   if(am&&String(am.created_at).slice(0,10)<t&&am.param){
-    var pref=am.param==="mate"?"mate":"romana";
+    var pref=MATERII[am.param]?am.param:"romana";
     var iar=[],rest=[];
-    deFacut.forEach(function(x){
-      ((x.subject==="mate"?"mate":"romana")===pref?iar:rest).push(x);});
+    deFacut.forEach(function(x){(x.subject===pref?iar:rest).push(x);});
     if(iar.length){deFacut=iar.concat(rest);setStareRambursare(am.id,"aplicat");}
   }
   return {azi:t,uc:uc,doneIds:doneIds,bestByTest:bestByTest,
-    deFacut:deFacut,blocate:blocate,facute:facute,
+    deFacut:deFacut,blocate:blocate,facute:facute,cerute:cerute,
     pasAzi:HubLogic.zileDePas(S.redemptions).indexOf(t)>=0};
 }
 
@@ -1507,7 +1561,7 @@ function randAronAcasa(d){
     $("aHero").innerHTML='<div class="hero"><div class="lab">Testul de azi</div>'+
       '<div class="big">'+esc(t.topic)+'</div>'+
       '<div class="row"><div class="meta">'+n+(n===1?" întrebare":" întrebări")+' · '+
-        (t.subject==="mate"?"matematică":"română")+'</div>'+
+        mat(t.subject).nume+'</div>'+
         '<button class="cta" onclick="openTest('+JSON.stringify(t.id)+')">Începem →</button></div>'+
       '<div class="foot">Timpul de aici nu se scade din cele 50 de minute.</div></div>';
   }else{
@@ -1540,7 +1594,10 @@ function randAronAcasa(d){
 /* Progresul se raportează la ÎNTREG planul (până la plan_end), nu la câte teste
    sunt încărcate acum în bază — altfel ținta ar tot crește și l-ar induce în eroare. */
 function acoperire(d){
-  var facute=Object.keys(d.doneIds).length;
+  // testele la cerere nu umflă bara: ea măsoară cât din PLAN a parcurs
+  var facute=Object.keys(d.doneIds).filter(function(id){
+    var t=S.tests.find(function(x){return x.id===id;});
+    return !t||!laCerere(t);}).length;
   var total=S.settings.plan_end
     ? HubLogic.unlockedCount(S.settings.start_date,S.settings.cadence_days,S.settings.plan_end)
     : S.tests.length;
@@ -1559,23 +1616,37 @@ function randAronTeste(){
   $("aTitle").textContent="Teste";
   $("aToday").textContent="tot ce ai deschis până acum";
 
-  var f=["toate","mate","romana"], et={toate:"Toate",mate:"Matematică",romana:"Română"};
+  /* Chipsurile se construiesc din materiile care CHIAR au teste încărcate.
+     Șapte butoane fixe pe un telefon, dintre care patru goale, ar arăta ca o
+     promisiune neonorată. Dacă filtrul rămas de data trecută nu mai are teste,
+     se cade înapoi pe „Toate". */
+  var prez={}; S.tests.forEach(function(x){prez[mat(x.subject)===MATERII[x.subject]?x.subject:"romana"]=true;});
+  var f=["toate"].concat(Object.keys(MATERII).filter(function(k){return prez[k];}));
+  if(f.indexOf(aronFiltru)<0)aronFiltru="toate";
   $("aChips").innerHTML=f.map(function(k){
+    var et=k==="toate"?"Toate":(mat(k).ico+" "+mat(k).nume.charAt(0).toUpperCase()+mat(k).nume.slice(1));
     return '<button class="chip'+(aronFiltru===k?" on":"")+'" onclick="aronFiltreaza('+
-      JSON.stringify(k)+')">'+et[k]+'</button>';}).join("");
+      JSON.stringify(k)+')">'+et+'</button>';}).join("");
   function trece(x){ return aronFiltru==="toate" ||
-    (aronFiltru==="mate"?x.subject==="mate":x.subject!=="mate"); }
+    (MATERII[x.subject]?x.subject:"romana")===aronFiltru; }
 
   var deFacut=d.deFacut.filter(trece), blocate=d.blocate.filter(trece);
+  /* Testele „pentru școală" stau deasupra, cu etichetă proprie: nu sunt din
+     plan, dar sunt cele cu termen. Într-o zi de Pas nu apare nimic — ziua e
+     plătită și liberă cu totul. */
+  var cerute=d.pasAzi?[]:d.cerute.filter(trece);
+  var capCerute=cerute.length?('<div class="grup">Pentru școală</div>'+
+    cerute.map(function(x){return renderTestCard(x,null);}).join("")+
+    (deFacut.length?'<div class="grup" style="margin-top:14px">Testul de azi</div>':"")):"";
   if(d.pasAzi){
     $("aronTodo").innerHTML='<div class="notice small">Ziua de azi e liberă. Testul te așteaptă mâine.</div>';
     $("aronTodoRest").innerHTML="";
-  }else if(!deFacut.length&&!blocate.length){
+  }else if(!deFacut.length&&!blocate.length&&!cerute.length){
     $("aronTodo").innerHTML='<div class="notice small">Nimic de rezolvat aici — bravo! 🎉</div>';
     $("aronTodoRest").innerHTML="";
   }else{
-    $("aronTodo").innerHTML=deFacut.length?renderTestCard(deFacut[0],null)
-      :'<div class="notice small">Nimic deschis acum. Următorul vine curând.</div>';
+    $("aronTodo").innerHTML=capCerute+(deFacut.length?renderTestCard(deFacut[0],null)
+      :(cerute.length?"":'<div class="notice small">Nimic deschis acum. Următorul vine curând.</div>'));
     var rest=deFacut.slice(1).map(function(x){return renderTestCard(x,null);})
       .concat(blocate.map(function(x){return renderLockedCard(x,d.uc);}));
     $("aronTodoRest").innerHTML = !rest.length ? ""
@@ -1640,8 +1711,30 @@ function roDate(d){var m=["ian","feb","mar","apr","mai","iun","iul","aug","sep",
     if(isNaN(d.getTime()))return "";
   }
   return d.getDate()+" "+m[d.getMonth()];}
+/* ---- MATERIILE ----
+   Până în clasa a V-a hub-ul cunoștea două materii: `mate` și „orice altceva",
+   afișat ca română. Din septembrie 2026 Aron are șapte, plus recapitularea
+   mixtă. O materie necunoscută cade tot pe română, ca un `subject` scris greșit
+   în SQL să nu spargă ecranul — se vede la culoare că e ceva de reparat.
+   Ordinea de aici e ordinea chipsurilor din fila Teste. */
+var MATERII={
+  mate:     {nume:"matematică",   ico:"🔢", cls:"mate"},
+  romana:   {nume:"română",       ico:"✏️", cls:"rom"},
+  istorie:  {nume:"istorie",      ico:"🏛️", cls:"ist"},
+  geografie:{nume:"geografie",    ico:"🌍", cls:"geo"},
+  biologie: {nume:"biologie",     ico:"🌿", cls:"bio"},
+  engleza:  {nume:"engleză",      ico:"🇬🇧", cls:"eng"},
+  germana:  {nume:"germană",      ico:"🇩🇪", cls:"ger"},
+  mixt:     {nume:"recapitulare", ico:"🎯", cls:"mix"}
+};
+function mat(s){return MATERII[s]||MATERII.romana;}
+/* Test „la cerere": `release_order <= 0`. Nu ține de calendar, se deblochează
+   imediat și NU ocupă testul zilei — pentru lecția de ieri de la istorie sau
+   pentru un test anunțat vineri, unde peste trei săptămâni n-ar mai ajuta.
+   Nu intră nici în bara de acoperire, care măsoară planul, nu extrasele. */
+function laCerere(t){return Number(t&&t.release_order)<=0;}
 function renderTestCard(t,best){
-  var cls=t.subject==="mate"?"mate":"rom", ico=t.subject==="mate"?"🔢":"✏️";
+  var cls=mat(t.subject).cls, ico=mat(t.subject).ico;
   var badge=best?('<span class="badge done">'+best.score+"/"+best.max_score+"</span>"):
     ('<span class="pill '+cls+'">nou</span>');
   return '<button class="card test '+cls+'" onclick="openTest(\''+t.id+'\')">'+
@@ -1649,7 +1742,7 @@ function renderTestCard(t,best){
     '<div class="mt">'+esc(t.title)+'</div></div>'+badge+'<div class="go">›</div></button>';
 }
 function renderLockedCard(t,uc){
-  var cls=t.subject==="mate"?"mate":"rom", ico=t.subject==="mate"?"🔢":"✏️";
+  var cls=mat(t.subject).cls, ico=mat(t.subject).ico;
   var when=HubLogic.addDays(S.settings.start_date,(t.release_order-1)*S.settings.cadence_days);
   return '<div class="card test '+cls+' locked"><div class="ico">'+ico+'</div>'+
     '<div class="body"><div class="tt">'+esc(t.topic)+'</div><div class="mt">se deblochează pe '+roDate(when)+'</div></div>'+
@@ -1675,9 +1768,16 @@ function openTest(testId){
   $("iCurat").textContent=(jetoaneActive()&&!HubLogic.areFlash(t))
     ? ("Fără nicio greșeală: +"+HubLogic.JETON_CURAT+" 🪙 în plus.")
     : "";
-  $("iMeta").textContent=(rest<total)
+  /* Coada se anunță din intro, ca bonusul: nimic nu apare pe nepusă masă. */
+  var cozi={};
+  (t.questions||[]).forEach(function(q){
+    var m=HubLogic.qMaterie(t,q); if(m&&m!==t.subject)cozi[m]=(cozi[m]||0)+1;});
+  var coada=Object.keys(cozi).map(function(m){
+    return cozi[m]+" de "+mat(m).nume;}).join(" și ");
+  $("iMeta").textContent=((rest<total)
     ? (rest+" întrebări rămase din "+total+" · vreo "+Math.max(1,Math.round(rest*0.8))+" minute")
-    : (total+" întrebări · vreo "+Math.max(1,Math.round(total*0.8))+" minute");
+    : (total+" întrebări · vreo "+Math.max(1,Math.round(total*0.8))+" minute"))
+    + (coada?(" · la final, "+coada):"");
   var shortN=Math.min(HubLogic.SHORT_N,rest);
   if(rest<=HubLogic.SHORT_N){
     $("iShort").classList.add("hidden"); $("iHint").textContent="";
@@ -1828,13 +1928,18 @@ function shuffled(n,seed){var a=[],i;for(i=0;i<n;i++)a.push(i);
 function seedText(s){var h=0,i;s=String(s||"");
   for(i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%2147483647;return h;}
 function renderQuestion(){
-  var t=quiz.test,q=t.questions[curIdx()],cls=t.subject==="mate"?"mate":"rom";
-  $("qProg").className="qprog"+(cls==="rom"?" rom":"");
+  /* Culoarea și pastila urmăresc materia ÎNTREBĂRII, nu a testului: când vin
+     cele două de istorie la finalul unui test de mate, se vede că s-a schimbat
+     materia. La un copil care ține la predictibilitate, saltul anunțat e mai
+     bun decât unul ascuns. */
+  var t=quiz.test,q=t.questions[curIdx()],
+      qm=HubLogic.qMaterie(t,q),cls=mat(qm).cls;
+  $("qProg").className="qprog"+(qm==="mate"?"":" rom");
   // bara și numărătoarea se raportează la sesiunea de azi; cardurile revenite nu o fac să pară mai lungă
   var base=quiz.base||t.questions.length;
   $("qProg").firstElementChild.style.width=Math.round(Math.min(quiz.pos,base)/base*100)+"%";
   $("qCount").textContent=(quiz.pos<base)?((quiz.pos+1)+"/"+base):"revenire";
-  $("qTopic").className="pill "+cls; $("qTopic").textContent=(t.subject==="mate"?"🔢 ":"✏️ ")+t.topic;
+  $("qTopic").className="pill "+cls; $("qTopic").textContent=mat(qm).ico+" "+HubLogic.qTema(t,q);
   $("qText").textContent=q.q;
   quiz.answered=false; quiz.given=null; quiz.sel=null; quiz.picked=[]; quiz.cmap=null;
   quiz.t0=Date.now(); // se măsoară, nu se afișează niciodată
@@ -2072,7 +2177,8 @@ function grade(q,given){
   var last=(quiz.pos+1>=quiz.queue.length);
   $("qNext").classList.remove("hidden");
   $("qNext").textContent=last?"Vezi rezultatul 🎉":"Continuă →";
-  if(quiz.test.subject!=="mate")$("qNext").classList.add("rom");else $("qNext").classList.remove("rom");
+  var qmn=HubLogic.qMaterie(quiz.test,q);
+  if(qmn!=="mate")$("qNext").classList.add("rom");else $("qNext").classList.remove("rom");
   // Regula celor două greșeli consecutive: nu se insistă pe a treia.
   // Se oferă o ieșire, formulată ca alegere, nu ca eșec.
   if(quiz.wrongRun>=HubLogic.WALL_LIMIT && !last){
