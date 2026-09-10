@@ -492,7 +492,7 @@ h1,h2,h3{margin:0}
       <div class="section-h">Unde ai ajuns</div>
       <div class="card pad18">
         <div style="display:flex;justify-content:space-between;align-items:baseline">
-          <b style="font-size:15px">Recapitulare de vară</b>
+          <b style="font-size:15px">Modulul 1</b>
           <span class="small" id="aCovLab">0 din 0</span>
         </div>
         <div class="xpbar" style="margin-top:8px"><i id="aCovBar" style="width:0%"></i></div>
@@ -523,7 +523,7 @@ h1,h2,h3{margin:0}
         </div>
         <div class="stat streak"><div class="big" id="aStreak">0🔥</div><div class="lab">Zile la rând</div></div>
       </div>
-      <div class="section-h">Recapitularea de vară</div>
+      <div class="section-h">Modulul 1</div>
       <div class="card pad18">
         <div style="display:flex;justify-content:space-between;align-items:baseline">
           <b style="font-size:15px">Teste duse până la capăt</b>
@@ -716,7 +716,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-09-09a";
+var APP_VERSION="2026-09-10a";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -1562,7 +1562,7 @@ function randAronAcasa(d){
       '<div class="big">'+esc(t.topic)+'</div>'+
       '<div class="row"><div class="meta">'+n+(n===1?" întrebare":" întrebări")+' · '+
         mat(t.subject).nume+'</div>'+
-        '<button class="cta" onclick="openTest('+JSON.stringify(t.id)+')">Începem →</button></div>'+
+        '<button class="cta" onclick="openTest(\''+t.id+'\')">Începem →</button></div>'+
       '<div class="foot">Timpul de aici nu se scade din cele 50 de minute.</div></div>';
   }else{
     $("aPas").classList.add("hidden");
@@ -1592,7 +1592,10 @@ function randAronAcasa(d){
 }
 
 /* Progresul se raportează la ÎNTREG planul (până la plan_end), nu la câte teste
-   sunt încărcate acum în bază — altfel ținta ar tot crește și l-ar induce în eroare. */
+   sunt încărcate acum în bază — altfel ținta ar tot crește și l-ar induce în eroare.
+   „Modulul 1” e scris în clar aici — nu calculat din calendar — pentru că
+   etichetează planul curent, nu perioada calendaristică; de actualizat manual
+   (căutați „Modulul 1” în acest fișier) când plan_end trece la Modulul 2. */
 function acoperire(d){
   // testele la cerere nu umflă bara: ea măsoară cât din PLAN a parcurs
   var facute=Object.keys(d.doneIds).filter(function(id){
@@ -1603,8 +1606,8 @@ function acoperire(d){
     : S.tests.length;
   if(facute>total)total=facute;
   return {facute:facute,total:total,pct:total?Math.round(facute/total*100):0,
-    text:facute>=total?"Ai terminat toată recapitularea. 🏆"
-      :("Mai ai "+(total-facute)+" până pe "+roDate(S.settings.plan_end||d.azi)+", când începe școala.")};
+    text:facute>=total?"Ai terminat Modulul 1. 🏆"
+      :("Mai ai "+(total-facute)+" până pe "+roDate(S.settings.plan_end||d.azi)+", finalul Modulului 1.")};
 }
 
 /* FILA „TESTE" — chips de materie, un singur test în față, restul pliate.
@@ -2760,8 +2763,8 @@ function randParentAzi(){
       '<div class="mt">cerut pe '+ziScurt(r.created_at)+' · '+r.cost+' 🪙'+
         (r.param?' · '+esc(r.param):'')+'</div></div></div>'+
       '<div class="btnrow">'+
-        '<button class="mini go" onclick="onoreaza('+JSON.stringify(r.id)+')">Onorat</button>'+
-        '<button class="mini gh" onclick="anuleaza('+JSON.stringify(r.id)+')">Anulează</button>'+
+        '<button class="mini go" onclick=\'onoreaza('+JSON.stringify(r.id)+')\'>Onorat</button>'+
+        '<button class="mini gh" onclick=\'anuleaza('+JSON.stringify(r.id)+')\'>Anulează</button>'+
       '</div></div>';
   }).join("");
 
@@ -2842,14 +2845,14 @@ function randParentProgres(){
   if(facute>total)total=facute;
   $("pPlan").innerHTML=
     '<div style="display:flex;justify-content:space-between;align-items:baseline">'+
-      '<b style="font-size:15px">Recapitulare de vară</b>'+
+      '<b style="font-size:15px">Modulul 1</b>'+
       '<span class="small">'+facute+' din '+total+'</span></div>'+
     '<div class="xpbar" style="margin-top:8px"><i style="width:'+
       (total?Math.round(facute/total*100):0)+'%"></i></div>'+
     '<div class="small" style="margin-top:8px">'+
-      (facute>=total?"Toată recapitularea e acoperită.":
+      (facute>=total?"Modulul 1 e acoperit.":
         ("Mai are "+(total-facute)+" până pe "+roDate(S.settings.plan_end||todayStr())+
-         ", când începe școala."))+'</div>';
+         ", finalul Modulului 1."))+'</div>';
 
   var zileDesc=f.zile.slice().reverse();
   $("pTime").innerHTML=zileDesc.map(function(z){
