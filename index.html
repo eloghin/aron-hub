@@ -716,7 +716,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-09-10a";
+var APP_VERSION="2026-09-15a";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -1628,8 +1628,8 @@ function randAronTeste(){
   if(f.indexOf(aronFiltru)<0)aronFiltru="toate";
   $("aChips").innerHTML=f.map(function(k){
     var et=k==="toate"?"Toate":(mat(k).ico+" "+mat(k).nume.charAt(0).toUpperCase()+mat(k).nume.slice(1));
-    return '<button class="chip'+(aronFiltru===k?" on":"")+'" onclick="aronFiltreaza('+
-      JSON.stringify(k)+')">'+et+'</button>';}).join("");
+    return '<button class="chip'+(aronFiltru===k?" on":"")+'" onclick=\'aronFiltreaza('+
+      JSON.stringify(k)+')\'>'+et+'</button>';}).join("");
   function trece(x){ return aronFiltru==="toate" ||
     (MATERII[x.subject]?x.subject:"romana")===aronFiltru; }
 
@@ -1861,13 +1861,14 @@ async function finishExtra(){
   try{
     var r=await sb.from("recoveries").insert([row]);
     if(r&&r.error)throw r.error;
-    await refresh();
   }catch(e){
     saved=false;
     var local={};Object.keys(row).forEach(function(k){local[k]=row[k];});
     local.created_at=new Date().toISOString();
     S.recoveries=S.recoveries.concat([local]);
   }
+  // rândul e deja salvat — dacă doar reîmprospătarea eșuează, nu se reintroduce nimic
+  if(saved){try{await refresh();}catch(e){}}
   $("rEmoji").textContent=reparate?"🔁":"➕";
   $("rTitle").textContent="Exersat";
   $("rScore").textContent=corecte+" din "+items.length+" nimerite. "+
@@ -1889,7 +1890,9 @@ async function finishExtra(){
 
 /* ---- QUIZ ---- */
 function startQuiz(testId,mode){
-  var t=S.tests.find(function(x){return x.id===testId;});if(!t)return;
+  try{
+  var t=S.tests.find(function(x){return x.id===testId;});
+  if(!t){alert("Nu găsesc testul ăsta. Reîncarcă pagina și încearcă iar.");return;}
   var qu;
   if(mode==="short"){ qu=HubLogic.nextIndices(t,S.attempts,HubLogic.SHORT_N); }
   else { qu=HubLogic.nextIndices(t,S.attempts,t.questions.length); }
@@ -1904,6 +1907,10 @@ function startQuiz(testId,mode){
     setStareRambursare(ro.id,"aplicat");
   }
   renderQuestion(); show("screenQuiz");
+  }catch(e){
+    console.error("startQuiz a picat:",e);
+    alert("Ceva n-a mers la pornirea testului. Reîncarcă pagina și încearcă din nou.");
+  }
 }
 /* Ceasul sesiunii: se adună doar intervalele dintre acțiuni reale, fiecare
    plafonat la IDLE_CAP. Dacă lasă telefonul din mână 20 de minute, intră 2. */
@@ -2262,13 +2269,18 @@ async function finishQuiz(stoppedEarly){
   try{
     var r=await sb.from("attempts").insert([row]);
     if(r&&r.error)throw r.error;
-    await refresh();
   }catch(e){
     saved=false; queuePush(row);
     var local={}; Object.keys(row).forEach(function(k){local[k]=row[k];});
     local.created_at=new Date().toISOString();
     S.attempts=S.attempts.concat([local]); // ca hub-ul să arate corect până la retrimitere
   }
+  /* Insertul a reușit — dacă DOAR reîmprospătarea (GET) eșuează după aceea, nu
+     înseamnă că rândul nu s-a salvat. Înainte, orice hiccup de rețea AICI trecea
+     prin catch-ul de mai sus, care pune rândul în coada offline (queuePush) —
+     iar la următoarea deschidere se REtrimitea, creând un al doilea rând identic
+     în Supabase. Exact tiparul din duplicatele văzute în Istoric. */
+  if(saved){try{await refresh();}catch(e){}}
   var pct=res.max?Math.round(res.score/res.max*100):0;
   if(random){
     // fără acuzație, fără blocare: pur și simplu nu se pune la socoteală, iar seria rămâne
@@ -2474,15 +2486,17 @@ async function buyReward(id){
   var row={reward_id:r.id,student:"aron",cost:r.cost,efect:r.efect||null,param:param,
     stare:(r.efect==="pas")?"aplicat":"cerut"};
   if(r.efect==="pas")row.aplicat_la=todayStr();
+  var savedRed=true;
   try{
     var res=await sb.from("redemptions").insert([row]);
     if(res&&res.error)throw res.error;
-    await refresh();
   }catch(e){
+    savedRed=false;
     var local={};Object.keys(row).forEach(function(k){local[k]=row[k];});
     local.created_at=new Date().toISOString(); local.id="local-"+Date.now();
     S.redemptions=S.redemptions.concat([local]);
   }
+  if(savedRed){try{await refresh();}catch(e){}}
   // confirmare seacă, fără laudă: lauda la cheltuire ar transforma recompensa în test de caracter
   alert("Ai luat: "+r.nume+".");
   if(r.efect==="pas"){showAron();return;}
@@ -2540,15 +2554,17 @@ async function adaugaPaginaCaiet(){
   if(!confirm("A lucrat o pagină de caiet și ați corectat-o împreună?\n\nAron primește +"+HubLogic.JETON_REC+" 🪙."))return;
   var row={student:"aron",items:[],corecte:1,total:1,sursa:"caiet",
     meta:{v:APP_VERSION,manual:true}};
+  var savedCaiet=true;
   try{
     var r=await sb.from("recoveries").insert([row]);
     if(r&&r.error)throw r.error;
-    await refresh();
   }catch(e){
+    savedCaiet=false;
     var local={};Object.keys(row).forEach(function(k){local[k]=row[k];});
     local.created_at=new Date().toISOString();
     S.recoveries=S.recoveries.concat([local]);
   }
+  if(savedCaiet){try{await refresh();}catch(e){}}
   showParent();
 }
 /* ---- RAPORT PENTRU CLAUDE ---- */
