@@ -350,6 +350,8 @@ h1,h2,h3{margin:0}
   box-shadow:0 4px 14px rgba(0,0,0,.13)}
 .hero .foot{margin-top:15px;font-size:12.5px;opacity:.92;position:relative;
   border-top:1px solid rgba(255,255,255,.22);padding-top:11px}
+.hero:before,.hero:after{pointer-events:none;z-index:0}
+.hero .row{z-index:1}
 .hero.calm{background:linear-gradient(125deg,#4C1D95 0%,#5B21B6 60%,#6D28D9 100%)}
 
 /* ===== ÎNTREBĂRI DE TIP „LABEL” =====
@@ -716,7 +718,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-09-15a";
+var APP_VERSION="2026-09-16a";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
