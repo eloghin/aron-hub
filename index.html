@@ -656,8 +656,6 @@ h1,h2,h3{margin:0}
       <div id="pMaiMulte"></div>
       <div class="section-h">Jetoane</div>
       <div class="card pad" id="pJet"></div>
-      <div class="section-h">Caietul de vacanță</div>
-      <div class="card" style="padding:12px 16px" id="pCaiet"></div>
       <div class="ver" id="pVer"></div>
     </div>
   </div>
@@ -718,7 +716,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-09-16a";
+var APP_VERSION="2026-09-21a";
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
@@ -1070,6 +1068,24 @@ var HubLogic=(function(){
      A doua barieră: se iau doar greșelile din zilele TRECUTE, niciodată din
      sesiunea de azi, deci nu se poate greși și recupera în aceeași zi. */
   function cheieRec(testId,idx){return testId+":"+idx;}
+  /* Itemi marcați de părinte „încă n-au făcut la școală". Nu se șterg din
+     scoruri (ce s-a întâmplat rămâne), dar nu se mai servesc în recuperare
+     sau în exersat — n-are ce repara la ceva ce nu i s-a predat — și apar
+     separat în raport, ca testele viitoare să-i ocolească. */
+  var NF={};
+  function setNefacute(rows){NF={};(rows||[]).forEach(function(r){
+    if(r&&r.test_id!=null)NF[cheieRec(r.test_id,r.idx)]=true;});}
+  function eNefacut(testId,idx){return !!NF[cheieRec(testId,idx)];}
+  /* Aceeași încercare trimisă de mai multe ori (atingeri repetate) sau același
+     test reluat cu același scor: se arată o dată, cu contor. */
+  function grupeazaRepetate(attempts){
+    var out=[],idx={};
+    (attempts||[]).forEach(function(a){
+      var m=a.meta||{};
+      var k=a.test_id+"|"+(a.score||0)+"|"+(a.max_score||0)+"|"+(m.mode||"full")+"|"+(!!m.random)+"|"+(!!m.stopped);
+      if(idx[k]!==undefined){out[idx[k]].n++;return;}
+      idx[k]=out.length; out.push({a:a,n:1});});
+    return out;}
   function recuperateOk(recoveries){
     var s={};
     (recoveries||[]).forEach(function(r){
@@ -1153,7 +1169,7 @@ var HubLogic=(function(){
       (t.questions||[]).forEach(function(q,i){
         if(qTema(t,q)!==topic)return;   // tema se citește de pe item, nu de pe test
         var k=cheieRec(t.id,i);
-        if(folosite[k])return;
+        if(folosite[k]||NF[k])return;
         var it={q:q,testId:t.id,idx:i,topic:qTema(t,q),subject:qMaterie(t,q),key:k};
         if(vaz[i])vechi.push(it); else noi.push(it);});});
     return noi.concat(vechi).slice(0,lim);}
@@ -1186,6 +1202,7 @@ var HubLogic=(function(){
         var q=(t.questions||[])[i];if(!q)return;
         if(gradeQuestion(q,g))return;
         var k=cheieRec(a.test_id,i);
+        if(NF[k])return;
         if(vazut[k])return; vazut[k]=true;
         out.push({src:k,testId:a.test_id,idx:i,topic:t.topic,subject:t.subject});});});
     return out;}
@@ -1206,7 +1223,7 @@ var HubLogic=(function(){
         var vaz=seenIndices(attempts,t.id);
         (t.questions||[]).forEach(function(q,i){
           if(ales||vaz[i])return;
-          var k=cheieRec(t.id,i); if(folosite[k])return;
+          var k=cheieRec(t.id,i); if(folosite[k]||NF[k])return;
           ales={testId:t.id,idx:i};});});
       if(!ales){ // n-a rămas nimic nou pe tema asta: se reia itemul greșit
         ales={testId:g.testId,idx:g.idx};}
@@ -1276,8 +1293,11 @@ var HubLogic=(function(){
       var m=a.meta||{};
       if(m.random)nimereala=true;
       if(m.stopped)oprit=true;
+      var tp=((bid[a.test_id]||{}).topic)||a.test_id,gasit=null;
+      teme.forEach(function(x){if(x.test===a.test_id&&x.score===(a.score||0)&&x.max===(a.max_score||0))gasit=x;});
+      if(gasit){gasit.n++;return;}
       corecte+=a.score||0; total+=a.max_score||0;
-      teme.push({topic:((bid[a.test_id]||{}).topic)||a.test_id,
+      teme.push({test:a.test_id,topic:tp,n:1,
         score:a.score||0,max:a.max_score||0,mod:m.mode||"full",random:!!m.random});});
     rec.forEach(function(r){
       var m=(r.meta&&Number(r.meta.minute))||0; minute+=m;
@@ -1340,6 +1360,7 @@ var HubLogic=(function(){
     extraAzi:extraAzi,maiPoateExtra:maiPoateExtra,extraPool:extraPool,
     temeExersabile:temeExersabile,extraPlatit:extraPlatit,qTema:qTema,qMaterie:qMaterie,
     intrebariFolosite:intrebariFolosite,testeIncercate:testeIncercate,
+    setNefacute:setNefacute,eNefacut:eNefacut,grupeazaRepetate:grupeazaRepetate,
     testeContorizate:testeContorizate,castigate:castigate,cheltuit:cheltuit,sold:sold,
     poateCumpara:poateCumpara,disponibilaDin:disponibilaDin,ultimaCumparare:ultimaCumparare,
     zileDePas:zileDePas,rambursareActiva:rambursareActiva,deOnorat:deOnorat,luniSaptamanii:luniSaptamanii,
@@ -1463,6 +1484,12 @@ async function refresh(){
     var f=await sb.from("recoveries").select("*").order("created_at");
     if(!f.error)S.recoveries=f.data||[];
   }catch(err){ /* tabelele lipsesc — se merge mai departe fără jetoane */ }
+  S.nefacute=[];
+  try{
+    var g=await sb.from("nefacute").select("*");
+    if(g&&!g.error)S.nefacute=g.data||[];
+  }catch(err){ /* migrația 11 nerulată — nimic marcat */ }
+  HubLogic.setNefacute(S.nefacute);
 }
 function jetoane(){return HubLogic.sold(S.attempts,S.recoveries,S.redemptions);}
 function jetoaneActive(){return (S.rewards||[]).filter(function(r){return r.activ!==false;}).length>0;}
@@ -2223,6 +2250,12 @@ function renderMistakes(t,answers){
     : "";
 }
 async function finishQuiz(stoppedEarly){
+  /* Atingerile repetate pe „Vezi rezultatul" cât timp salvarea așteaptă rețeaua
+     salvau aceeași încercare de fiecare dată (mate-24, 20 sept: 21 de rânduri;
+     mate-23 și rom-16 la fel). Prima atingere câștigă, restul se ignoră. */
+  if(!quiz||quiz.salvez)return;
+  quiz.salvez=true;
+  try{$("qNext").classList.add("hidden");$("qStop").classList.add("hidden");}catch(e){}
   tickActive();
   if(quiz.extra)return finishExtra();    // sesiunea de exersat are propria tabelă, nu atinge scorurile
   var t=quiz.test;
@@ -2370,7 +2403,6 @@ function textTarif(){
     randTarif("Test fără nicio greșeală","peste cele 2 🪙 · jocherul anulează bonusul",
       "+"+HubLogic.JETON_CURAT+" 🪙")+
     randTarif("Exersezi — greșelile vechi intră aici","o dată pe zi",e)+
-    randTarif("Lucrezi o pagină nouă de caiet, apoi o corectezi cu mama","cel mult "+HubLogic.CAIET_MAX_ZI+" pe zi",r)+
     '<div class="small" style="margin-top:10px;opacity:.8">Cele 2 🪙 pe test le primești oricum, câte ai nimerit. Bonusul vine peste ele, dacă n-ai nicio greșeală.</div>';
 }
 /* Vitrina, ca bloc separat deasupra listei. Motivul e că până acum recompensa
@@ -2540,6 +2572,7 @@ function startRecovery(){
    a completat-o. Nu se folosește pentru tema de la școală: ce trebuie făcut
    oricum nu se cumpără, altfel peste câteva luni nu mai vrea să facă neplătit. */
 function renderCaiet(){
+  if(!$("pCaiet"))return;   // secțiunea nu mai e pe ecran din 2026-09-21a
   var azi=HubLogic.paginiCaietAzi(S.recoveries,todayStr());
   var mai=HubLogic.maiPoateCaiet(S.recoveries,todayStr());
   var buton=mai>0
@@ -2577,10 +2610,11 @@ function buildReport(){
   var rows=Object.keys(fa).map(function(k){
     var a=fa[k],t=bid[k]; if(!t)return null;
     var wrong=[],grabit=[],tm=(a.meta&&a.meta.times)||[];
+    var nefac=[];
     (t.questions||[]).forEach(function(q,i){
       var g=(a.answers||[])[i];
       if(g===undefined)return;
-      if(!HubLogic.gradeQuestion(q,g)) wrong.push(i+1);
+      if(!HubLogic.gradeQuestion(q,g)){ if(HubLogic.eNefacut(k,i))nefac.push(i+1); else wrong.push(i+1);}
       if(HubLogic.isRushed(q,tm[i])) grabit.push(i+1);
     });
     var secs=tm.filter(function(x){return !!x;});
@@ -2588,6 +2622,7 @@ function buildReport(){
     var o={test:k,topic:t.topic,subject:t.subject,data:String(a.created_at).slice(0,10),
       ora:String(a.created_at).slice(11,16),scor:a.score+"/"+a.max_score,gresite:wrong};
     if(grabit.length)o.citite_pe_fuga=grabit;
+    if(nefac.length)o.nefacute_la_scoala=nefac;
     if(mediu!=null)o.sec_pe_intrebare=mediu;
     var mn=HubLogic.attemptMinutes(a); if(mn)o.minute_lucrate=mn;
     return o;
@@ -2603,6 +2638,11 @@ function buildReport(){
     zile_libere:S.settings.freeze_days||[],
     deblocate:HubLogic.unlockedCount(S.settings.start_date,S.settings.cadence_days,new Date()),
     total_teste:S.tests.length, pe_teme:HubLogic.topicStats(S.attempts,S.tests), incercari:rows};
+  // ce a marcat Elena „încă n-au făcut la școală" — de ocolit în testele următoare
+  out.nefacute_la_scoala=(S.nefacute||[]).map(function(n){
+    var t=bid[n.test_id]; var q=t&&(t.questions||[])[n.idx];
+    return {test:n.test_id,intrebare:n.idx+1,topic:t?t.topic:"",
+      text:q?String(q.q).slice(0,90):""};});
   // minutele de ecran consumate cu învățatul, pe zi — de compensat din cele 50
   var mzi=HubLogic.minutesByDay(S.attempts), mzk=Object.keys(mzi).sort().slice(-14), mrec={};
   mzk.forEach(function(d){mrec[d]=mzi[d];});
@@ -2707,10 +2747,17 @@ function detaliiIncercare(a){
     if(g!==undefined&&HubLogic.gradeQuestion(q,g))return;
     var rush=HubLogic.isRushed(q,times[i])?'<span class="flag">citit pe fugă</span>':"";
     var sec=times[i]?(" · "+Math.round(times[i]/1000)+"s"):"";
-    rows.push('<div class="dq"><div class="dqt">'+(i+1)+". "+esc(q.q)+rush+'</div>'+
+    var nf=HubLogic.eNefacut(a.test_id,i);
+    var tid=String(a.test_id).replace(/[^A-Za-z0-9_-]/g,"");
+    var btnNf=nf
+      ? '<div class="btnrow" style="margin-top:6px"><span class="flag" style="margin-left:0">încă nefăcut la școală</span>'+
+        '<button class="mini gh" onclick="nefacut(\''+tid+'\','+i+',false)">Anulează</button></div>'
+      : '<div class="btnrow" style="margin-top:6px"><button class="mini gh" onclick="nefacut(\''+tid+'\','+i+',true)">'+
+        'Încă n-au făcut la școală</button></div>';
+    rows.push('<div class="dq"'+(nf?' style="opacity:.6"':'')+'><div class="dqt">'+(i+1)+". "+esc(q.q)+rush+'</div>'+
       '<div class="dl bad">a răspuns: <b>'+esc(answerText(q,g))+'</b>'+esc(sec)+'</div>'+
       '<div class="dl good">corect: <b>'+esc(correctText(q))+'</b></div>'+
-      (q.explain?'<div class="why">'+esc(q.explain)+'</div>':"")+'</div>');
+      (q.explain?'<div class="why">'+esc(q.explain)+'</div>':"")+btnNf+'</div>');
   });
   return rows.length?rows.join(""):'<div class="none">Nimic greșit la acest test.</div>';
 }
@@ -2722,10 +2769,11 @@ function toggleZi(ix){
   if(!box.classList.contains("hidden")){
     box.classList.add("hidden"); if(buton)buton.classList.remove("open"); return;}
   var z=istoricZile[ix];
+  ziDeschisa=ix;
   if(z){
     var parti=[];
-    z.incercari.forEach(function(a){
-      var m=a.meta||{};
+    HubLogic.grupeazaRepetate(z.incercari).forEach(function(g){
+      var a=g.a, m=a.meta||{};
       var eticheta=m.random?"trecut pe fugă, necontorizat":
         m.stopped?"oprit devreme":
         (m.mode==="short"?"sesiune scurtă":(HubLogic.isPartial(a)?"neterminat":""));
@@ -2733,7 +2781,7 @@ function toggleZi(ix){
       parti.push('<div class="dq" style="border-top:0;padding-bottom:2px">'+
         '<div class="dqt">'+esc((t&&t.topic)||a.test_id)+
         ' <span class="small" style="font-weight:600">'+String(a.created_at).slice(11,16)+
-        ' · '+a.score+"/"+a.max_score+(eticheta?" · "+esc(eticheta):"")+'</span></div></div>'+
+        ' · '+a.score+"/"+a.max_score+(g.n>1?" (×"+g.n+")":"")+(eticheta?" · "+esc(eticheta):"")+'</span></div></div>'+
         detaliiIncercare(a));});
     if(z.exersat)parti.push('<div class="dq"><div class="dqt">'+z.exersat+
       (z.exersat===1?" sesiune de exersat":" sesiuni de exersat")+
@@ -2746,7 +2794,7 @@ function toggleZi(ix){
 }
 
 /* ---- ECRANUL DE PĂRINTE, în trei file ---- */
-var parentTab="azi", istoricZile=[], istoricTot=false;
+var parentTab="azi", istoricZile=[], istoricTot=false, ziDeschisa=null;
 
 function parentGo(f){
   parentTab=f;
@@ -2755,6 +2803,22 @@ function parentGo(f){
   try{window.scrollTo(0,0);}catch(e){}
 }
 function istoricMaiMult(){ istoricTot=true; randParentIstoric(); }
+/* „Încă n-au făcut la școală" — pe o întrebare greșită. Tabela `nefacute`
+   (migrația 11). Dacă migrația n-a rulat, se spune asta, nu se pierde nimic. */
+async function nefacut(testId,idx,marcheaza){
+  var ok=true;
+  try{
+    var r=marcheaza
+      ? await sb.from("nefacute").insert([{test_id:testId,idx:idx}])
+      : await sb.from("nefacute").delete().eq("test_id",testId).eq("idx",idx);
+    if(r&&r.error)throw r.error;
+  }catch(e){ok=false;}
+  if(!ok){alert("Nu s-a salvat. Dacă e prima dată, rulează în Supabase migratie_11_nefacute.sql.");return;}
+  try{await refresh();}catch(e){}
+  var ix=ziDeschisa;
+  randParentIstoric();
+  if(ix!==null&&ix!==undefined)toggleZi(ix);
+}
 
 function numeZi(d){
   var z=["duminică","luni","marți","miercuri","joi","vineri","sâmbătă"];
@@ -2797,7 +2861,7 @@ function randParentAzi(){
   }else{
     ln='<span class="dot"></span>A intrat azi la '+esc(rz.ora)+'.';
     var buc=[];
-    rz.teme.forEach(function(x){buc.push(esc(x.topic)+" — "+x.score+" din "+x.max);});
+    rz.teme.forEach(function(x){buc.push(esc(x.topic)+" — "+x.score+" din "+x.max+(x.n>1?" (×"+x.n+")":""));});
     if(rz.exersat)buc.push(rz.exersat===1?"o sesiune de exersat":rz.exersat+" sesiuni de exersat");
     sm=buc.join(". ")+".";
     sm+="<br>"+rz.minute+(rz.minute===1?" minut":" minute")+" de învățat.";
@@ -2896,8 +2960,8 @@ function randParentIstoric(){
   var lim=istoricTot?istoricZile.length:14;
   var arata=istoricZile.slice(0,lim);
   $("pRecent").innerHTML = arata.length? arata.map(function(z,ix){
-    var buc=[];
-    if(z.teste)buc.push(z.teste+(z.teste===1?" test":" teste"));
+    var buc=[], nT=HubLogic.grupeazaRepetate(z.incercari).length;
+    if(nT)buc.push(nT+(nT===1?" test":" teste"));
     if(z.exersat)buc.push(z.exersat+(z.exersat===1?" sesiune":" sesiuni"));
     if(z.pct!==null)buc.push(z.pct+"%");
     if(z.minute)buc.push(z.minute+" min");
@@ -2927,7 +2991,8 @@ function randParentIstoric(){
       '<div style="font-size:14px">'+chl+'</div></div>'+
       '<div class="small" style="margin:10px 0 2px;opacity:.75">Tarif</div>'+textTarif();
   }else{$("pJet").innerHTML='<div class="notice small">Sistemul de jetoane nu e instalat încă.</div>';}
-  renderCaiet();
+  // Caietul de vacanță a ieșit din ecran pe 21 sept 2026 (vacanța s-a terminat).
+  // Paginile vechi rămân în sold și în raport (pagini_caiet); logica nu s-a atins.
 
   var byId={}; S.tests.forEach(function(t){byId[t.id]=t;});
   var rush=0,seen=0;
