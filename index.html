@@ -34,7 +34,8 @@
 html,body{margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45}
-.wrap{max-width:720px;margin:0 auto;padding:20px 18px 104px}
+.wrap{max-width:720px;margin:0 auto;padding:20px 18px calc(150px + env(safe-area-inset-bottom))}
+/* 104px nu ajungea pe Android cu bara de gesturi: bara de jos a părintelui acoperea linia cu versiunea (22 sept 2026). */
 .hidden{display:none!important}
 button{font-family:inherit;cursor:pointer;border:0;background:none}
 h1,h2,h3{margin:0}
@@ -434,6 +435,7 @@ h1,h2,h3{margin:0}
           <div class="av">👩‍🏫</div><div class="nm">Părinte</div><div class="small">progres & rapoarte</div>
         </button>
       </div>
+      <div class="ver" id="profVer">versiune 2026-09-22a</div>
     </div>
   </div>
 
@@ -459,6 +461,7 @@ h1,h2,h3{margin:0}
           <button class="key ghost" onclick="goProfiles()">↩</button>
         </div>
       </div>
+      <div class="ver">versiune 2026-09-22a</div>
     </div>
   </div>
 
@@ -716,7 +719,9 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-09-21a";
+var APP_VERSION="2026-09-22a";
+/* Versiunea se vede și pe primul ecran, fără PIN. */
+try{document.addEventListener("DOMContentLoaded",function(){var e=document.getElementById("profVer");if(e)e.textContent="versiune "+APP_VERSION;});}catch(e){}
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
    nu se pot desincroniza de cod și nu depind de nicio cale de pe server. */
 var ICONS={
