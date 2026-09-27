@@ -719,7 +719,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-09-22a";
+var APP_VERSION="2026-09-27a";
 /* Versiunea se vede și pe primul ecran, fără PIN. */
 try{document.addEventListener("DOMContentLoaded",function(){var e=document.getElementById("profVer");if(e)e.textContent="versiune "+APP_VERSION;});}catch(e){}
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
@@ -1083,6 +1083,41 @@ var HubLogic=(function(){
   function eNefacut(testId,idx){return !!NF[cheieRec(testId,idx)];}
   /* Aceeași încercare trimisă de mai multe ori (atingeri repetate) sau același
      test reluat cu același scor: se arată o dată, cu contor. */
+  /* Reluările unui test, după încercarea de bază. Răspunsurile salvate sunt
+     lipite peste cele vechi (mergeAnswers), deci ce a răspuns ÎN sesiunea
+     respectivă se recunoaște după `meta.times[i]` — timpul se măsoară doar pe
+     întrebările văzute atunci. Întoarce null dacă n-a reluat testul.
+       gresite_din_nou      — greșite la prima ȘI iar la o reluare: nu le știe
+       corecte_doar_la_reluare — greșite prima dată, corecte după: poate a
+                              învățat, poate a ținut minte răspunsul — NU se
+                              socotesc știute
+       gresite_noi_la_reluare — corecte prima dată, greșite la reluare */
+  function reluari(ord,t,baza,k){
+    var qs=t.questions||[],gr={},nou={},bun={},scoruri=[],azi=0,n=0;
+    var zi0=String(baza.created_at).slice(0,10),t0=new Date(baza.created_at);
+    function gresit(q,g,i){return g!==undefined&&g!==null&&!gradeQuestion(q,g)&&!eNefacut(k,i);}
+    var bazaGresite={};
+    qs.forEach(function(q,i){if(gresit(q,(baza.answers||[])[i],i))bazaGresite[i]=true;});
+    (ord||[]).forEach(function(a){
+      if(a===baza||a.test_id!==k||(a.meta&&a.meta.random))return;
+      if(!(new Date(a.created_at)>t0))return;
+      n++; if(String(a.created_at).slice(0,10)===zi0)azi++;
+      scoruri.push(a.score+"/"+a.max_score+(isPartial(a)?" (parțial)":""));
+      var tm=(a.meta&&a.meta.times)||[];
+      qs.forEach(function(q,i){
+        if(!tm[i])return;                       // n-a văzut-o în sesiunea asta
+        var g=(a.answers||[])[i]; if(g===undefined||g===null)return;
+        if(gresit(q,g,i)){ if(bazaGresite[i])gr[i]=true; else nou[i]=true; }
+        else if(bazaGresite[i]) bun[i]=true;});});
+    if(!n)return null;
+    function lst(o,fara){return Object.keys(o).filter(function(i){return !(fara&&fara[i]);})
+      .map(function(i){return +i+1;}).sort(function(x,y){return x-y;});}
+    var o={reluari:n,reluari_aceeasi_zi:azi,scor_reluari:scoruri};
+    var a1=lst(gr),a2=lst(bun,gr),a3=lst(nou);
+    if(a1.length)o.gresite_din_nou=a1;
+    if(a2.length)o.corecte_doar_la_reluare=a2;
+    if(a3.length)o.gresite_noi_la_reluare=a3;
+    return o;}
   function grupeazaRepetate(attempts){
     var out=[],idx={};
     (attempts||[]).forEach(function(a){
@@ -1375,7 +1410,7 @@ var HubLogic=(function(){
     recuperateAzi:recuperateAzi,cheieRec:cheieRec,
     totalXP:totalXP,xpAlready:xpAlready,levelFromXP:levelFromXP,streakDays:streakDays,topicStats:topicStats,
     isPartial:isPartial,isRushed:isRushed,firstAttempts:firstAttempts,fmt:fmt,addDays:addDays,WALL_LIMIT:WALL_LIMIT,
-    seenIndices:seenIndices,nextIndices:nextIndices,mergeAnswers:mergeAnswers,answeredCountOf:answeredCountOf,
+    reluari:reluari,seenIndices:seenIndices,nextIndices:nextIndices,mergeAnswers:mergeAnswers,answeredCountOf:answeredCountOf,
     looksRandom:looksRandom,randomSignals:randomSignals,isFastAnswer:isFastAnswer,SHORT_N:4};
 })();
 
@@ -2610,8 +2645,16 @@ async function adaugaPaginaCaiet(){
 /* ---- RAPORT PENTRU CLAUDE ---- */
 function buildReport(){
   var bid={}; S.tests.forEach(function(t){bid[t.id]=t;});
-  var fa={}; S.attempts.slice().sort(function(a,b){return new Date(a.created_at)-new Date(b.created_at);})
-    .forEach(function(a){if(!fa[a.test_id])fa[a.test_id]=a;});
+  /* Baza fiecărui test = PRIMA încercare completă (aceeași ca în `pe_teme`);
+     dacă n-a terminat niciodată testul, prima sesiune reală. Sesiunile la
+     nimereală nu sunt niciodată bază. Reluările de după ies separat, ca Elena
+     (și Claude) să vadă ce a greșit și a doua oară, nu doar că a știut la final. */
+  var ord=S.attempts.slice().sort(function(a,b){return new Date(a.created_at)-new Date(b.created_at);});
+  var fa={},fb={};
+  ord.forEach(function(a){if(a.meta&&a.meta.random)return;
+    if(!fb[a.test_id])fb[a.test_id]=a;
+    if(!HubLogic.isPartial(a)&&!fa[a.test_id])fa[a.test_id]=a;});
+  Object.keys(fb).forEach(function(k){if(!fa[k])fa[k]=fb[k];});
   var rows=Object.keys(fa).map(function(k){
     var a=fa[k],t=bid[k]; if(!t)return null;
     var wrong=[],grabit=[],tm=(a.meta&&a.meta.times)||[];
@@ -2630,6 +2673,8 @@ function buildReport(){
     if(nefac.length)o.nefacute_la_scoala=nefac;
     if(mediu!=null)o.sec_pe_intrebare=mediu;
     var mn=HubLogic.attemptMinutes(a); if(mn)o.minute_lucrate=mn;
+    var rel=HubLogic.reluari(ord,t,a,k);
+    if(rel)Object.keys(rel).forEach(function(c){o[c]=rel[c];});
     return o;
   }).filter(Boolean);
   var partiale=S.attempts.filter(function(a){return HubLogic.isPartial(a)&&!(a.meta&&a.meta.random);}).map(function(a){
