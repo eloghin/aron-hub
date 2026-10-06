@@ -634,6 +634,7 @@ h1,h2,h3{margin:0}
 
     <!-- FILA „AZI": trebuie să încapă fără scroll -->
     <div id="tabAzi">
+      <div id="pLipsa"></div>
       <div id="pOnorat"></div>
       <div id="pAziSum"></div>
       <div class="section-h">Timp de compensat azi</div>
@@ -719,7 +720,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-09-27a";
+var APP_VERSION="2026-10-06a";
 /* Versiunea se vede și pe primul ecran, fără PIN. */
 try{document.addEventListener("DOMContentLoaded",function(){var e=document.getElementById("profVer");if(e)e.textContent="versiune "+APP_VERSION;});}catch(e){}
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
@@ -751,6 +752,12 @@ var HubLogic=(function(){
   function daysBetween(a,b){return Math.round((toDate(b)-toDate(a))/86400000);}
   function unlockedCount(s,c,t){var d=daysBetween(s,t);if(d<0)return 0;return Math.floor(d/c)+1;}
   function isUnlocked(test,uc){return test.release_order<=uc;}
+  /* Zilele din calendar fără niciun test (6 oct 2026: ist-02 nu fusese inserat,
+     update-ul care îl muta pe 74 n-a dat eroare, iar Aron a văzut „Ai rezolvat tot").
+     Întoarce numerele de zi (release_order) din [de, pana] care n-au test. */
+  function zileFaraTest(tests,de,pana){var are={},out=[];
+    (tests||[]).forEach(function(t){are[Number(t.release_order)]=true;});
+    for(var i=Math.max(1,de);i<=pana;i++){if(!are[i])out.push(i);}return out;}
   function normalizeNum(s){return String(s==null?"":s).replace(/\s/g,"").replace(",",".").trim().toLowerCase();}
   function seqOK(g,n){if(!g||g.length!==n)return false;for(var i=0;i<n;i++){if(Number(g[i])!==i)return false;}return true;}
   function gradeQuestion(q,g){if(g===undefined||g===null)return false;
@@ -1389,7 +1396,7 @@ var HubLogic=(function(){
       z.pct=z.max?Math.round(z.corecte/z.max*100):null;
       return z;});}
 
-  return{unlockedCount:unlockedCount,
+  return{unlockedCount:unlockedCount,zileFaraTest:zileFaraTest,
     intreDate:intreDate,rezumatAzi:rezumatAzi,fereastra7:fereastra7,peZile:peZile,isUnlocked:isUnlocked,gradeQuestion:gradeQuestion,scoreAttempt:scoreAttempt,
     IDLE_CAP_MS:IDLE_CAP_MS,SESSION_CAP_MS:SESSION_CAP_MS,minutesOf:minutesOf,
     attemptMinutes:attemptMinutes,minutesByDay:minutesByDay,
@@ -1603,6 +1610,10 @@ function aronDate(){
   }
   return {azi:t,uc:uc,doneIds:doneIds,bestByTest:bestByTest,
     deFacut:deFacut,blocate:blocate,facute:facute,cerute:cerute,
+    // gol în calendar: azi n-are test, dar există teste puse pentru zilele de după.
+    // Dacă banca s-a terminat de tot, rămâne „Ai rezolvat tot” (e adevărat); Elena vede oricum avertismentul.
+    lipsaAzi:uc>0&&HubLogic.zileFaraTest(S.tests,uc,uc).length>0&&
+      S.tests.some(function(x){return Number(x.release_order)>uc;}),
     pasAzi:HubLogic.zileDePas(S.redemptions).indexOf(t)>=0};
 }
 
@@ -1633,6 +1644,11 @@ function randAronAcasa(d){
         mat(t.subject).nume+'</div>'+
         '<button class="cta" onclick="openTest(\''+t.id+'\')">Începem →</button></div>'+
       '<div class="foot">Timpul de aici nu se scade din cele 50 de minute.</div></div>';
+  }else if(d.lipsaAzi){
+    $("aPas").classList.add("hidden");
+    $("aHero").innerHTML='<div class="hero calm"><div class="lab">Testul de azi</div>'+
+      '<div class="big">Testul de azi n-a ajuns încă</div>'+
+      '<div class="foot">Nu e nimic de făcut din partea ta. Apare aici imediat ce e pus.</div></div>';
   }else{
     $("aPas").classList.add("hidden");
     $("aHero").innerHTML='<div class="hero calm"><div class="lab">Gata pe azi</div>'+
@@ -2698,6 +2714,7 @@ function buildReport(){
   mzk.forEach(function(d){mrec[d]=mzi[d];});
   out.minute_invatat_pe_zi=mrec;
   out.minute_azi=mzi[todayStr()]||0;
+  try{out.zile_fara_test=zileLipsa().map(function(z){return {release_order:z.nr,data:z.data};});}catch(e){}
   // economia de jetoane — ce se reglează săptămânal, o singură manetă
   if((S.rewards||[]).length){
     var rid2={};S.rewards.forEach(function(r){rid2[r.id]=r;});
@@ -2879,10 +2896,24 @@ function numeZi(d){
    răspunde la „a intrat azi?", apoi minutele. Cardurile cumulative de dinainte
    (teste rezolvate, XP total) au dispărut de aici: după șase săptămâni cresc
    monoton și nu mai răspund la nicio întrebare pe care și-o pune cineva azi. */
+/* Zilele fără test de azi încolo (până la 7 zile, cel mult până la plan_end). */
+function zileLipsa(){
+  var s=S.settings, t=todayStr();
+  var uc=HubLogic.unlockedCount(s.start_date,s.cadence_days,t);
+  var cap=s.plan_end?HubLogic.unlockedCount(s.start_date,s.cadence_days,s.plan_end):uc+7;
+  return HubLogic.zileFaraTest(S.tests,uc,Math.min(uc+7,cap)).map(function(nr){
+    return {nr:nr,azi:nr===uc,data:HubLogic.fmt(HubLogic.addDays(s.start_date,(nr-1)*s.cadence_days))};});
+}
 function randParentAzi(){
   var t=todayStr();
   $("pTitle").textContent="Azi";
   $("pSub").textContent=numeZi(t)+", "+roDate(t);
+  var lp=zileLipsa();
+  $("pLipsa").innerHTML = !lp.length ? "" :
+    '<div class="act" style="border:2px solid #e5484d"><div class="hd">⚠️ Zile fără test în calendar</div>'+
+    '<div class="mt" style="padding:4px 2px 2px;font-size:14px;line-height:1.45">'+
+    lp.map(function(z){return (z.azi?'<b>azi</b>':esc(numeZi(z.data)+" "+roDate(z.data)))+' (release_order '+z.nr+')';}).join("<br>")+
+    '<br><span style="opacity:.75">Testul n-a fost inserat în baza de date. Aron vede „n-a ajuns încă”.</span></div></div>';
 
   var rid={};(S.rewards||[]).forEach(function(r){rid[r.id]=r;});
   var onor=[]; try{onor=HubLogic.deOnorat(S.redemptions);}catch(e){}
