@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Deutsch-Trainer Lektion 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Lexend:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: o singură coloană de lucru (max 640px), file sus; culorile der/die/das sunt codul clasic de gen din manualele de germană */
+:root{
+  --bg:#eef1f6; --surface:#ffffff; --ink:#152033; --muted:#5a6578; --line:#d6dce6;
+  --accent:#2747d0; --accent-ink:#ffffff; --signal:#f2b705;
+  --ok:#1d8655; --ok-bg:#e3f4ec; --notyet:#b8640f; --notyet-bg:#fbefe0;
+  --der:#2f63d8; --die:#d23b4a; --das:#1f8a4c;
+  --display:"Bricolage Grotesque",system-ui,sans-serif;
+  --body:"Lexend",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e131b; --surface:#171f2b; --ink:#e7ecf4; --muted:#9aa6b8; --line:#2a3546;
+  --accent:#8099ff; --accent-ink:#0e131b; --signal:#f5c842;
+  --ok:#52c690; --ok-bg:#16301f; --notyet:#f0a35a; --notyet-bg:#33240f;
+  --der:#7ea2ff; --die:#ff7f8b; --das:#5fd093; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0e131b; --surface:#171f2b; --ink:#e7ecf4; --muted:#9aa6b8; --line:#2a3546;
+  --accent:#8099ff; --accent-ink:#0e131b; --signal:#f5c842;
+  --ok:#52c690; --ok-bg:#16301f; --notyet:#f0a35a; --notyet-bg:#33240f;
+  --der:#7ea2ff; --die:#ff7f8b; --das:#5fd093; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:20px 48px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-direction:column;gap:12px}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:800;font-size:1.7rem;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 small{display:block;font-family:var(--body);font-weight:500;font-size:.85rem;color:var(--muted);letter-spacing:0}
+.stripe{height:4px;border-radius:2px;background:linear-gradient(90deg,#111 0 33.3%,#d00 33.3% 66.6%,#ffce00 66.6%);width:72px}
+.voice{font:inherit;font-size:.78rem;background:var(--surface);cursor:pointer;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.voice.bad{color:var(--notyet);border-color:var(--notyet)}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+nav button{font:inherit;font-size:.92rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.eyebrow{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.prompt{font-family:var(--display);font-weight:600;font-size:1.6rem;line-height:1.25;text-wrap:balance;margin:0}
+.prompt .gap{display:inline-block;min-width:3.2em;border-bottom:3px solid var(--signal);text-align:center}
+.sub{color:var(--muted);margin:0}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:460px){.opts{grid-template-columns:1fr}}
+.opt{font:inherit;font-size:1.02rem;text-align:left;padding:14px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;min-height:54px}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default;opacity:.55}
+.opt.right{border-color:var(--ok);background:var(--ok-bg);opacity:1}
+.opt.chosen{border-color:var(--notyet);background:var(--notyet-bg);opacity:1}
+.opt .de{font-weight:600}
+button:focus-visible,input:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.primary{font:inherit;font-weight:600;background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;padding:12px 20px;cursor:pointer}
+.primary:disabled{opacity:.4;cursor:default}
+.ghost{font:inherit;background:transparent;color:var(--accent);border:1.5px solid var(--line);border-radius:12px;padding:10px 16px;cursor:pointer}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.play{display:inline-flex;align-items:center;gap:10px;font:inherit;font-weight:600;background:var(--ink);color:var(--bg);border:0;border-radius:999px;padding:12px 20px;cursor:pointer}
+.play svg{width:18px;height:18px;fill:currentColor}
+.mini{font:inherit;font-size:.85rem;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:6px 12px;cursor:pointer}
+.say{background:none;border:0;padding:0 4px;color:var(--accent);cursor:pointer;vertical-align:middle}
+.say svg{width:18px;height:18px;fill:currentColor}
+.fb{border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.fb.ok{background:var(--ok-bg)} .fb.notyet{background:var(--notyet-bg)}
+.fb strong{font-family:var(--display);font-size:1.15rem}
+.fb.ok strong{color:var(--ok)} .fb.notyet strong{color:var(--notyet)}
+.fb p{margin:0}
+.dots{display:flex;gap:5px;flex-wrap:wrap}
+.dots i{width:22px;height:6px;border-radius:3px;background:var(--line)}
+.dots i.done{background:var(--ink)} .dots i.cur{background:var(--signal)}
+input.txt{font:inherit;font-size:1.3rem;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.keys{display:flex;gap:6px}
+.keys button{font:inherit;font-size:1.1rem;width:44px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.builder{display:flex;flex-direction:column;gap:12px}
+.line{min-height:58px;border:1.5px dashed var(--line);border-radius:12px;padding:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.line .ph{color:var(--muted);font-size:.9rem;padding-left:6px}
+.bank{display:flex;flex-wrap:wrap;gap:8px}
+.tile{font:inherit;font-weight:500;font-size:1.05rem;padding:8px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.tile.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tile:disabled{visibility:hidden}
+.flag{display:block;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.big-flag{width:150px;max-width:100%}
+.tld{font-family:var(--mono);font-size:2.4rem;font-weight:500}
+.faces{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.face{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px}
+.face svg{width:52px;height:52px}
+.art-der{color:var(--der)} .art-die{color:var(--die)} .art-das{color:var(--das)}
+.opt.art{text-align:center;font-weight:600;font-size:1.3rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat b{font-family:var(--display);font-size:1.6rem;font-variant-numeric:tabular-nums}
+.stat span{font-size:.8rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 10px;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
+.chip .ro{font-size:.8rem;color:var(--muted)}
+.chip .lv{display:flex;gap:3px;margin-top:3px}
+.chip .lv i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.chip .lv i.f{background:var(--ok)}
+.group{display:flex;flex-direction:column;gap:10px}
+.group h3{font-family:var(--display);font-size:1.15rem;margin:0}
+.verbs{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;white-space:nowrap}
+th{font-size:.78rem;color:var(--muted);font-weight:600}
+td.end b{color:var(--accent)}
+.memo{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:460px){.memo{grid-template-columns:repeat(3,1fr)}}
+.card{aspect-ratio:3/4;max-width:100%;border-radius:12px;border:1.5px solid var(--line);background:var(--ink);color:var(--bg);font:inherit;font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:6px;text-align:center;overflow-wrap:anywhere}
+.card.open{background:var(--surface);color:var(--ink)}
+.card.done{background:var(--ok-bg);color:var(--ink);border-color:var(--ok)}
+.card .flag{width:80%}
+.back-mark{font-family:var(--display);font-size:1.4rem;opacity:.35}
+.profile{border:2px solid var(--ink);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:8px}
+.profile h2{font-family:var(--display);margin:0;font-size:1.6rem}
+.profile p{margin:0;font-size:1.15rem}
+.note{font-size:.85rem;color:var(--muted);margin:0}
+@media (prefers-reduced-motion:no-preference){.card{transition:background .15s}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Wer bist du?<small>Germană · Lektion 1 · antrenament zilnic</small></h1>
+      <button class="voice" id="voice">Testează sunetul</button>
+    </div>
+    <div class="stripe" aria-hidden="true"></div>
+    <div id="soundhelp" class="panel note" hidden></div>
+    <nav role="tablist">
+      <button id="t-azi" aria-selected="true" data-tab="azi">Azi</button>
+      <button id="t-memo" aria-selected="false" data-tab="memo">Memo</button>
+      <button id="t-ich" aria-selected="false" data-tab="ich">Das bin ich</button>
+      <button id="t-harta" aria-selected="false" data-tab="harta">Harta cuvintelor</button>
+    </nav>
+  </header>
+  <main id="main"></main>
+</div>
+
+<script>
+/* ---------- utilitare ---------- */
+const $=s=>document.querySelector(s);
+function h(tag,attrs,...kids){const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs||{})){if(k==='class')e.className=v;else if(k==='html')e.innerHTML=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(v!==false&&v!=null)e.setAttribute(k,v===true?'':v)}for(const k of kids.flat()){if(k==null||k===false)continue;e.append(k.nodeType?k:document.createTextNode(k))}return e}
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const SPK='<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>';
+
+/* ---------- vocea germană ---------- */
+let deVoice=null, voiceState='unknown';
+/* 'none' = browserul nu are deloc sinteză vocală; 'node' = are voci, dar niciuna germană; 'unknown' = lista e goală (des pe telefon) -> încercăm oricum */
+function loadVoices(){
+  if(!('speechSynthesis' in window)){voiceState='none';badge();return}
+  const vs=speechSynthesis.getVoices(); if(!vs.length){badge();return}
+  deVoice=vs.find(v=>/^de[-_]DE/i.test(v.lang)&&/natural|online|google|enhanced|premium/i.test(v.name))||vs.find(v=>/^de/i.test(v.lang))||null;
+  voiceState=deVoice?'ok':'node'; badge();
+}
+function badge(){const b=$('#voice');if(!b)return;
+  if(needAudio()&&audioFail){b.textContent='Sunetul nu pornește aici';b.className='voice bad';return}
+  if(badgeMode==='audio'){b.textContent='Sunet: voce online';b.className='voice';return}
+  if(voiceState==='ok'){b.textContent='Voce germană: '+deVoice.name.replace(/Microsoft |Google |Online|\(Natural\)| - .*/g,'').trim();b.className='voice'}
+  else if(voiceState==='none'||voiceState==='node'){b.textContent='Testează sunetul';b.className='voice'}
+  else{b.textContent='Testează sunetul';b.className='voice'}}
+/* rezervă: pe GitHub Pages, când browserul n-are voce germană (ex. DuckDuckGo, aplicații), sunetul vine ca fișier audio */
+let audioFail=false,useAudio=false;
+const needAudio=()=>useAudio||voiceState==='none'||voiceState==='node';
+const voiceOK=()=>!(needAudio()&&audioFail);
+function sayAudio(text,rate){return new Promise(res=>{try{
+  const a=new Audio('https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=de&ttsspeed='+(rate<.8?'0.4':'1')+'&q='+encodeURIComponent(text));
+  let d=false;const fin=ok=>{if(!d){d=true;res(ok)}};
+  a.onplaying=()=>{heard=true;if(badgeMode!=='audio'){badgeMode='audio';badge()}};a.onended=()=>fin(true);a.onerror=()=>{audioFail=true;badge();fin(false)};
+  setTimeout(()=>fin(true),2500+text.length*120);const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{audioFail=true;badge();fin(false)});
+}catch(e){audioFail=true;res(false)}})}
+let badgeMode='';
+function say(text,rate=0.9){
+  if(needAudio())return sayAudio(text,rate);
+  return new Promise(res=>{try{
+  if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel();
+  speechSynthesis.resume&&speechSynthesis.resume();
+  const u=new SpeechSynthesisUtterance(text);u.lang='de-DE';if(deVoice)u.voice=deVoice;u.rate=rate;
+  let d=false,started=false;const fin=ok=>{if(!d){d=true;res(ok!==false)}};
+  u.onstart=()=>{heard=true;started=true};u.onend=()=>fin(true);
+  u.onerror=()=>{if(!started&&!d){useAudio=true;d=true;sayAudio(text,rate).then(res)}else fin(false)};
+  setTimeout(()=>{if(!started&&!d&&voiceState!=='ok'){useAudio=true;try{speechSynthesis.cancel()}catch(e){};d=true;sayAudio(text,rate).then(res)}},1500);
+  setTimeout(fin,2500+text.length*110/rate);speechSynthesis.speak(u)}catch(e){useAudio=true;sayAudio(text,rate).then(res)}})}
+let heard=false;
+function soundTest(){
+  const box=$('#soundhelp');box.hidden=false;box.innerHTML='<p>Se aude „Hallo! Ich heiße Aron.”?</p>';heard=false;
+  say('Hallo! Ich heiße Aron.');
+  setTimeout(()=>{loadVoices();if(heard){box.innerHTML='<p><b>Sunetul merge.</b> Dacă totuși nu auzi nimic, dă volumul mai tare.</p>';return}
+    box.innerHTML=`<p><b>Nu a pornit sunetul.</b> Încearcă pe rând:</p><ol>
+<li>Volumul sus, iar pe iPhone butonul de silențios de pe lateral să nu fie pe silențios (vocea paginii respectă butonul).</li>
+<li>Deschide pagina în Chrome (Android) sau Safari (iPhone). Unele browsere, de exemplu DuckDuckGo, nu au voce încorporată.</li>
+<li>Android: Setări → Sistem → Limbi → Ieșire text în vorbire → Google, apoi instalează limba Germană.<br>iPhone: Setări → Accesibilitate → Conținut vorbit → Voci → Germană → descarcă o voce.</li>
+<li>Pe laptop merge direct în Chrome sau Edge.</li></ol>`},2200);
+}
+const sayBtn=t=>h('button',{class:'say','aria-label':'Ascultă','html':SPK,onclick:ev=>{ev.stopPropagation();say(t)}});
+
+/* ---------- steaguri ---------- */
+function flagSVG(code,cls='flag'){
+  const W=60,H=40;let b='';
+  const hz=c=>c.map((x,i)=>`<rect y="${i*H/c.length}" width="${W}" height="${H/c.length+.5}" fill="${x}"/>`).join('');
+  const vt=c=>c.map((x,i)=>`<rect x="${i*W/c.length}" width="${W/c.length+.5}" height="${H}" fill="${x}"/>`).join('');
+  if(code==='de')b=hz(['#000','#DD0000','#FFCE00']);
+  if(code==='fr')b=vt(['#0055A4','#fff','#EF4135']);
+  if(code==='pl')b=hz(['#fff','#DC143C']);
+  if(code==='it')b=vt(['#009246','#fff','#CE2B37']);
+  if(code==='ro')b=vt(['#002B7F','#FCD116','#CE1126']);
+  if(code==='es')b=`<rect width="60" height="40" fill="#AA151B"/><rect y="10" width="60" height="20" fill="#F1BF00"/>`;
+  if(code==='br')b=`<rect width="60" height="40" fill="#009C3B"/><polygon points="30,5 55,20 30,35 5,20" fill="#FFDF00"/><circle cx="30" cy="20" r="8.5" fill="#002776"/>`;
+  if(code==='tr')b=`<rect width="60" height="40" fill="#E30A17"/><circle cx="22" cy="20" r="10" fill="#fff"/><circle cx="24.5" cy="20" r="8" fill="#E30A17"/><polygon fill="#fff" points="33,20 38.9,18.1 38.9,11.9 42.5,16.9 48.4,15 44.8,20 48.4,25 42.5,23.1 38.9,28.1 38.9,21.9" transform="translate(-1 0) scale(.95) translate(2 1)"/>`;
+  return `<svg class="${cls}" viewBox="0 0 60 40" role="img" aria-label="steag">${b}</svg>`;
+}
+function faceSVG(m){const mouth=['M16 33 Q26 42 36 33','M17 36 L35 36','M16 39 Q26 30 36 39'][m];return `<svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="23" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="18" cy="21" r="3" fill="currentColor"/><circle cx="34" cy="21" r="3" fill="currentColor"/><path d="${mouth}" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`}
+
+/* ---------- vocabularul din fișă (Lektion 1.1 + Wiederholung) ---------- */
+const FACTS=[],BY={};const add=f=>{FACTS.push(f);BY[f.id]=f};
+[['Hallo!','Salut!','hi'],['Hi!','Hei!','hi'],['Guten Morgen!','Bună dimineața!','hi'],['Guten Tag!','Bună ziua!','hi'],['Guten Abend!','Bună seara!','hi'],['Grüß dich!','Te salut!','hi'],['Tschüs!','Pa!','bye'],['Auf Wiedersehen!','La revedere!','bye'],['Bis bald!','Pe curând!','bye']]
+ .forEach((g,i)=>add({id:'g'+i,cat:'greet',de:g[0],ro:g[1],kind:g[2],typ:g[0].replace(/!/,'')}));
+[['Super!','Super!',0],['Sehr gut.','Foarte bine.',0],['Gut.','Bine.',0],['Es geht.','Merge.',1],['So lala.','Așa și așa.',1],['Nicht so gut.','Nu prea bine.',2],['Schlecht.','Rău.',2]]
+ .forEach((g,i)=>add({id:'f'+i,cat:'feel',de:g[0],ro:g[1],mood:g[2]}));
+[['wer','Wer bist du?','Cine ești tu?','Wer','bist du?','Ich bin Anna.','Eu sunt Anna.'],
+ ['wie','Wie heißt du?','Cum te numești?','Wie','heißt du?','Ich heiße Max.','Mă numesc Max.'],
+ ['wo','Wo wohnst du?','Unde locuiești?','Wo','wohnst du?','Ich wohne in Sibiu.','Locuiesc în Sibiu.'],
+ ['woher','Woher kommst du?','De unde ești?','Woher','kommst du?','Ich komme aus Berlin.','Sunt din Berlin.'],
+ ['alt','Wie alt bist du?','Câți ani ai?','Wie alt','bist du?','Ich bin elf Jahre alt.','Am unsprezece ani.'],
+ ['geht',"Wie geht's?",'Ce mai faci?','Wie',"geht's?",'Sehr gut, danke!','Foarte bine, mulțumesc!'],
+ ['gesch','Hast du Geschwister?','Ai frați sau surori?',null,null,'Ich habe einen Bruder.','Am un frate.']]
+ .forEach(q=>{add({id:'q-'+q[0],cat:'q',de:q[1],ro:q[2],key:q[3],rest:q[4],ans:'a-'+q[0]});add({id:'a-'+q[0],cat:'a',de:q[5],ro:q[6],q:'q-'+q[0]})});
+[['p0','Was? Wie bitte?','Ce? Poftim?'],['p1','Die Musik ist zu laut.','Muzica e prea tare.'],['p2','Ich komme aus der Türkei.','Sunt din Turcia.'],['p3','Ich habe eine Schwester.','Am o soră.'],['p4','Ich habe keine Geschwister.','Nu am frați sau surori.'],['p5','Ich habe einen Bruder und eine Schwester.','Am un frate și o soră.']]
+ .forEach(p=>add({id:p[0],cat:'phrase',de:p[1],ro:p[2]}));
+[['Wer?','Cine?'],['Wie?','Cum?'],['Wo?','Unde?'],['Woher?','De unde?'],['Wie alt?','Câți ani?'],['Was?','Ce?']]
+ .forEach((w,i)=>add({id:'w'+i,cat:'w',de:w[0],ro:w[1],typ:w[0].replace('?','')}));
+[['ich','eu'],['du','tu'],['er','el'],['sie','ea']].forEach(p=>add({id:'pr-'+p[0],cat:'pron',de:p[0],ro:p[1],typ:p[0]}));
+[['Deutschland','Germania','de','0049'],['Frankreich','Franța','fr','0033'],['Polen','Polonia','pl','0048'],['Italien','Italia','it','0039'],['Spanien','Spania','es','0034'],['Brasilien','Brazilia','br','0055'],['die Türkei','Turcia','tr','0090'],['Rumänien','România','ro','0040']]
+ .forEach(l=>add({id:'l-'+l[2],cat:'land',de:l[0],ro:l[1],code:l[2],vw:l[3],typ:l[0].replace('die ',''),alt:[l[0]]}));
+[['der','Bruder','fratele'],['die','Schwester','sora'],['die','Geschwister','frații și surorile'],['das','Land','țara'],['die','Flagge','steagul'],['die','Zahl','numărul'],['die','Vorwahl','prefixul telefonic'],['die','Internetkennung','domeniul de internet'],['der','Chat','conversația online']]
+ .forEach((w,i)=>add({id:'n'+i,cat:'wort',art:w[0],noun:w[1],de:w[0]+' '+w[1],ro:w[2],typ:w[1]}));
+[['der','Computer','calculatorul'],['das','Handy','telefonul mobil'],['der','Rucksack','rucsacul'],['die','Familie','familia'],['das','Tennis','tenisul'],['der','Hamburger','hamburgerul']]
+ .forEach((w,i)=>add({id:'i'+i,cat:'intl',art:w[0],noun:w[1],de:w[0]+' '+w[1],ro:w[2],typ:w[1]}));
+const VERBS={sein:{ro:'a fi',f:['bin','bist','ist'],r:['eu sunt','tu ești','el/ea este'],s:['Ich ___ Anna.','Wer ___ du?','Er ___ elf Jahre alt.'],opts:['bin','bist','ist']},
+ heißen:{ro:'a se numi',f:['heiße','heißt','heißt'],r:['eu mă numesc','tu te numești','el/ea se numește'],s:['Ich ___ Max.','Wie ___ du?','Sie ___ Lena.'],opts:['heiße','heißt','heißen']},
+ wohnen:{ro:'a locui',f:['wohne','wohnst','wohnt'],r:['eu locuiesc','tu locuiești','el/ea locuiește'],s:['Ich ___ in Sibiu.','Wo ___ du?','Er ___ in Berlin.'],opts:['wohne','wohnst','wohnt']},
+ kommen:{ro:'a veni',f:['komme','kommst','kommt'],r:['eu vin','tu vii','el/ea vine'],s:['Ich ___ aus Italien.','Woher ___ du?','Sie ___ aus Polen.'],opts:['komme','kommst','kommt']},
+ haben:{ro:'a avea',f:['habe','hast','hat'],r:['eu am','tu ai','el/ea are'],s:['Ich ___ einen Bruder.','Du ___ eine Schwester.','Er ___ keine Geschwister.'],opts:['habe','hast','hat']}};
+const PERS=['ich','du','er/sie'];
+for(const[v,d]of Object.entries(VERBS))d.f.forEach((form,p)=>add({id:`v-${v}-${p}`,cat:'verb',verb:v,p,form,de:`${PERS[p]} ${form}`,ro:d.r[p],typ:form}));
+
+/* ---------- memorie locală (doar pe acest aparat) ---------- */
+const KEY='aron-de-l1-v1';
+let ST={facts:{},sessions:0,hist:[],memo:{}};
+try{const r=localStorage.getItem(KEY);if(r)ST=Object.assign(ST,JSON.parse(r))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}};
+const box=id=>(ST.facts[id]||{b:0}).b;
+const seen=id=>(ST.facts[id]||{s:-99}).s;
+
+/* ---------- alegerea exercițiilor ---------- */
+const REC={greet:['read','hiBye','hear'],feel:['read','mood','hear'],q:['read','qa','wGap','hear'],a:['read','hear'],phrase:['read','hear'],w:['read','hear'],pron:['read'],land:['flag','tld','read'],wort:['read','article','hear'],intl:['read','article','hear'],verb:['verbPick','read']};
+const PROD={greet:['roDe','type','hear'],feel:['roDe','mood'],q:['build','roDe','wGap'],a:['build','hear'],phrase:['build','roDe'],w:['type','roDe'],pron:['type'],land:['type','vorwahl','flag'],wort:['type','article'],intl:['article','roDe'],verb:['type','verbPick']};
+const isRec=t=>!['type','build','roDe','vorwahl'].includes(t);
+function typesFor(f,b){let t=(b>=2?PROD:REC)[f.cat];if(f.cat==='q'&&!f.key)t=t.filter(x=>x!=='wGap');if(!voiceOK())t=t.filter(x=>x!=='hear');return t.length?t:['read']}
+const GAP=[0,1,2,4,7,12];
+function pickFacts(n){
+  const now=ST.sessions+1,per={},out=[];
+  let pool=FACTS.map(f=>{const b=box(f.id),due=now-seen(f.id)>=GAP[Math.min(b,5)];return{f,w:(6-b)*(6-b)*(due?1:.12)*(seen(f.id)<0?.8:1)}});
+  while(out.length<n&&pool.length){
+    const tot=pool.reduce((s,x)=>s+x.w,0);let r=Math.random()*tot,k=0;
+    for(;k<pool.length-1;k++){r-=pool[k].w;if(r<=0)break}
+    const x=pool.splice(k,1)[0];if((per[x.f.cat]||0)>=3)continue;per[x.f.cat]=(per[x.f.cat]||0)+1;out.push(x.f)}
+  return out;
+}
+
+/* ---------- tab-uri ---------- */
+let tab='azi';
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.tab;document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));try{speechSynthesis.cancel()}catch(e){};render()}));
+function render(){const m=$('#main');m.innerHTML='';({azi:viewStart,memo:viewMemo,ich:viewIch,harta:viewMap})[tab](m)}
+
+/* ---------- AZI: start ---------- */
+function shelfCounts(){let n=0,mid=0,sure=0;FACTS.forEach(f=>{const b=box(f.id);if(b>=3)sure++;else if(b>=1)mid++;else n++});return{n,mid,sure}}
+function viewStart(m){
+  const c=shelfCounts(),last=ST.hist[ST.hist.length-1];
+  m.append(h('section',{class:'panel'},
+    h('span',{class:'eyebrow'},ST.sessions?`Sesiunea ${ST.sessions+1}`:'Prima sesiune'),
+    h('p',{class:'prompt'},'Zece întrebări, câte puțin din toată lecția.'),
+    h('p',{class:'sub'},'Exercițiile se schimbă de la o zi la alta: asculți, potrivești, construiești propoziții, scrii. Ce nu iese azi revine mai des.'),
+    h('div',{class:'stats'},
+      h('div',{class:'stat'},h('b',{},String(c.n)),h('span',{},'încă nevăzute')),
+      h('div',{class:'stat'},h('b',{},String(c.mid)),h('span',{},'în lucru')),
+      h('div',{class:'stat'},h('b',{},String(c.sure)),h('span',{},'reușite de 3+ ori la rând'))),
+    last?h('p',{class:'note'},`Data trecută (${last.d}): ${last.ok} din ${last.t} din prima.`):null,
+    h('div',{class:'row'},h('button',{class:'primary',id:'go',onclick:startSession},'Începem'))));
+}
+
+/* ---------- AZI: sesiune ---------- */
+let S=null;
+function startSession(){
+  try{speechSynthesis.cancel()}catch(e){}
+  const facts=pickFacts(10);let prev=null;
+  let q=facts.map(f=>{const ts=typesFor(f,box(f.id));let t=shuffle(ts).find(x=>x!==prev)||ts[0];prev=t;return{fid:f.id,type:t}});
+  const recs=q.filter(x=>isRec(x.type)).slice(0,2);q=[...recs,...q.filter(x=>!recs.includes(x))];
+  S={q,i:0,first:0,firstOk:0,miss:0,missed:new Set(),up:0,easyNext:false};render2();
+}
+function render2(){
+  const m=$('#main');m.innerHTML='';
+  if(S.i>=S.q.length)return endSession(m);
+  let it=S.q[S.i];
+  if(S.easyNext){S.easyNext=false;const f=BY[it.fid];it.type=pick(REC[f.cat].filter(t=>t!=='hear'||voiceOK()))}
+  const f=BY[it.fid];
+  const dots=h('div',{class:'dots','aria-label':`Întrebarea ${S.i+1} din ${S.q.length}`},S.q.map((_,k)=>h('i',{class:k<S.i?'done':k===S.i?'cur':''})));
+  const p=h('section',{class:'panel'},dots);m.append(p);
+  (EX[it.type]||EX.read)(p,f,it);
+}
+const OKS=['Da.','Exact.','Corect.','Bine prins.','Da, asta e.'];
+function feedback(p,it,ok,note,deSay){
+  const f=BY[it.fid];
+  if(!it.retry){S.first++;const r=ST.facts[f.id]||{b:0,s:-99};
+    if(ok){S.firstOk++;r.b=Math.min(5,r.b+1);S.up++}else{r.b=Math.max(0,r.b-2)}
+    r.s=ST.sessions+1;ST.facts[f.id]=r;save()}
+  if(!ok){S.missed.add(f.id);if(!it.retry){const t=pick(REC[f.cat].filter(x=>x!=='hear'||voiceOK()));S.q.splice(Math.min(S.i+3,S.q.length),0,{fid:f.id,type:t,retry:true})}S.miss++}else S.miss=0;
+  const title=ok?(Math.random()<.06?'Sigma.':pick(OKS)):'Încă nu.';
+  const nxt=h('button',{class:'primary',id:'next',onclick:()=>{S.i++;if(S.miss>=2){S.miss=0;return breakPanel()}render2()}},'Mai departe');
+  p.append(h('div',{class:'fb '+(ok?'ok':'notyet'),role:'status'},h('strong',{},title),note?h('p',{},note):null,h('div',{class:'row'},nxt)));
+  if(deSay)say(deSay);nxt.focus({preventScroll:true});nxt.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+function breakPanel(){
+  const m=$('#main');m.innerHTML='';
+  m.append(h('section',{class:'panel'},h('p',{class:'prompt'},'Ultimele două au fost mai grele.'),
+    h('p',{class:'sub'},'Ce ai lucrat până acum e salvat. Alegi tu:'),
+    h('div',{class:'row'},h('button',{class:'primary',onclick:()=>{S.easyNext=true;render2()}},'Continuăm cu ceva mai ușor'),h('button',{class:'ghost',onclick:()=>{S.i=S.q.length;render2()}},'Ajunge pe azi'))));
+}
+function endSession(m){
+  ST.sessions++;const d=new Date().toLocaleDateString('ro-RO',{day:'numeric',month:'short'});
+  ST.hist.push({d,ok:S.firstOk,t:S.first});ST.hist=ST.hist.slice(-30);save();
+  const c=shelfCounts();const miss=[...S.missed].map(id=>BY[id]);
+  m.append(h('section',{class:'panel'},h('span',{class:'eyebrow'},'Gata pe azi'),
+    h('p',{class:'prompt'},`${S.firstOk} din ${S.first} din prima.`),
+    h('p',{class:'sub'},`Pe raftul „reușite de 3+ ori” sunt acum ${c.sure} din ${FACTS.length}. O sesiune scurtă nu spune că o expresie e învățată; spune doar unde suntem azi.`),
+    miss.length?h('div',{class:'group'},h('span',{class:'eyebrow'},'Revin data viitoare'),h('div',{class:'chips'},miss.map(f=>h('button',{class:'chip',onclick:()=>say(sp(f))},h('span',{},f.de),h('span',{class:'ro'},f.ro))))):null,
+    h('div',{class:'row'},h('button',{class:'primary',onclick:()=>{tab='memo';document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x.dataset.tab==='memo'));render()}},'Un Memo?'),h('button',{class:'ghost',onclick:render},'Înapoi'))));
+}
+const sp=f=>f.cat==='verb'?f.de.replace('er/sie','er'):f.de;
+
+/* ---------- explicații: vorbesc despre regulă ---------- */
+function verbRule(f){if(f.verb==='haben'&&f.p>0)return 'haben pierde b-ul la du și er: ich habe, du hast, er/sie hat.';if(f.verb==='sein')return 'sein e neregulat: ich bin, du bist, er/sie ist.';if(f.verb==='heißen'&&f.p>0)return 'La heißen: du heißt, er heißt. ß e deja un fel de s, deci nu se mai adaugă încă un s.';return `Regula: ich → -e, du → -st, er/sie → -t. Deci: ${f.de}.`}
+const WHY={'Wer':'Răspunsul e o persoană („Ich bin Anna”), deci întrebarea e Wer = cine.','Wie':'„Ich heiße…” sau „Sehr gut” răspund la Wie = cum.','Wo':'„in Sibiu” spune locul unde stai, deci Wo = unde.','Woher':'„aus …” spune de unde vii, deci Woher = de unde.','Wie alt':'„… Jahre alt” răspunde la Wie alt = câți ani.'};
+const SPELL={'Frankreich':'Frank-reich: „ei” se citește „ai”, dar se scrie e-i.','Spanien':'Spa-ni-en: la final „ien”, ca la Italien și Brasilien.','Woher':'Wo + her = Woher, un singur cuvânt.','Tschüs':'Începe cu „Tsch” și are ü.','du':'du se scrie d-u.','ich':'ich are trei litere: i-c-h.','heiße':'heiße se scrie cu ß.','heißt':'heißt: ß + t.','Türkei':'Türkei are ü.','Rumänien':'Rumänien are ä.','Grüß dich':'Grüß are ü și ß.'};
+function explain(it,f,correct){
+  switch(it.type){
+    case 'hiBye':return f.kind==='hi'?`„${f.de}” se spune la întâlnire.${f.id==='g5'?' Grüß dich = te salut.':''}`:`„${f.de}” se spune la plecare.`;
+    case 'mood':return ['„'+f.de+'” = '+f.ro+' O stare bună.','„'+f.de+'” = '+f.ro+' Nici bine, nici rău.','„'+f.de+'” = '+f.ro+' O stare proastă.'][f.mood];
+    case 'wGap':return WHY[f.key];
+    case 'verbPick':return verbRule(f);
+    case 'article':return `${f.art} ${f.noun} = ${f.ro}. Articolul se învață lipit de cuvânt.`;
+    case 'flag':case 'tld':case 'vorwahl':return `${f.de} = ${f.ro} · .${f.code} · ${f.vw}`;
+    case 'qa':return `„${f.de}” → „${BY[f.ans].de}”`;
+    case 'build':return `Ordinea: ${f.de}`;
+    default:return `${f.de} = ${f.ro}`;
+  }
+}
+
+/* ---------- distractori ---------- */
+function pool(f){const cats=f.cat==='a'||f.cat==='phrase'?['a','phrase']:f.cat==='intl'||f.cat==='wort'?['wort','intl']:[f.cat];return FACTS.filter(x=>cats.includes(x.cat)&&x.id!==f.id)}
+function distract(f,key,n=3){const seenTxt=new Set([f[key]]);const out=[];for(const x of shuffle(pool(f))){if(!seenTxt.has(x[key])){seenTxt.add(x[key]);out.push(x)}if(out.length>=n)break}return out}
+
+/* ---------- butoane de răspuns ---------- */
+function options(p,items,correctIdx,onDone,{disabled=false,cls=''}={}){
+  const g=h('div',{class:'opts'});const bs=items.map((node,k)=>{const b=h('button',{class:'opt '+cls,disabled,onclick:()=>{bs.forEach(x=>x.disabled=true);bs[correctIdx].classList.add('right');if(k!==correctIdx)b.classList.add('chosen');onDone(k===correctIdx)}},node);g.append(b);return b});
+  p.append(g);return bs;
+}
+function mc(p,f,it,choices,correctNode,{cls='',deSay=f.de}={}){
+  const all=shuffle([...choices.map(x=>({x,c:false})),{x:correctNode,c:true}]);
+  return options(p,all.map(a=>a.x),all.findIndex(a=>a.c),ok=>feedback(p,it,ok,ok?`${f.de} = ${f.ro}`.replace(/= $/,''):explain(it,f),deSay),{cls});
+}
+
+/* ---------- tipurile de exerciții ---------- */
+const EX={
+  read(p,f,it){
+    p.append(h('span',{class:'eyebrow'},'Ce înseamnă?'),h('p',{class:'prompt'},sp(f),sayBtn(sp(f))));
+    const d=distract(f,'ro');mc(p,f,it,d.map(x=>x.ro),f.ro,{deSay:sp(f)});
+  },
+  roDe(p,f,it){
+    p.append(h('span',{class:'eyebrow'},'Cum se spune în germană?'),h('p',{class:'prompt'},f.ro));
+    const d=distract(f,'de');mc(p,f,it,d.map(x=>h('span',{class:'de'},sp(x))),h('span',{class:'de'},sp(f)),{deSay:sp(f)});
+  },
+  hear(p,f,it){
+    p.append(h('span',{class:'eyebrow'},'Ascultă și alege'),h('p',{class:'sub'},'Răspunsurile apar după ce asculți.'));
+    let bs;
+    const play=async r=>{await say(sp(f),r);bs.forEach(b=>{if(!b.classList.contains('right')&&!b.classList.contains('chosen')&&!p.querySelector('.fb'))b.disabled=false})};
+    p.append(h('div',{class:'row'},h('button',{class:'play',html:SPK+'<span>Ascultă</span>',onclick:()=>play(.9)}),h('button',{class:'mini',onclick:()=>play(.6)},'Mai încet'),h('button',{class:'mini',onclick:ev=>{ev.target.replaceWith(h('span',{class:'note'},sp(f)))}},'Nu se aude? Arată textul')));
+    const d=distract(f,'ro');const all=shuffle([...d.map(x=>({x:x.ro,c:false})),{x:f.ro,c:true}]);
+    bs=options(p,all.map(a=>a.x),all.findIndex(a=>a.c),ok=>feedback(p,it,ok,`${sp(f)} = ${f.ro}`,null),{disabled:true});
+  },
+  hiBye(p,f,it){
+    p.append(h('span',{class:'eyebrow'},'Când se spune?'),h('p',{class:'prompt'},f.de,sayBtn(f.de)));
+    options(p,['La întâlnire (salut)','La plecare (la revedere)'],f.kind==='hi'?0:1,ok=>feedback(p,it,ok,explain(it,f),f.de));
+  },
+  mood(p,f,it){
+    p.append(h('span',{class:'eyebrow'},"Wie geht's?"),h('p',{class:'prompt'},f.de,sayBtn(f.de)),h('p',{class:'sub'},'Ce față se potrivește?'));
+    const g=h('div',{class:'faces'});const bs=[0,1,2].map(m=>{const b=h('button',{class:'opt face','aria-label':['bine','la mijloc','rău'][m],html:faceSVG(m)+`<span>${['bine','la mijloc','rău'][m]}</span>`,onclick:()=>{bs.forEach(x=>x.disabled=true);bs[f.mood].classList.add('right');if(m!==f.mood)b.classList.add('chosen');feedback(p,it,m===f.mood,explain(it,f),f.de)}});g.append(b);return b});p.append(g);
+  },
+  qa(p,f,it){
+    p.append(h('span',{class:'eyebrow'},'Alege răspunsul potrivit'),h('p',{class:'prompt'},f.de,sayBtn(f.de)));
+    const a=BY[f.ans];const d=shuffle(FACTS.filter(x=>x.cat==='a'&&x.id!==a.id)).slice(0,3);
+    const all=shuffle([...d.map(x=>({x:x.de,c:false})),{x:a.de,c:true}]);
+    options(p,all.map(x=>h('span',{class:'de'},x.x)),all.findIndex(x=>x.c),ok=>feedback(p,it,ok,ok?`${f.de} → ${a.de}`:explain(it,f),a.de));
+  },
+  wGap(p,f,it){
+    const a=BY[f.ans];
+    p.append(h('span',{class:'eyebrow'},'Ce cuvânt W lipsește?'),h('p',{class:'prompt'},h('span',{class:'gap'},'?'),' '+f.rest),h('p',{class:'sub'},'Răspunsul: ',h('b',{},a.de)));
+    const W=['Wer','Wie','Wo','Woher','Wie alt'];options(p,W,W.indexOf(f.key),ok=>feedback(p,it,ok,explain(it,f),f.de));
+  },
+  verbPick(p,f,it){
+    const V=VERBS[f.verb];
+    p.append(h('span',{class:'eyebrow'},`${f.verb} = ${V.ro}`),h('p',{class:'prompt',html:V.s[f.p].replace('___','<span class="gap">?</span>')}));
+    options(p,V.opts,V.opts.indexOf(f.form),ok=>feedback(p,it,ok,ok?`${V.s[f.p].replace('___',f.form)}`:verbRule(f),V.s[f.p].replace('___',f.form)));
+  },
+  article(p,f,it){
+    p.append(h('span',{class:'eyebrow'},'der, die sau das?'),h('p',{class:'prompt'},h('span',{class:'gap'},'?'),' '+f.noun,sayBtn(f.de)),h('p',{class:'sub'},f.ro));
+    const A=['der','die','das'];options(p,A.map(x=>h('span',{class:'art-'+x},x)),A.indexOf(f.art),ok=>feedback(p,it,ok,explain(it,f),f.de),{cls:'art'});
+  },
+  flag(p,f,it){
+    p.append(h('span',{class:'eyebrow'},'Al cui e steagul?'),h('div',{html:flagSVG(f.code,'flag big-flag')}));
+    const d=distract(f,'de');mc(p,f,it,d.map(x=>h('span',{class:'de'},x.de)),h('span',{class:'de'},f.de));
+  },
+  tld(p,f,it){
+    p.append(h('span',{class:'eyebrow'},'Internetkennung · ce țară?'),h('p',{class:'tld'},'.'+f.code));
+    const d=distract(f,'de');mc(p,f,it,d.map(x=>h('span',{class:'de'},x.de)),h('span',{class:'de'},f.de));
+  },
+  vorwahl(p,f,it){
+    const N=['null','eins','zwei','drei','vier','fünf','sechs','sieben','acht','neun'];const words=[...f.vw].map(c=>N[+c]).join(' ');
+    p.append(h('span',{class:'eyebrow'},'Vorwahl · ce țară are prefixul?'));
+    if(voiceOK())p.append(h('div',{class:'row'},h('button',{class:'play',html:SPK+'<span>Ascultă prefixul</span>',onclick:()=>say(words,.75)}),h('button',{class:'mini',onclick:ev=>{ev.target.replaceWith(h('span',{class:'tld'},f.vw))}},'Arată cifrele')));
+    else p.append(h('p',{class:'prompt'},words),h('p',{class:'sub'},'Citește cifrele în gând, una câte una.'));
+    const d=distract(f,'de');mc(p,f,it,d.map(x=>h('span',{class:'de'},x.de)),h('span',{class:'de'},f.de),{deSay:f.de});
+  },
+  type(p,f,it){
+    let ask,hint=null;
+    if(f.cat==='verb'){ask=h('span',{},PERS[f.p]+' ',h('span',{class:'gap'},'?'));hint=`${f.verb} = ${VERBS[f.verb].ro} · ${f.ro}`}
+    else if(f.cat==='land'){ask=f.ro;hint='Scrie numele țării în germană.'}
+    else if(f.cat==='wort'){ask=h('span',{},h('span',{class:'art-'+f.art},f.art),' ',h('span',{class:'gap'},'?'));hint=f.ro}
+    else{ask=f.ro;hint='Scrie în germană.'}
+    p.append(h('span',{class:'eyebrow'},'Scrie'),h('p',{class:'prompt'},ask),h('p',{class:'sub'},hint));
+    if(f.cat==='land')p.append(h('div',{html:flagSVG(f.code,'flag big-flag')}));
+    const inp=h('input',{class:'txt',id:'ans',autocomplete:'off',autocapitalize:'off',spellcheck:'false','aria-label':'Răspunsul tău'});
+    const keys=h('div',{class:'keys'},['ä','ö','ü','ß'].map(k=>h('button',{type:'button',onclick:()=>{const s=inp.selectionStart??inp.value.length;inp.value=inp.value.slice(0,s)+k+inp.value.slice(inp.selectionEnd??s);inp.focus();inp.setSelectionRange(s+1,s+1)}},k)));
+    const go=h('button',{class:'primary',onclick:check},'Verifică');
+    p.append(inp,h('div',{class:'row'},keys,go));setTimeout(()=>inp.focus({preventScroll:true}),50);
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!go.disabled)check()});
+    function check(){
+      if(!inp.value.trim())return;go.disabled=true;inp.disabled=true;keys.querySelectorAll('button').forEach(b=>b.disabled=true);
+      const r=compare(inp.value,f.typ,f.alt);const tip=SPELL[f.typ]||'';const say1=f.cat==='verb'?sp(f):f.de;
+      if(r==='ok')return feedback(p,it,true,`${f.typ}${tip&&Math.random()<.4?' · '+tip:''}`,say1);
+      if(r==='ss')return feedback(p,it,true,`Se scrie ${f.typ}, cu ß. Pe tastatură e butonul ß de mai sus.`,say1);
+      const why=r==='uml'?`Se scrie ${f.typ}: are literă cu puncte.`:r==='close'?`Se scrie ${f.typ}. O singură literă diferă.`:`Răspunsul: ${f.typ}.`;
+      feedback(p,it,false,`${why} ${tip}`.trim(),say1);
+      const copy=h('input',{class:'txt',id:'copy',placeholder:'Scrie-l o dată după model',autocomplete:'off',spellcheck:'false','aria-label':'Copiază după model'});
+      const fb=p.querySelector('.fb');fb.insertBefore(copy,fb.lastChild);
+      copy.addEventListener('input',()=>{if(compare(copy.value,f.typ,f.alt)==='ok'){copy.disabled=true;copy.style.borderColor='var(--ok)';$('#next').focus()}});
+      copy.addEventListener('keydown',e=>{if(e.key==='Enter')$('#next').click()});
+    }
+  },
+  build(p,f,it){
+    const target=f.de.replace(/[.!?,]/g,'').split(' ');
+    p.append(h('span',{class:'eyebrow'},'Construiește propoziția'),h('p',{class:'prompt'},f.ro));
+    const b=builder(target,distractorFor(target),words=>{b.lock();const ok=words.join(' ')===target.join(' ');feedback(p,it,ok,ok?f.de:explain(it,f),f.de)});p.append(b);
+  }
+};
+const PAIRS={'wohne':'wohnst','wohnst':'wohne','komme':'kommst','kommst':'komme','heiße':'heißt','heißt':'heiße','bin':'bist','bist':'bin','habe':'hast','hast':'habe','einen':'eine','eine':'einen','Wo':'Woher','Woher':'Wo','Wer':'Wie','Wie':'Wer','ist':'bist'};
+function distractorFor(t){for(const w of t)if(PAIRS[w]&&!t.includes(PAIRS[w]))return[PAIRS[w]];return[]}
+function builder(target,extra,onCheck){
+  const tiles=shuffle([...target,...extra]).map(w=>({w,used:false}));const placed=[];let locked=false;
+  const line=h('div',{class:'line'}),bank=h('div',{class:'bank'});
+  const btn=h('button',{class:'primary',onclick:()=>onCheck(placed.map(t=>t.w))},'Verifică');
+  function draw(){line.innerHTML='';bank.innerHTML='';
+    placed.forEach((t,k)=>line.append(h('button',{class:'tile on',disabled:false,onclick:()=>{if(locked)return;placed.splice(k,1);t.used=false;draw()}},t.w)));
+    if(!placed.length)line.append(h('span',{class:'ph'},'Atinge cuvintele în ordine'));
+    tiles.forEach(t=>bank.append(h('button',{class:'tile',disabled:t.used||locked,onclick:()=>{t.used=true;placed.push(t);say(t.w,1);draw()}},t.w)));
+    btn.disabled=locked||placed.length!==target.length}
+  const wrap=h('div',{class:'builder'},line,bank,h('div',{class:'row'},btn,extra.length?h('span',{class:'note'},'Un cuvânt e în plus.'):null));
+  wrap.lock=()=>{locked=true;draw()};draw();return wrap;
+}
+function norm(s){return s.toLowerCase().replace(/[.!?,]/g,'').replace(/\s+/g,' ').trim()}
+function lev(a,b){const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+function compare(given,target,alt=[]){
+  const g=norm(given);const ts=[target,...alt].map(norm);
+  if(ts.includes(g))return'ok';
+  const ss=x=>x.replace(/ß/g,'ss');if(ts.map(ss).includes(ss(g)))return'ss';
+  const um=x=>ss(x).replace(/ä/g,'a').replace(/ö/g,'o').replace(/ü/g,'u');if(ts.map(um).includes(um(g)))return'uml';
+  if(ts.some(t=>lev(g,t)<=1&&t.length>3))return'close';return'no';
+}
+
+/* ---------- MEMO ---------- */
+let memoDeck='land';
+function viewMemo(m){
+  const decks={land:'Țări',qa:'Întrebare ↔ răspuns',words:'Cuvinte DE ↔ RO',art:'Cuvânt ↔ articol'};
+  let pairs=[];
+  if(memoDeck==='land')pairs=shuffle(FACTS.filter(f=>f.cat==='land')).slice(0,6).map(f=>[{html:flagSVG(f.code)},{t:f.de,s:f.de}]);
+  if(memoDeck==='qa')pairs=shuffle(FACTS.filter(f=>f.cat==='q')).slice(0,6).map(f=>[{t:f.de,s:f.de},{t:BY[f.ans].de,s:BY[f.ans].de}]);
+  if(memoDeck==='words')pairs=shuffle(FACTS.filter(f=>['greet','w','feel','wort','intl'].includes(f.cat))).filter((f,i,a)=>a.findIndex(x=>x.ro===f.ro)===i).slice(0,6).map(f=>[{t:f.de,s:f.de},{t:f.ro}]);
+  if(memoDeck==='art')pairs=shuffle(FACTS.filter(f=>f.cat==='wort'||f.cat==='intl')).slice(0,6).map(f=>[{t:f.noun,s:f.de},{t:f.ro}]);
+  const cards=shuffle(pairs.flatMap((p,i)=>p.map(c=>({...c,pair:i}))));
+  let open=[],moves=0,found=0,busy=false;
+  const info=h('p',{class:'sub'},'Întoarce două cartonașe. Cele în germană se aud.');
+  const grid=h('div',{class:'memo'});
+  const els=cards.map((c,k)=>{const b=h('button',{class:'card','aria-label':'cartonaș '+(k+1),onclick:()=>flip(k)});b.append(h('span',{class:'back-mark'},'?'));grid.append(b);return b});
+  function face(k){const c=cards[k],b=els[k];b.innerHTML='';if(c.html)b.innerHTML=c.html;else b.append(c.t);b.classList.add('open')}
+  function hide(k){const b=els[k];b.innerHTML='';b.append(h('span',{class:'back-mark'},'?'));b.classList.remove('open')}
+  function flip(k){if(busy||open.includes(k)||els[k].classList.contains('done'))return;face(k);if(cards[k].s)say(cards[k].s);open.push(k);
+    if(open.length===2){moves++;const[a,b]=open;if(cards[a].pair===cards[b].pair){els[a].classList.add('done');els[b].classList.add('done');open=[];found++;
+        if(found===pairs.length){const best=ST.memo[memoDeck];if(!best||moves<best){ST.memo[memoDeck]=moves;save()}info.textContent=`Toate perechile în ${moves} încercări.`+(best?` Recordul tău la jocul ăsta: ${Math.min(best,moves)}.`:'')}}
+      else{busy=true;setTimeout(()=>{hide(a);hide(b);open=[];busy=false},1100)}}}
+  const sel=h('div',{class:'row'},Object.entries(decks).map(([k,v])=>h('button',{class:k===memoDeck?'primary':'ghost',onclick:()=>{memoDeck=k;render()}},v)));
+  m.append(h('section',{class:'panel'},h('span',{class:'eyebrow'},'Memo'),sel,info,grid,h('div',{class:'row'},h('button',{class:'ghost',onclick:render},'Amestecă din nou'))));
+}
+
+/* ---------- DAS BIN ICH ---------- */
+let P={name:'Aron',age:'elf',city:'Sibiu',land:'Rumänien',sib:'keine Geschwister',mood:'gut'},step=0;
+function viewIch(m){
+  const steps=[
+    {q:'Wie heißt du?',ro:'Cum te numești?',input:'name',label:'Numele tău',build:()=>['Ich','heiße',P.name]},
+    {q:'Wie alt bist du?',ro:'Câți ani ai?',choose:['age',[['zehn','10'],['elf','11'],['zwölf','12'],['dreizehn','13']]],build:()=>['Ich','bin',P.age,'Jahre','alt']},
+    {q:'Wo wohnst du?',ro:'Unde locuiești?',input:'city',label:'Orașul',build:()=>['Ich','wohne','in',P.city]},
+    {q:'Woher kommst du?',ro:'De unde ești?',choose:['land',FACTS.filter(f=>f.cat==='land').map(f=>[f.de.replace('die ','der '),f.ro])],build:()=>['Ich','komme','aus',...P.land.split(' ')]},
+    {q:'Hast du Geschwister?',ro:'Ai frați sau surori?',choose:['sib',[['einen Bruder','un frate'],['eine Schwester','o soră'],['einen Bruder und eine Schwester','un frate și o soră'],['zwei Brüder','doi frați'],['zwei Schwestern','două surori'],['keine Geschwister','nu am frați sau surori']]],build:()=>['Ich','habe',...P.sib.split(' ')]},
+    {q:"Wie geht's?",ro:'Ce mai faci?',mood:true}
+  ];
+  const panel=h('section',{class:'panel'});m.append(panel);
+  if(step>=steps.length)return profileCard(panel);
+  const s=steps[step];
+  panel.append(h('span',{class:'eyebrow'},`Interviu · ${step+1} din ${steps.length}`),
+    h('div',{class:'row'},h('button',{class:'play',html:SPK+'<span>Ascultă întrebarea</span>',onclick:()=>say(s.q)})),
+    h('p',{class:'prompt'},s.q),h('p',{class:'sub'},s.ro));
+  const next=()=>{step++;render()};
+  if(s.mood){
+    const opts=[['super','Mir geht es super.',0],['gut','Mir geht es gut.',0],['so lala','Mir geht es so lala.',1],['nicht so gut','Mir geht es nicht so gut.',2]];
+    panel.append(h('div',{class:'opts'},opts.map(o=>h('button',{class:'opt',onclick:()=>{P.mood=o[0];say(o[1]);next()}},h('span',{class:'de'},o[1])))));
+    return;
+  }
+  const area=h('div',{class:'builder'});panel.append(area);
+  const goBuild=()=>{area.innerHTML='';const target=s.build();const fbx=h('div');
+    const b=builder(target,distractorFor(target),w=>{if(w.join(' ')===target.join(' ')){b.lock();const sent=target.join(' ')+'.';say(sent);fbx.replaceChildren(h('div',{class:'fb ok'},h('strong',{},sent),h('p',{},'Spune-o și tu cu voce tare, o dată.'),h('div',{class:'row'},h('button',{class:'primary',onclick:next},'Următoarea întrebare'))))}else{fbx.replaceChildren(h('div',{class:'fb notyet'},h('strong',{},'Încă nu.'),h('p',{},`Propoziția începe cu „${target[0]} ${target[1]}”. Mută cuvintele și verifică din nou.`)))}});
+    area.append(b,fbx)};
+  if(s.input){const inp=h('input',{class:'txt',id:'ich-'+s.input,value:P[s.input],'aria-label':s.label});area.append(h('span',{class:'note'},s.label),inp,h('div',{class:'row'},h('button',{class:'primary',onclick:()=>{P[s.input]=inp.value.trim()||P[s.input];goBuild()}},'Mai departe')))}
+  else{const[k,list]=s.choose;area.append(h('div',{class:'opts'},list.map(([de,ro])=>h('button',{class:'opt',onclick:()=>{P[k]=de;say(de);goBuild()}},h('span',{class:'de'},de),h('br'),h('span',{class:'note'},ro)))))}
+}
+function profileCard(panel){
+  const lines=[`Ich heiße ${P.name}.`,`Ich bin ${P.age} Jahre alt.`,`Ich wohne in ${P.city}.`,`Ich komme aus ${P.land}.`,`Ich habe ${P.sib}.`,`Mir geht es ${P.mood}.`];
+  panel.append(h('span',{class:'eyebrow'},'Gata'),h('div',{class:'profile'},h('h2',{},'Das bin ich!'),lines.map(l=>h('p',{},l,sayBtn(l)))),
+    h('p',{class:'sub'},'Ascultă tot, apoi spune cele șase propoziții cu voce tare fără să te uiți. Asta e exact exercițiul 8 din fișa de recapitulare.'),
+    h('div',{class:'row'},h('button',{class:'play',html:SPK+'<span>Ascultă tot</span>',onclick:async()=>{for(const l of lines){await say(l,.85)}}}),h('button',{class:'ghost',onclick:()=>{step=0;render()}},'Încă o dată')));
+}
+
+/* ---------- HARTA CUVINTELOR ---------- */
+function viewMap(m){
+  const lv=id=>h('span',{class:'lv','aria-label':'nivel '+box(id)},[0,1,2,3,4].map(k=>h('i',{class:k<box(id)?'f':''})));
+  const chip=(f,top)=>h('button',{class:'chip',onclick:()=>say(sp(f))},top||h('span',{},f.de),h('span',{class:'ro'},f.ro),lv(f.id));
+  const grp=(t,list,fn)=>h('div',{class:'group'},h('h3',{},t),h('div',{class:'chips'},list.map(f=>fn?fn(f):chip(f))));
+  const C=c=>FACTS.filter(f=>f.cat===c);
+  const vt=h('div',{class:'verbs'},h('table',{},h('thead',{},h('tr',{},h('th',{},''),Object.keys(VERBS).map(v=>h('th',{},`${v} (${VERBS[v].ro})`)))),
+    h('tbody',{},PERS.map((pp,p)=>h('tr',{},h('td',{},h('b',{},pp)),Object.entries(VERBS).map(([v,d])=>{const f=d.f[p];const stem=v==='sein'?'':f.replace(/(e|st|t)$/,'');return h('td',{class:'end'},h('button',{class:'say',style:'color:inherit;font:inherit',onclick:()=>say(`${pp.replace('er/sie','er')} ${f}`)},stem,h('b',{},f.slice(stem.length))))}))))));
+  m.append(h('section',{class:'panel'},h('span',{class:'eyebrow'},'Toată lecția pe o pagină · atinge ca să auzi'),
+    h('p',{class:'note'},'Bulinele verzi arată de câte ori la rând a ieșit fiecare (până la 5).'),
+    grp('Salut / la revedere',C('greet')),
+    grp("Wie geht's?",C('feel'),f=>chip(f,h('span',{style:'display:flex;gap:6px;align-items:center'},h('span',{style:'width:22px;height:22px;display:inline-block',html:faceSVG(f.mood)}),f.de))),
+    grp('Cuvintele W',C('w')),
+    grp('Întrebare → răspuns',C('q'),f=>h('button',{class:'chip',onclick:async()=>{await say(f.de);say(BY[f.ans].de)}},h('span',{},f.de),h('span',{},'→ '+BY[f.ans].de),h('span',{class:'ro'},f.ro),lv(f.id))),
+    grp('Die Länder',C('land'),f=>chip(f,h('span',{style:'display:flex;gap:8px;align-items:center'},h('span',{style:'width:28px;display:inline-block',html:flagSVG(f.code)}),f.de,h('span',{class:'ro',style:'font-family:var(--mono)'},`.${f.code} · ${f.vw}`)))),
+    grp('Wörter (der · die · das)',[...C('wort'),...C('intl')],f=>chip(f,h('span',{},h('b',{class:'art-'+f.art},f.art),' '+f.noun))),
+    h('div',{class:'group'},h('h3',{},'Verbele'),h('p',{class:'note'},'ich → -e · du → -st · er/sie → -t. sein e neregulat.'),vt)));
+}
+render();$("#voice").addEventListener("click",soundTest);
+</script>
+
+</body>
+</html>
