@@ -720,7 +720,7 @@ var SUPABASE_URL = "PASTE_SUPABASE_URL_AICI";
 var SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY_AICI";
 /* ==================== */
 
-var APP_VERSION="2026-10-06a";
+var APP_VERSION="2026-11-10a";
 /* Versiunea se vede și pe primul ecran, fără PIN. */
 try{document.addEventListener("DOMContentLoaded",function(){var e=document.getElementById("profVer");if(e)e.textContent="versiune "+APP_VERSION;});}catch(e){}
 /* Iconițele recompenselor, încorporate ca date: se urcă un singur fișier,
@@ -1813,6 +1813,9 @@ var MATERII={
   biologie: {nume:"biologie",     ico:"🌿", cls:"bio"},
   engleza:  {nume:"engleză",      ico:"🇬🇧", cls:"eng"},
   germana:  {nume:"germană",      ico:"🇩🇪", cls:"ger"},
+  /* TIC (10 nov 2026): intră doar ca întrebări de coadă în testele altor
+     materii, nu ca test separat; de aceea împrumută culoarea recapitulării. */
+  tic:      {nume:"TIC",          ico:"💻", cls:"mix"},
   mixt:     {nume:"recapitulare", ico:"🎯", cls:"mix"}
 };
 function mat(s){return MATERII[s]||MATERII.romana;}
@@ -2423,7 +2426,7 @@ async function finishQuiz(stoppedEarly){
    Prețurile sunt vizibile de la început, inclusiv ce nu-și permite, cu
    distanța până acolo. Țintele inaccesibile-dar-vizibile sunt motorul
    economisirii — de aceea nimic nu se ascunde. */
-var LUNI_SCURT=["ian","feb","mar","apr","mai","iun","iul","aug","sep","oct","noi","dec"];
+var LUNI_SCURT=["ian","feb","mar","apr","mai","iun","iul","aug","sep","oct","nov","dec"];
 function ziScurt(s){
   var p=String(s).slice(0,10).split("-");
   if(p.length<3)return String(s);
