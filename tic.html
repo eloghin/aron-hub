@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TIC · Calculatorul, pe înțeles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Lexend:wght@400;500;600&display=swap">
+<style>
+/* Lecție TIC în două părți, din lecțiile prof. Dăncăneț (folderul TIC). O coloană, max 640px. */
+:root{
+  --bg:#eef1f6; --surface:#fff; --ink:#152033; --muted:#5a6578; --line:#d6dce6;
+  --accent:#2747d0; --accent-ink:#fff; --soft:#e7ecfb;
+  --ok:#1d8655; --ok-bg:#e3f4ec; --notyet:#b8640f; --notyet-bg:#fbefe0;
+  --in:#2f63d8; --out:#c2410c; --both:#7c3aed;
+  --display:"Bricolage Grotesque",system-ui,sans-serif; --body:"Lexend",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0e131b; --surface:#171f2b; --ink:#e7ecf4; --muted:#9aa6b8; --line:#2a3546;
+  --accent:#8099ff; --accent-ink:#0e131b; --soft:#1e2840;
+  --ok:#52c690; --ok-bg:#16301f; --notyet:#f0a35a; --notyet-bg:#33240f;
+  --in:#7ea2ff; --out:#fb923c; --both:#b794f6; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding:20px 16px 56px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font-family:var(--display);font-weight:800;font-size:1.6rem;margin:0;letter-spacing:-.01em}
+h1 small{display:block;font-family:var(--body);font-weight:500;font-size:.85rem;color:var(--muted)}
+h2{font-family:var(--display);font-weight:800;font-size:1.25rem;margin:0 0 6px}
+p{margin:0 0 10px}
+.tabs{display:flex;gap:8px}
+.tab{flex:1;font:inherit;font-weight:600;padding:10px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tab .done{font-size:.8rem;font-weight:500}
+.dots{display:flex;gap:6px;justify-content:center}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.dot.on{background:var(--accent)}
+.dot.past{background:var(--ok)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.muted{color:var(--muted);font-size:.9rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.tile{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--bg)}
+.tile b{display:block}
+.tile .big{font-size:1.6rem;line-height:1}
+.tile span{font-size:.85rem;color:var(--muted)}
+.flow{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.flow div{border-radius:10px;padding:8px 12px;background:var(--soft)}
+.keep{border-left:4px solid var(--accent);background:var(--soft);padding:10px 12px;border-radius:8px;margin-top:8px}
+.btn{font:inherit;font-weight:600;padding:12px 18px;border-radius:12px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer;width:100%}
+.btn.sec{background:var(--surface);color:var(--ink);border:1.5px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:8px;margin-top:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{font:inherit;font-size:.92rem;padding:8px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+.chip.ok{background:var(--ok-bg);border-color:var(--ok)}
+.chip.ny{background:var(--notyet-bg);border-color:var(--notyet)}
+.cols{display:grid;gap:8px}
+.col{border:1.5px dashed var(--line);border-radius:12px;padding:8px;min-height:56px;cursor:pointer;background:var(--bg)}
+.col h3{margin:0 0 4px;font-size:.85rem;font-weight:600}
+.col .chips{margin:4px 0 0}
+.opt{display:block;width:100%;text-align:left;font:inherit;padding:12px 14px;margin:8px 0 0;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok)}
+.opt.ny{background:var(--notyet-bg);border-color:var(--notyet)}
+.fb{margin-top:10px;padding:10px 12px;border-radius:10px;font-size:.95rem}
+.fb.ok{background:var(--ok-bg)}
+.fb.ny{background:var(--notyet-bg)}
+.seq{display:flex;flex-direction:column;gap:6px;margin:10px 0;min-height:20px}
+.seq div{padding:8px 12px;border-radius:10px;background:var(--soft)}
+input.num{font:inherit;font-size:1.1rem;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);width:160px}
+.qn{font-weight:600;margin:14px 0 0}
+.end{text-align:center}
+.end .big{font-size:2.4rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a href="./" style="color:var(--muted);font-size:.9rem;text-decoration:none">← înapoi în hub</a>
+    <h1>Calculatorul, pe înțeles<small>TIC · clasa a V-a · după lecțiile de la oră</small></h1>
+  </header>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t0" onclick="return openPart(0)">Partea 1<br><span class="done" id="d0">componente și periferice</span></button>
+    <button class="tab" role="tab" id="t1" onclick="return openPart(1)">Partea 2<br><span class="done" id="d1">stocare, istorie, sistem de operare</span></button>
+  </div>
+  <div class="dots" id="dots"></div>
+  <main id="stage"></main>
+</div>
+<script>
+"use strict";
+/* ---------- Conținutul: din cele 5 prezentări din folderul TIC ---------- */
+var PARTS=[
+ {title:"Partea 1", steps:[
+  {kind:"card", html:
+   "<h2>Calculatorul e o bucătărie</h2>"+
+   "<p>Toate piesele calculatorului au câte o treabă. Ca să le ții minte, gândește-te la o bucătărie de restaurant.</p>"+
+   "<div class='grid2'>"+
+   "<div class='tile'><div class='big'>👨‍🍳</div><b>Procesorul (CPU)</b><span>bucătarul: face toate calculele și coordonează totul</span></div>"+
+   "<div class='tile'><div class='big'>🍽️</div><b>Memoria RAM</b><span>masa de lucru: ține ce folosești acum; seara se strânge tot</span></div>"+
+   "<div class='tile'><div class='big'>🗄️</div><b>Stocarea (HDD, SSD)</b><span>dulapul: păstrează lucrurile și peste noapte</span></div>"+
+   "<div class='tile'><div class='big'>🛤️</div><b>Placa de bază</b><span>holurile: leagă toate piesele prin trasee numite magistrale</span></div>"+
+   "<div class='tile'><div class='big'>🔌</div><b>Sursa de alimentare</b><span>ia curentul din priză și dă energie fiecărei piese</span></div>"+
+   "<div class='tile'><div class='big'>🌀</div><b>Sistemul de răcire</b><span>hota: ventilatoarele și radiatoarele scot căldura</span></div>"+
+   "</div>"+
+   "<div class='keep'><b>Ține minte:</b> RAM-ul e <b>volatil</b>: se golește când oprești calculatorul. De aceea o poveste nesalvată dispare la o pană de curent, iar un joc salvat pe SSD rămâne.</div>"},
+  {kind:"quiz", title:"Verifici bucătăria", qs:[
+   {q:"Cine face calculele și coordonează calculatorul?", o:["procesorul (CPU)","memoria RAM","placa de bază"], c:0, r:"Procesorul e bucătarul: el lucrează, ceilalți îl ajută."},
+   {q:"Se ia curentul. Ce se pierde?", o:["ce era doar în RAM, nesalvat","jocurile salvate pe SSD","tot ce e pe hard disk"], c:0, r:"RAM-ul e masa de lucru și se golește. Dulapul (HDD, SSD) păstrează."},
+   {q:"Ce face placa de bază?", o:["leagă toate componentele","transformă curentul din priză","răcește procesorul"], c:0, r:"Placa de bază leagă piesele prin magistrale. Curentul îl transformă sursa."}
+  ]},
+  {kind:"card", html:
+   "<h2>Drumul datelor</h2>"+
+   "<p>Orice faci pe calculator trece prin aceleași patru etape. Exemplu: apeși tasta <b>A</b> într-un document.</p>"+
+   "<div class='flow'>"+
+   "<div><b>1. Introducere</b> · apeși tasta (tastatura)</div>"+
+   "<div><b>2. Procesare</b> · procesorul înțelege ce ai apăsat</div>"+
+   "<div><b>3. Stocare / memorie</b> · litera stă în RAM; când salvezi, ajunge pe SSD</div>"+
+   "<div><b>4. Ieșire</b> · litera A apare pe monitor</div>"+
+   "</div>"+
+   "<p class='muted'>Prescurtat: intră → se lucrează → se păstrează → iese.</p>"},
+  {kind:"order", title:"Pune etapele în ordine", hint:"Atinge-le pe rând, de la prima la ultima.",
+   items:["Introducere","Procesare","Stocare / memorie","Ieșire"], r:"Ordinea e: intră → se lucrează → se păstrează → iese."},
+  {kind:"card", html:
+   "<h2>Perifericele = ușile bucătăriei</h2>"+
+   "<p>„Periferic” vine din greacă și înseamnă <b>ce se află în jur</b>. Sunt dispozitivele legate la unitatea centrală, cu fir sau fără fir.</p>"+
+   "<div class='flow'>"+
+   "<div style='border-left:4px solid var(--in)'><b>Intrare</b> · informația merge de la om spre calculator<br><span class='muted'>tastatură, mouse, microfon, scanner, cameră web</span></div>"+
+   "<div style='border-left:4px solid var(--out)'><b>Ieșire</b> · de la calculator spre om<br><span class='muted'>monitor, boxe, căști, imprimantă, videoproiector</span></div>"+
+   "<div style='border-left:4px solid var(--both)'><b>Intrare / ieșire</b> · în ambele sensuri<br><span class='muted'>ecran tactil, stick USB, imprimantă multifuncțională</span></div>"+
+   "</div>"+
+   "<div class='keep'><b>Truc:</b> întreabă-te „ce face omul cu el?”. Dacă dă comenzi → intrare. Dacă primește ceva (vede, aude, ține foaia în mână) → ieșire. Dacă le face pe amândouă → ambele.</div>"},
+  {kind:"sort", title:"Sortează perifericele", hint:"Atinge un dispozitiv, apoi coloana lui. Trei merg la „ambele”.",
+   cols:["Intrare","Ieșire","Intrare / ieșire"],
+   items:[["tastatură",0],["boxe",1],["ecran tactil",2],["microfon",0],["imprimantă",1],["stick USB",2],["cameră web",0],["videoproiector",1],["imprimantă multifuncțională",2]],
+   r:{"ecran tactil":"Arată imagini (ieșire) și preia atingeri (intrare).","stick USB":"Pe stick se scrie și de pe el se citește.","imprimantă multifuncțională":"Are scanner (intrare) și imprimantă (ieșire).","microfon":"Microfonul preia vocea, deci duce spre calculator.","cameră web":"Camera trimite imaginea spre calculator.","boxe":"Boxele redau sunetul spre om.","videoproiector":"Proiectează imaginea spre om.","imprimantă":"Tipărește pe hârtie ce vine din calculator.","tastatură":"Prin ea dai comenzi."}},
+  {kind:"end", html:"<div class='big'>✅</div><h2>Partea 1, gata</h2><p>Mâine: partea 2 (unde se păstrează datele, cum au evoluat calculatoarele și ce face sistemul de operare).</p>"}
+ ]},
+ {title:"Partea 2", steps:[
+  {kind:"card", html:
+   "<h2>Dulapurile: dispozitivele de stocare</h2>"+
+   "<p>Textele, pozele, muzica și jocurile sunt <b>date</b>. Le păstrăm pe un dispozitiv de stocare. Diferă prin <b>cum</b> scriu datele:</p>"+
+   "<div class='flow'>"+
+   "<div><b>🧲 Magnetic</b> · discuri care se rotesc<br><span class='muted'>HDD (hard disk): încape mult, e ieftin</span></div>"+
+   "<div><b>💿 Optic</b> · o rază laser citește discul<br><span class='muted'>CD, DVD, Blu-ray</span></div>"+
+   "<div><b>⚡ Electronic (flash)</b> · cipuri, fără piese care se mișcă<br><span class='muted'>SSD (mult mai rapid decât HDD), stick USB, card de memorie</span></div>"+
+   "</div>"+
+   "<p class='muted'>Mai există și stocarea în cloud: datele stau pe servere și ajungi la ele prin internet.</p>"},
+  {kind:"sort", title:"Cum păstrează datele?", hint:"Atinge un dispozitiv, apoi coloana lui.",
+   cols:["Magnetic","Optic","Flash"],
+   items:[["HDD",0],["DVD",1],["SSD",2],["CD",1],["stick USB",2],["Blu-ray",1],["card de memorie",2]],
+   r:{"HDD":"Hard disk-ul are discuri care se rotesc: magnetic.","SSD":"SSD-ul are cipuri, nimic nu se rotește: flash.","DVD":"Discurile se citesc cu laser: optic.","CD":"Discurile se citesc cu laser: optic.","Blu-ray":"Discurile se citesc cu laser: optic.","stick USB":"Stick-ul are cipuri: flash.","card de memorie":"Cardul are cipuri: flash."}},
+  {kind:"card", html:
+   "<h2>Scara unităților</h2>"+
+   "<p>Cea mai mică unitate e <b>bitul</b>: 0 sau 1. Opt biți fac un <b>byte</b> (octet), cât încape o literă.</p>"+
+   "<div class='flow'><div style='text-align:center'><b>bit → B → KB → MB → GB → TB → PB</b></div></div>"+
+   "<p>1 B = 8 biți. De la byte în sus, fiecare treaptă e de <b>1024</b> de ori mai mare.</p>"+
+   "<div class='keep'><b>Urci</b> pe scară (de la MB la GB) → <b>împarți</b> la 1024.<br><b>Cobori</b> (de la GB la MB) → <b>înmulțești</b> cu 1024.</div>"+
+   "<p class='muted' style='margin-top:10px'>Ca să-ți faci o idee: o literă ≈ 1 B, o pagină de text ≈ 2 KB, o melodie MP3 ≈ 4 MB, un film HD: câțiva GB.</p>"},
+  {kind:"quiz", title:"Urci sau cobori?", qs:[
+   {q:"2 GB = ? MB", num:"2048", r:"Cobori de la GB la MB, deci înmulțești: 2 · 1024 = 2048."},
+   {q:"3 B = ? biți", num:"24", r:"1 B = 8 biți, deci 3 · 8 = 24."},
+   {q:"Care e mai mare?", o:["1 TB","900 GB","2000 MB"], c:0, r:"1 TB = 1024 GB, mai mult decât 900 GB. 2000 MB sunt sub 2 GB."}
+  ]},
+  {kind:"card", html:
+   "<h2>Din săli întregi, în buzunar</h2>"+
+   "<p>Cele șase momente din lecție, de la cel mai vechi:</p>"+
+   "<div class='flow'>"+
+   "<div><b>1. Abacul</b> · antichitate · bile mutate cu mâna, fără curent</div>"+
+   "<div><b>2. Pascalina</b> · în jurul anului 1642 · roți dințate, tot fără curent</div>"+
+   "<div><b>3. Tuburile electronice</b> · anii 1940 · primele calculatoare electronice, cât o cameră</div>"+
+   "<div><b>4. Tranzistorii și circuitele integrate</b> · anii 1950–1960 · piese mult mai mici</div>"+
+   "<div><b>5. Microprocesorul și PC-ul</b> · anii 1970–1980 · un cip face calculele, calculatorul ajunge acasă</div>"+
+   "<div><b>6. Internetul și telefonul</b> · din anii 1990 · totul în rețea, telefonul e un calculator</div>"+
+   "</div>"+
+   "<p class='muted'>Firul roșu: piesele se micșorează, calculatoarele devin mai rapide, mai ieftine și ajung la tot mai mulți oameni.</p>"},
+  {kind:"order", title:"Așază pe axa timpului", hint:"De la cel mai vechi la cel mai nou.",
+   items:["Abacul","Pascalina","Tuburile electronice","Tranzistorii","Microprocesorul și PC-ul","Internetul și telefonul"], r:"Firul roșu: fără curent → electronic și mare → tot mai mic și mai rapid."},
+  {kind:"card", html:
+   "<h2>Sistemul de operare: dirijorul</h2>"+
+   "<p>Un calculator fără sistem de operare e ca o orchestră fără dirijor: instrumentele sunt acolo, dar nimeni nu le spune când să cânte.</p>"+
+   "<div class='flow'>"+
+   "<div><b>Tu</b> · la tastatură și mouse</div>"+
+   "<div><b>Aplicațiile</b> · Paint, Word, browserul, jocurile</div>"+
+   "<div style='border-left:4px solid var(--accent)'><b>Sistemul de operare</b> · face legătura dintre aplicații și hardware</div>"+
+   "<div><b>Hardware-ul</b> · procesor, memorie, disc, ecran</div>"+
+   "</div>"+
+   "<p>Pornește calculatorul, coordonează piesele, pornește și închide aplicațiile, ține datele în <b>fișiere</b> și <b>foldere</b> și protejează calculatorul (conturi, parole).</p>"+
+   "<p class='muted'>Pe calculatoare: Windows, macOS, Linux. Pe telefoane și tablete: Android, iOS.</p>"+
+   "<div class='keep'>Pe ecran: <b>desktopul</b> (fundalul), <b>pictogramele</b>, butonul <b>Start</b>, <b>bara de activități</b> și zona cu ceasul.</div>"},
+  {kind:"quiz", title:"Ultima verificare", qs:[
+   {q:"Fără sistem de operare…", o:["nicio aplicație nu ar porni","calculatorul ar merge mai repede","s-ar pierde doar internetul"], c:0, r:"Sistemul de operare e programul principal. Restul pornesc prin el."},
+   {q:"Android este:", o:["un sistem de operare pentru telefoane","o aplicație de desenat","un dispozitiv de stocare"], c:0, r:"Android și iOS sunt sisteme de operare pentru telefoane și tablete."},
+   {q:"Unde e mai rapid să ții jocurile?", o:["pe un SSD","pe un HDD","pe un DVD"], c:0, r:"SSD-ul are cipuri, fără piese care se rotesc, deci e mult mai rapid."}
+  ]},
+  {kind:"end", html:"<div class='big'>✅</div><h2>Partea 2, gata</h2><p>Ai trecut prin toate cele cinci lecții de la oră. Pasul următor e fișa pe hârtie, din memorie.</p>"}
+ ]}
+];
+
+/* ---------- Stare ---------- */
+var cur={part:0, step:0}, done=[false,false];
+function load(){ try{ var s=JSON.parse(localStorage.getItem("tic-lectie")||"{}"); if(s.done) done=s.done; if(typeof s.part==="number") cur.part=s.part; }catch(e){} }
+function save(){ try{ localStorage.setItem("tic-lectie", JSON.stringify({done:done, part:cur.part})); }catch(e){} }
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function shuffle(a,seed){ a=a.slice(); var x=seed||7; for(var i=a.length-1;i>0;i--){ x=(x*1103515245+12345)%2147483648; var j=Math.floor(x/65536)%(i+1); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+function openPart(p){ cur.part=p; cur.step=0; save(); render(); window.scrollTo(0,0); return false; }
+function next(){ var P=PARTS[cur.part]; if(cur.step<P.steps.length-1){ cur.step++; if(P.steps[cur.step].kind==="end"){ done[cur.part]=true; save(); } render(); window.scrollTo(0,0); } return false; }
+function back(){ if(cur.step>0){ cur.step--; render(); window.scrollTo(0,0); } return false; }
+
+function render(){
+  var P=PARTS[cur.part], S=P.steps[cur.step];
+  [0,1].forEach(function(i){ $("t"+i).setAttribute("aria-selected", i===cur.part?"true":"false"); if(done[i]) $("d"+i).textContent="✓ parcursă"; });
+  $("dots").innerHTML=P.steps.map(function(_,i){ return "<span class='dot "+(i===cur.step?"on":(i<cur.step?"past":""))+"'></span>"; }).join("");
+  var h="<div class='card'>";
+  if(S.kind==="card") h+=S.html+nav(true);
+  else if(S.kind==="end") h+="<div class='end'>"+S.html+"</div>"+(cur.part===0?"<div class='row'><button class='btn' onclick='return openPart(1)'>Partea 2, dacă ai chef azi</button></div>":"");
+  else if(S.kind==="quiz") h+=quizHTML(S);
+  else if(S.kind==="sort") h+=sortHTML(S);
+  else if(S.kind==="order") h+=orderHTML(S);
+  h+="</div>";
+  $("stage").innerHTML=h;
+}
+function nav(enabled){ return "<div class='row'>"+(cur.step>0?"<button class='btn sec' onclick='return back()'>Înapoi</button>":"")+"<button class='btn' id='nx' onclick='return next()' "+(enabled?"":"disabled")+">Mai departe</button></div>"; }
+function unlock(){ var b=$("nx"); if(b) b.disabled=false; }
+
+/* ---------- Întrebări ---------- */
+var qstate={};
+function quizHTML(S){
+  qstate={left:S.qs.length};
+  var h="<h2>"+esc(S.title)+"</h2>";
+  S.qs.forEach(function(q,i){
+    h+="<p class='qn'>"+esc(q.q)+"</p>";
+    if(q.num){ h+="<div class='row' style='align-items:center'><input class='num' id='n"+i+"' inputmode='numeric' autocomplete='off'><button class='btn' style='width:auto' onclick='return checkNum("+i+")'>Verific</button></div>"; }
+    else { var ord=shuffle(q.o.map(function(_,k){return k;}), cur.part*31+cur.step*7+i*13+5);
+      ord.forEach(function(k){ h+="<button class='opt' id='o"+i+"_"+k+"' onclick='return pick("+i+","+k+")'>"+esc(q.o[k])+"</button>"; }); }
+    h+="<div id='f"+i+"'></div>";
+  });
+  return h+nav(false);
+}
+function curQ(i){ return PARTS[cur.part].steps[cur.step].qs[i]; }
+function settle(i,ok){ var q=curQ(i); var f=$("f"+i);
+  if(ok){ f.className="fb ok"; f.textContent="Da. "+q.r; if(!qstate["d"+i]){ qstate["d"+i]=1; qstate.left--; if(qstate.left===0) unlock(); } }
+  else { f.className="fb ny"; f.textContent="Încă nu. "+q.r+" Mai încearcă."; } }
+function pick(i,k){ if(qstate["d"+i]) return false; var q=curQ(i); var b=$("o"+i+"_"+k); var ok=(k===q.c); b.classList.add(ok?"ok":"ny"); settle(i,ok); return false; }
+function checkNum(i){ if(qstate["d"+i]) return false; var q=curQ(i); var v=($("n"+i).value||"").replace(/[\s.]/g,""); settle(i, v===q.num); return false; }
+
+/* ---------- Sortare ---------- */
+var sorts={};
+function sortHTML(S){
+  sorts={sel:null, place:{}};
+  var items=shuffle(S.items.map(function(x){return x[0];}), cur.part*17+cur.step*3+11);
+  var h="<h2>"+esc(S.title)+"</h2><p class='muted'>"+esc(S.hint)+"</p><div class='chips' id='pool'>";
+  items.forEach(function(n,i){ h+="<button class='chip' id='c"+i+"' data-n='"+esc(n)+"' onclick='return selChip("+i+",event)'>"+esc(n)+"</button>"; });
+  h+="</div><div class='cols'>";
+  S.cols.forEach(function(c,j){ h+="<div class='col' onclick='return dropTo("+j+")'><h3>"+esc(c)+"</h3><div class='chips' id='col"+j+"'></div></div>"; });
+  h+="</div><div class='row'><button class='btn' onclick='return checkSort()'>Verific</button></div><div id='sf'></div>";
+  return h+nav(false);
+}
+function selChip(i,ev){ var c=$("c"+i); if(c.classList.contains("ok")) return false;
+  if(sorts.sel!==null){ var o=$("c"+sorts.sel); if(o) o.classList.remove("sel"); }
+  sorts.sel=(sorts.sel===i)?null:i; if(sorts.sel!==null) c.classList.add("sel");
+  if(ev&&ev.stopPropagation) ev.stopPropagation(); return false; }
+function dropTo(j){ if(sorts.sel===null) return false; var c=$("c"+sorts.sel); c.classList.remove("sel","ny"); $("col"+j).appendChild(c); sorts.place[c.getAttribute("data-n")]=j; sorts.sel=null; return false; }
+function checkSort(){
+  var S=PARTS[cur.part].steps[cur.step], want={}, left=0, notes=[];
+  S.items.forEach(function(x){ want[x[0]]=x[1]; });
+  S.items.forEach(function(x,idx){ var n=x[0]; var el=document.querySelector(".chip[data-n='"+n.replace(/'/g,"\\'")+"']");
+    if(!(n in sorts.place)){ left++; return; }
+    if(sorts.place[n]===want[n]){ el.classList.add("ok"); el.classList.remove("ny"); }
+    else { el.classList.add("ny"); notes.push(S.r[n]); } });
+  var f=$("sf");
+  if(left){ f.className="fb ny"; f.textContent="Mai sunt "+left+" de așezat."; return false; }
+  if(notes.length){ f.className="fb ny"; f.innerHTML="Încă nu, la cele portocalii. "+notes.map(esc).join(" ")+" Mută-le și verifică din nou."; return false; }
+  f.className="fb ok"; f.textContent="Toate la locul lor."; unlock(); return false; }
+
+/* ---------- Ordonare ---------- */
+var ord={};
+function orderHTML(S){
+  ord={seq:[]};
+  var items=shuffle(S.items.map(function(_,k){return k;}), cur.part*23+cur.step*5+3);
+  var h="<h2>"+esc(S.title)+"</h2><p class='muted'>"+esc(S.hint)+"</p><div class='chips'>";
+  items.forEach(function(k){ h+="<button class='chip' id='r"+k+"' onclick='return addSeq("+k+")'>"+esc(S.items[k])+"</button>"; });
+  h+="</div><div class='seq' id='seq'></div><div class='row'><button class='btn sec' onclick='return resetSeq()'>De la capăt</button><button class='btn' onclick='return checkSeq()'>Verific</button></div><div id='of'></div>";
+  return h+nav(false);
+}
+function addSeq(k){ if(ord.seq.indexOf(k)>=0) return false; ord.seq.push(k); $("r"+k).disabled=true; $("r"+k).style.opacity=".4"; drawSeq(); return false; }
+function drawSeq(){ var S=PARTS[cur.part].steps[cur.step]; $("seq").innerHTML=ord.seq.map(function(k,i){ return "<div>"+(i+1)+". "+esc(S.items[k])+"</div>"; }).join(""); }
+function resetSeq(){ ord.seq.forEach(function(k){ $("r"+k).disabled=false; $("r"+k).style.opacity=""; }); ord.seq=[]; drawSeq(); $("of").className=""; $("of").textContent=""; return false; }
+function checkSeq(){ var S=PARTS[cur.part].steps[cur.step], f=$("of");
+  if(ord.seq.length<S.items.length){ f.className="fb ny"; f.textContent="Mai ai de ales "+(S.items.length-ord.seq.length)+"."; return false; }
+  var ok=ord.seq.every(function(k,i){ return k===i; });
+  if(ok){ f.className="fb ok"; f.textContent="Da. "+S.r; unlock(); }
+  else { var bun=0; ord.seq.forEach(function(k,i){ if(k===i) bun++; }); f.className="fb ny"; f.textContent="Încă nu: "+bun+" din "+S.items.length+" sunt la locul lor. "+S.r+" Apasă „De la capăt”."; }
+  return false; }
+
+load(); render();
+</script>
+</body>
+</html>
