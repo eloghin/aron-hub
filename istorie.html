@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arhiva Orientului antic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@600;700&family=Inter:wght@400;600;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday learning, calm and mature: a detective's archive, not a quiz
+   IDEA the archive of ancient peoples: coloured cardboard folders opened one by one
+   PICTURE a large hand-drawn map of the ancient East, each people in its own colour
+   COLOUR white ground, lapis band; clay, gold, turquoise, violet for the four peoples
+   TYPE Spectral for titles, Inter for text, Patrick Hand in the comic panels
+   LAYOUT laptop: title band + map, then two columns of folders; phone: stacked, one dossier card */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#121419);--ink:light-dark(#17181c,#ecebe6);--mut:light-dark(#585a63,#a7a9b2);
+--lapis:light-dark(#1d3a9a,#1f3277);--card:light-dark(#f4f5f9,#1b1e26);--line:light-dark(#d6d9e2,#2f3340);
+--land:light-dark(#ecdfbf,#4a4131);--sea:light-dark(#a9c3ee,#2b4677);--sky:light-dark(#e3edfb,#1c2a44);
+--mes:light-dark(#ad4e28,#e88a60);--egi:light-dark(#946b00,#e3b53f);--per:light-dark(#0a7577,#4cc5c7);--evr:light-dark(#6a3ea2,#b58ce8);
+--ok:light-dark(#1b7443,#62d293);--soft:light-dark(#fff4d6,#3a3220);--skin:#c69470;--clay:light-dark(#cf9465,#a8714a);--stone:light-dark(#3b3b42,#5a5a64)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Spectral,Georgia,serif;line-height:1.08;letter-spacing:-.01em;text-wrap:balance;margin:0}
+h1{font-size:clamp(32px,5vw,50px)}
+h2{font-size:clamp(25px,3.4vw,32px);margin-bottom:12px}
+h3{font-size:20px}
+p{margin:0 0 12px;max-width:66ch}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--egi);outline-offset:2px}
+svg{display:block;width:100%;height:auto}
+.band{padding:clamp(22px,4vw,48px) max(5vw,16px)}
+.hero{background:var(--lapis);color:#fff}
+.hero a{color:#fff}
+.hubl{display:inline-block;margin-bottom:14px;font-size:15px;opacity:.9}
+.hero p{color:#dfe6ff;margin-top:10px}
+.heroin{max-width:1180px;margin:0 auto;display:grid;gap:22px}
+@media(min-width:860px){.heroin{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:center}}
+.mapcard{background:var(--land);border-radius:14px;overflow:hidden;box-shadow:0 2px 0 rgba(0,0,0,.15)}
+.mt{font:600 13px Inter,sans-serif;fill:var(--ink);paint-order:stroke;stroke:var(--land);stroke-width:3px}
+.ms{font:italic 12px Inter,sans-serif;fill:light-dark(#2c4a85,#cfe0ff)}
+.days{max-width:1180px;margin:0 auto;display:grid;gap:28px}
+@media(min-width:760px){.days{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.dayh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.dayh span{color:var(--mut);font-size:15px}
+.folder{position:relative;display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;text-align:left;background:color-mix(in srgb,var(--c) 11%,var(--bg));border:1.5px solid color-mix(in srgb,var(--c) 45%,var(--bg));border-radius:4px 12px 12px 12px;padding:14px;margin:22px 0 0;min-height:64px}
+.folder::before{content:"";position:absolute;left:-1.5px;top:-15px;width:92px;height:15px;background:color-mix(in srgb,var(--c) 30%,var(--bg));border:1.5px solid color-mix(in srgb,var(--c) 45%,var(--bg));border-bottom:0;border-radius:8px 8px 0 0}
+.folder:hover{background:color-mix(in srgb,var(--c) 18%,var(--bg))}
+.folder b{display:block;font-size:17px}
+.folder small{color:var(--mut);font-size:14px}
+.sym{width:48px;height:48px;color:var(--c)}
+.chip{font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--card);border:1px solid var(--line);white-space:nowrap}
+.chip.d{background:color-mix(in srgb,var(--ok) 15%,var(--bg));border-color:var(--ok);color:var(--ok)}
+.chip.w{border-color:var(--egi)}
+.note{color:var(--mut);font-size:15px;margin-top:14px}
+.view{max-width:800px;margin:0 auto;padding:16px max(4vw,16px) 40px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.top .tt{flex:1;font-family:Spectral,Georgia,serif;font-weight:700;font-size:20px;color:var(--c)}
+.btn{min-height:44px;padding:10px 16px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);font-weight:600}
+.btn.p{background:var(--c,var(--lapis));border-color:var(--c,var(--lapis));color:#fff}
+.btn.q{border-color:var(--c)}
+.btn:disabled{opacity:.45;cursor:default}
+.dots{display:flex;gap:6px;flex-wrap:wrap;list-style:none;padding:0;margin:0 0 16px}
+.dots button{min-height:32px;padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:var(--card);font-size:13px;color:var(--mut)}
+.dots button.on{background:var(--c);border-color:var(--c);color:#fff}
+.dots button.seen{color:var(--ink)}
+.card{background:var(--bg);border:1.5px solid color-mix(in srgb,var(--c) 40%,var(--line));border-radius:16px;padding:clamp(16px,3.5vw,28px);border-top:10px solid var(--c)}
+.kind{font-size:14px;font-weight:600;color:var(--c);margin-bottom:6px}
+.pic{margin:4px 0 16px;border-radius:12px;overflow:hidden;background:var(--card)}
+.w{background:var(--soft);padding:1px 6px;border-radius:6px;font-weight:700;white-space:nowrap}
+.w i{font-style:normal;font-weight:400;color:var(--mut);font-size:14px;margin-left:4px}
+.rule{background:color-mix(in srgb,var(--c) 10%,var(--bg));border:1.5px dashed var(--c);border-radius:12px;padding:12px 14px;margin:12px 0}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+.bd{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(max-width:520px){.bd{grid-template-columns:minmax(0,1fr)}}
+.pan{border:2.5px solid var(--ink);border-radius:8px;overflow:hidden;background:var(--bg)}
+.pan .cap{font:19px/1.3 "Patrick Hand",Inter,cursive;padding:8px 10px 10px}
+.pan .bub{display:block;background:var(--soft);border-radius:12px;padding:4px 10px;margin-bottom:6px}
+.mm{display:grid;gap:12px}
+.mmc{justify-self:center;background:var(--c);color:#fff;font:700 20px Spectral,Georgia,serif;padding:12px 22px;border-radius:99px;text-align:center}
+.mmg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(max-width:520px){.mmg{grid-template-columns:minmax(0,1fr)}}
+.br{border:1.5px solid var(--c);border-radius:12px;padding:10px 14px;background:color-mix(in srgb,var(--c) 8%,var(--bg));animation:pop .35s ease-out}
+.br b{display:block;color:var(--c);font-size:14px}
+.br.hid{border-style:dashed;background:var(--card);color:var(--mut);animation:none}
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+@media(prefers-reduced-motion:reduce){.br{animation:none}}
+.chain{display:grid;gap:8px;margin:8px 0 14px}
+.ch{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--card);animation:pop .35s ease-out}
+.ch span{width:40px;height:40px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:700}
+.ch small{display:block;color:var(--mut);font-size:15px}
+.tl{position:relative;margin:8px 0 16px 8px;padding-left:22px;border-left:3px solid var(--line)}
+.ev{position:relative;padding:6px 0}
+.ev::before{content:"";position:absolute;left:-31px;top:12px;width:15px;height:15px;border-radius:50%;background:var(--e)}
+.ev b{white-space:nowrap;color:var(--e)}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fc{min-height:120px;border-radius:14px;border:2px solid var(--e);background:color-mix(in srgb,var(--e) 10%,var(--bg));padding:14px;text-align:center;font-weight:600;white-space:pre-line}
+.fc.f{background:var(--e);color:#fff}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.bc{border-radius:14px;border:1.5px solid var(--e);overflow:hidden}
+.bc h3{background:var(--e);color:#fff;padding:10px 12px;font-size:18px}
+.bc dl{margin:0;padding:10px 12px}
+.bc dt{font-size:13px;font-weight:700;color:var(--e)}
+.bc dd{margin:0 0 8px;font-size:15px}
+.qq{font-weight:700;font-size:18px;margin:4px 0 14px}
+.qn{color:var(--mut);font-size:14px;margin-bottom:2px}
+.opts{display:grid;gap:10px}
+.opt{min-height:48px;text-align:left;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--card)}
+.opt:hover{border-color:var(--c)}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--bg))}
+.opt.no{opacity:.6}
+.opt .tag{float:right;font-size:13px;font-weight:600;color:var(--mut)}
+.fb{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--soft)}
+.fb.y{background:color-mix(in srgb,var(--ok) 12%,var(--bg))}
+.fb .btn{margin-top:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+input.tx,textarea{font:16px Inter,sans-serif;width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea{min-height:110px}
+.mg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.mg .opt.sel{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--bg))}
+.seq{display:grid;gap:6px;margin-bottom:12px}
+.seq div{padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--c) 12%,var(--bg))}
+.lbr{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:center;margin-top:10px}
+.lbr .n{width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:700}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{min-height:40px;padding:6px 12px;border-radius:99px;border:1.5px solid var(--line);background:var(--card);font-size:15px}
+.pill.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 16%,var(--bg));font-weight:600}
+.pill.no{border-style:dashed}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:15px}
+th,td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+th{background:var(--card)}
+td .pill{width:100%}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;padding:16px;z-index:5}
+.ovb{background:var(--bg);border-radius:16px;padding:22px;max-width:440px}
+.ret{position:fixed;right:16px;bottom:16px;z-index:4;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.end{text-align:center;padding:20px 0}
+.end svg{max-width:160px;margin:0 auto 12px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+{
+const P_ = ['mes','egi','per','evr'];
+const NUME = {mes:'Mesopotamienii',egi:'Egiptenii',per:'Perșii',evr:'Evreii'};
+const W = (a,b)=>`<span class="w">${a}<i>${b}</i></span>`;
+
+/* ---------- desene ---------- */
+const MAP = (o={})=>{
+  const hl=o.hl||P_;
+  const Z={egi:['cx="150" cy="205" rx="20" ry="72"',150,205],evr:['cx="193" cy="98" rx="11" ry="22"',193,98],mes:['cx="265" cy="120" rx="58" ry="20" transform="rotate(62 265 120)"',265,120],per:['cx="348" cy="118" rx="40" ry="52"',348,118]};
+  const zones=P_.map(k=>hl.includes(k)?`<ellipse ${Z[k][0]} fill="var(--${k})" fill-opacity=".42" stroke="var(--${k})" stroke-width="2.5"/>`:'').join('');
+  const names=o.names?`<text class="mt" x="125" y="205" text-anchor="end">Egipt</text><text class="mt" x="215" y="132" text-anchor="middle">Canaan</text><text class="mt" x="262" y="124" text-anchor="middle">Mesopotamia</text><text class="mt" x="350" y="122" text-anchor="middle">Persia</text>`:'';
+  const marks=o.marks?['egi','evr','mes','per'].map((k,i)=>`<circle cx="${Z[k][1]}" cy="${Z[k][2]}" r="12" fill="var(--ink)"/><text x="${Z[k][1]}" y="${Z[k][2]+5}" text-anchor="middle" style="font:700 14px Inter;fill:var(--bg)">${i+1}</text>`).join(''):'';
+  return `<svg viewBox="0 0 400 300" role="img" aria-label="Harta Orientului antic"><rect width="400" height="300" fill="var(--land)"/>
+  <path d="M0,18 L150,30 L176,44 L179,106 L150,113 L120,108 L90,100 L50,95 L0,90Z" fill="var(--sea)"/>
+  <path d="M172,134 L182,129 L240,300 L222,300Z" fill="var(--sea)"/>
+  <path d="M298,188 L318,180 L390,230 L395,260 L360,250Z" fill="var(--sea)"/>
+  ${zones}
+  <path d="M138,300 C150,262 136,226 148,190 C156,160 144,134 142,116" fill="none" stroke="var(--sea)" stroke-width="5"/>
+  <path d="M142,124 L128,110 M142,124 L156,110" stroke="var(--sea)" stroke-width="3"/>
+  <path d="M214,64 C222,90 224,112 244,136 C262,158 282,176 302,190" fill="none" stroke="var(--sea)" stroke-width="4"/>
+  <path d="M262,50 C270,80 276,108 286,136 C292,156 296,172 302,190" fill="none" stroke="var(--sea)" stroke-width="4"/>
+  <text class="ms" x="75" y="62" text-anchor="middle">Marea Mediterană</text>
+  <text class="ms" x="224" y="240">Marea Roșie</text>
+  <text class="ms" x="345" y="278" text-anchor="middle">Golful Persic</text>
+  ${o.rivers!==false?`<text class="mt" x="160" y="262">Nil</text><text class="mt" x="285" y="72">Tigru</text><text class="mt" x="262" y="174" text-anchor="end">Eufrat</text>`:''}
+  ${names}${marks}</svg>`;
+};
+const wedges=(x,y,rows,cols,s=1)=>{let o='';for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const X=x+c*16*s,Y=y+r*18*s;o+=(r+c)%3===0?`<path d="M${X},${Y} l${4*s},${10*s} l${4*s},${-10*s}z" fill="#6b4325"/>`:`<path d="M${X},${Y} l${11*s},${3.5*s} l${-11*s},${3.5*s}z" fill="#6b4325"/>`;}return o;};
+const T=(t,x,y,a='middle')=>`<text class="mt" style="stroke:var(--card)" x="${x}" y="${y}" text-anchor="${a}">${t}</text>`;
+const PIC={
+ izvoare:`<svg viewBox="0 0 400 200"><path d="M50,140 Q40,100 60,80 L100,80 Q120,100 110,140Z" fill="var(--clay)"/><rect x="55" y="72" width="50" height="10" rx="4" fill="var(--clay)"/>
+  <path d="M160,140 L200,70 L240,140Z" fill="#d9b56a"/><path d="M200,70 L240,140 L208,140Z" fill="#b8924a"/>
+  <rect x="290" y="70" width="60" height="72" rx="10" fill="var(--clay)"/>${wedges(298,82,3,3,1)}
+  <circle cx="330" cy="100" r="34" fill="none" stroke="var(--ink)" stroke-width="5"/><path d="M354,124 L378,148" stroke="var(--ink)" stroke-width="8" stroke-linecap="round"/>
+  ${T('obiecte',80,172)}${T('construcții',200,172)}${T('texte scrise',320,172)}</svg>`,
+ tablet:`<svg viewBox="0 0 400 220"><rect x="125" y="22" width="150" height="176" rx="20" fill="var(--clay)"/><rect x="125" y="22" width="150" height="10" rx="5" fill="#e6b48a" opacity=".6"/>${wedges(140,42,8,8,1)}
+  <path d="M330,30 L262,120" stroke="#8a6a3a" stroke-width="7" stroke-linecap="round"/><path d="M262,120 L256,130 L268,124Z" fill="#5a4320"/>${T('trestie ascuțită',338,24,'end')}</svg>`,
+ ocup:`<svg viewBox="0 0 400 190"><g transform="translate(70,30)"><path d="M0,110 L0,20" stroke="#8a7a2a" stroke-width="4"/>${[20,36,52,68].map(y=>`<ellipse cx="-8" cy="${y}" rx="6" ry="11" fill="#d9a400" transform="rotate(-25 -8 ${y})"/><ellipse cx="8" cy="${y}" rx="6" ry="11" fill="#d9a400" transform="rotate(25 8 ${y})"/>`).join('')}</g>
+  <g transform="translate(200,40)"><path d="M-40,20 L40,20 M0,0 L0,100 M-40,20 L-50,55 L-30,55Z M40,20 L30,55 L50,55Z" stroke="var(--ink)" stroke-width="4" fill="none"/><path d="M-50,55 Q-40,66 -30,55Z M30,55 Q40,66 50,55Z" fill="#d9a400"/><rect x="-22" y="98" width="44" height="8" rx="3" fill="var(--ink)"/></g>
+  <g transform="translate(330,40)"><path d="M-22,0 L22,0 L18,14 Q38,40 22,100 L-22,100 Q-38,40 -18,14Z" fill="var(--clay)"/><path d="M-30,50 Q0,58 30,50" stroke="#7a4a2a" stroke-width="3" fill="none"/></g>
+  ${T('agricultură',70,175)}${T('comerț',200,175)}${T('olărit',330,175)}</svg>`,
+ roata:`<svg viewBox="0 0 400 210"><ellipse cx="100" cy="150" rx="70" ry="16" fill="#7a5a3a"/><rect x="92" y="150" width="16" height="40" fill="#5a4026"/><path d="M75,148 Q60,100 85,80 L115,80 Q140,100 125,148Z" fill="var(--clay)"/>
+  <path d="M40,120 a62,18 0 0 0 30,24" stroke="var(--mut)" stroke-width="3" fill="none" marker-end=""/>
+  <g transform="translate(290,100)"><circle r="78" fill="var(--card)" stroke="var(--mes)" stroke-width="3"/>${[0,60,120,180,240,300].map(a=>`<path d="M0,0 L${(78*Math.cos(a*Math.PI/180)).toFixed(1)},${(78*Math.sin(a*Math.PI/180)).toFixed(1)}" stroke="var(--mes)" stroke-width="2"/>`).join('')}${[30,90,150,210,270,330].map(a=>`<text x="${(50*Math.cos(a*Math.PI/180)).toFixed(1)}" y="${(50*Math.sin(a*Math.PI/180)+5).toFixed(1)}" text-anchor="middle" style="font:600 13px Inter;fill:var(--ink)">60°</text>`).join('')}</g>
+  ${T('roata olarului',100,30)}${T('6 × 60° = 360°',290,15)}</svg>`,
+ nil:`<svg viewBox="0 0 400 200">${[0,1,2].map(i=>{const x=i*135;const f=`<g>${[0,1,2].map(c=>[0,1].map(r=>`<rect x="${x+12+c*36}" y="${70+r*44}" width="34" height="42" fill="${i===2?'#4a3b2a':'#6ea64a'}" stroke="${i===2?'#d9b56a':'#3f6e2a'}" stroke-width="${i===2?3:2}"/>`).join('')).join('')}</g>`;
+  return `<rect x="${x}" y="40" width="130" height="150" rx="10" fill="var(--land)"/>${f}${i===1?`<rect x="${x}" y="62" width="130" height="104" fill="var(--sea)" opacity=".92"/>`:''}${i===2?`<path d="M${x+12},${66} L${x+120},${66}" stroke="#d9b56a" stroke-width="2" stroke-dasharray="4 4"/><circle cx="${x+12}" cy="66" r="4" fill="#fff"/><circle cx="${x+120}" cy="66" r="4" fill="#fff"/>`:''}`;}).join('')}
+  ${T('1. câmpuri cu hotare',65,28)}${T('2. inundația',200,28)}${T('3. mâl + măsurat din nou',335,28)}</svg>`,
+ pyr:`<svg viewBox="0 0 400 220"><rect width="400" height="220" fill="var(--sky)"/><circle cx="330" cy="50" r="22" fill="#f2b705"/><rect y="170" width="400" height="50" fill="var(--land)"/>
+  <path d="M90,172 L200,40 L310,172Z" fill="#dcbc74"/><path d="M200,40 L310,172 L222,172Z" fill="#b8924a"/>${[0,1,2,3,4,5].map(i=>`<path d="M${120+i*20},172 l0,-10" stroke="#a5843f" stroke-width="2"/>`).join('')}
+  <path d="M40,172 L70,136 L100,172Z" fill="#dcbc74"/><path d="M70,136 L100,172 L76,172Z" fill="#b8924a"/>
+  ${[330,348,366].map(x=>`<circle cx="${x}" cy="150" r="5" fill="var(--skin)"/><path d="M${x-5},172 L${x-3},157 L${x+3},157 L${x+5},172Z" fill="#f4f1ea"/>`).join('')}</svg>`,
+ hiero:`<svg viewBox="0 0 400 180">${[
+   '<path d="M-24,0 l8,-8 l8,8 l8,-8 l8,8 l8,-8 l8,8" fill="none" stroke="var(--per)" stroke-width="4"/>',
+   '<ellipse rx="22" ry="9" fill="var(--mes)"/>',
+   '<path d="M0,26 C-14,10 -10,-16 0,-28 C10,-16 14,10 0,26Z" fill="#5a9a3a"/>',
+   '<path d="M-12,24 L-12,-6 Q-12,-22 0,-22 Q12,-22 12,-6 L12,24Z" fill="#8a6a3a"/><circle cx="-5" cy="-10" r="4" fill="#fff"/><circle cx="5" cy="-10" r="4" fill="#fff"/><path d="M-2,-3 L0,2 L2,-3Z" fill="#f2b705"/>',
+   '<path d="M-24,0 Q0,-18 24,0 Q0,16 -24,0Z" fill="none" stroke="var(--ink)" stroke-width="3"/><circle r="7" fill="var(--ink)"/><path d="M-6,8 L-12,24" stroke="var(--ink)" stroke-width="3"/>'
+  ].map((g,i)=>`<g transform="translate(${44+i*78},70)"><rect x="-34" y="-40" width="68" height="80" rx="10" fill="var(--soft)"/>${g}</g>${T(['apă','gură','trestie','bufniță','ochi'][i],44+i*78,140)}`).join('')}${T('semne reale, desenate simplificat',200,170)}</svg>`,
+ rosetta:`<svg viewBox="0 0 400 210"><path d="M120,20 L280,30 L292,195 L108,195Z" fill="var(--stone)"/>
+  ${[0,1,2,3].map(i=>`<path d="M135,${40+i*12} L270,${42+i*12}" stroke="#ddd" stroke-width="3" stroke-dasharray="6 5"/>`).join('')}
+  ${[0,1,2,3].map(i=>`<path d="M130,${100+i*11} L278,${102+i*11}" stroke="#ddd" stroke-width="2" stroke-dasharray="2 3"/>`).join('')}
+  ${[0,1,2].map(i=>`<path d="M126,${152+i*12} L284,${154+i*12}" stroke="#ddd" stroke-width="2"/>`).join('')}
+  ${T('hieroglife',345,62,'start').replace('x="345"','x="296"')}${T('altă scriere egipteană',296,118,'start')}${T('greacă',300,170,'start')}</svg>`,
+ qanat:`<svg viewBox="0 0 400 220"><rect width="400" height="220" fill="var(--sky)"/><circle cx="350" cy="36" r="18" fill="#f2b705"/>
+  <path d="M0,70 L70,20 L130,90 L400,90 L400,220 L0,220Z" fill="var(--land)"/><path d="M0,150 L400,150 L400,220 L0,220Z" fill="#c9b385" opacity=".6"/>
+  <path d="M60,110 L330,140" stroke="var(--sea)" stroke-width="12" stroke-linecap="round"/>
+  ${[130,190,250].map((x,i)=>`<rect x="${x-3}" y="90" width="6" height="${28+i*7}" fill="#8a7650"/>`).join('')}
+  <path d="M330,140 L330,90" stroke="var(--sea)" stroke-width="0"/><rect x="320" y="84" width="70" height="8" fill="#6ea64a"/>
+  ${T('munte',60,14)}${T('puțuri',190,84)}${T('canal sub pământ',200,176)}${T('câmp',355,78)}</svg>`,
+ imperiu:`<svg viewBox="0 0 400 210"><path d="M30,120 C40,50 140,30 220,40 C300,30 380,70 370,130 C360,180 260,195 180,185 C90,195 20,170 30,120Z" fill="var(--per)" fill-opacity=".25" stroke="var(--per)" stroke-width="3"/>
+  <path d="M120,40 L140,190 M220,40 L230,186 M300,45 L300,180 M30,115 L370,120" stroke="var(--per)" stroke-width="2" stroke-dasharray="6 5"/>
+  ${[[80,80],[180,80],[260,80],[335,90],[80,150],[180,150],[265,150],[330,150]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="6" fill="var(--per)"/>`).join('')}
+  <path d="M50,140 C120,120 200,135 350,100" stroke="var(--ink)" stroke-width="3" fill="none"/>
+  ${T('provincii cu guvernatori',200,20)}${T('drumul regal',300,124)}</svg>`,
+ templu:`<svg viewBox="0 0 400 210"><rect width="400" height="210" fill="var(--sky)"/><path d="M0,170 Q200,120 400,170 L400,210 L0,210Z" fill="var(--land)"/>
+  <rect x="140" y="80" width="120" height="70" fill="#efe6d2" stroke="#b9a77d" stroke-width="2"/><rect x="128" y="146" width="144" height="10" fill="#d9caa4"/>
+  <rect x="180" y="104" width="40" height="46" fill="#8a6a3a"/><path d="M134,80 L266,80 L258,68 L142,68Z" fill="#d9caa4"/>
+  ${[150,240].map(x=>`<rect x="${x}" y="84" width="10" height="62" fill="#c7a659"/>`).join('')}
+  ${T('Templul din Ierusalim, desen simplificat',200,24)}</svg>`,
+ ocupEvr:`<svg viewBox="0 0 400 170"><rect width="400" height="170" fill="var(--sky)"/><path d="M0,120 Q100,80 200,115 Q300,85 400,120 L400,170 L0,170Z" fill="#9cc27a"/>
+  ${[[70,118],[100,124],[130,116],[160,126]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="12" ry="8" fill="#f4f1ea" stroke="#999"/><circle cx="${x+12}" cy="${y-4}" r="4.5" fill="#555"/>`).join('')}
+  <g transform="translate(270,0)"><circle cy="78" r="9" fill="var(--skin)"/><path d="M-11,128 L-8,90 Q0,85 8,90 L11,128Z" fill="var(--evr)"/><path d="M14,128 L22,70 Q30,64 30,74" stroke="#6b4b25" stroke-width="3" fill="none"/></g>
+  ${T('păstori pe dealurile Canaanului',200,24)}</svg>`,
+ stalp:`<svg viewBox="0 0 400 230"><rect x="150" y="16" width="80" height="200" rx="30" fill="var(--stone)"/>
+  <circle cx="175" cy="52" r="8" fill="#9a9aa4"/><path d="M167,90 L170,62 L180,62 L183,90Z" fill="#9a9aa4"/><circle cx="208" cy="56" r="9" fill="#9a9aa4"/><path d="M196,90 L199,66 L217,66 L220,90Z" fill="#9a9aa4"/>
+  ${Array.from({length:10},(_,i)=>`<path d="M160,${104+i*10} L220,${104+i*10}" stroke="#9a9aa4" stroke-width="2" stroke-dasharray="3 3"/>`).join('')}
+  <g transform="translate(280,0)"><circle cy="132" r="9" fill="var(--skin)"/><path d="M-11,216 L-8,144 Q0,139 8,144 L11,216Z" fill="var(--lapis)"/></g>
+  <path d="M110,16 L110,216 M104,16 L116,16 M104,216 L116,216" stroke="var(--mut)" stroke-width="2"/>${T('peste 2 m',106,120,'end')}${T('om',280,226)}</svg>`,
+ talion:`<svg viewBox="0 0 400 180"><path d="M200,30 L200,150 M100,50 L300,50 M150,160 L250,160" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M100,50 L70,110 L130,110Z M300,50 L270,110 L330,110Z" fill="none" stroke="var(--ink)" stroke-width="2"/><path d="M66,110 Q100,128 134,110Z M266,110 Q300,128 334,110Z" fill="var(--mes)"/>
+  ${[100,300].map(x=>`<path d="M${x-18},92 Q${x},80 ${x+18},92 Q${x},104 ${x-18},92Z" fill="#fff" stroke="var(--ink)" stroke-width="2"/><circle cx="${x}" cy="92" r="5" fill="var(--ink)"/>`).join('')}
+  ${T('fapta',100,150)}${T('pedeapsa',300,150)}</svg>`,
+ inegal:`<svg viewBox="0 0 400 190">${[[100,'om liber','un ochi'],[300,'sclav','bani: jumătate din preț']].map(([x,a,b],i)=>`<path d="M${x},40 L${x},150 M${x-70},${i?60:50} L${x+70},${i?40:50}" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/>
+  <path d="M${x-88},${i?100:90} Q${x-70},${i?112:102} ${x-52},${i?100:90}Z M${x+52},${i?80:90} Q${x+70},${i?92:102} ${x+88},${i?80:90}Z" fill="var(--mes)"/>
+  ${i?`<circle cx="${x+64}" cy="72" r="6" fill="#d9a400"/><circle cx="${x+76}" cy="72" r="6" fill="#d9a400"/>`:`<circle cx="${x+70}" cy="80" r="6" fill="var(--ink)"/>`}
+  ${T('ochiul unui '+a,x-40,i?140:132)}${T(b,x+40,i?30:32)}`).join('')}</svg>`,
+ picto:`<svg viewBox="0 0 400 170"><g transform="translate(60,70)"><circle r="18" fill="none" stroke="#d9a400" stroke-width="4"/>${[0,45,90,135,180,225,270,315].map(a=>`<path d="M${(24*Math.cos(a*Math.PI/180)).toFixed(1)},${(24*Math.sin(a*Math.PI/180)).toFixed(1)} L${(32*Math.cos(a*Math.PI/180)).toFixed(1)},${(32*Math.sin(a*Math.PI/180)).toFixed(1)}" stroke="#d9a400" stroke-width="4"/>`).join('')}</g>
+  <g transform="translate(160,70)"><path d="M-30,0 Q0,-24 22,0 Q0,24 -30,0Z M22,0 L36,-14 L36,14Z" fill="none" stroke="var(--per)" stroke-width="4"/></g>
+  <g transform="translate(260,70)"><path d="M-20,-24 Q-30,-40 -12,-36 M20,-24 Q30,-40 12,-36 M-20,-24 L20,-24 L12,24 L-12,24Z" fill="none" stroke="var(--mes)" stroke-width="4"/></g>
+  <text x="350" y="86" text-anchor="middle" style="font:700 52px Spectral,serif;fill:var(--mut)">?</text>
+  ${T('soare',60,140)}${T('pește',160,140)}${T('bou',260,140)}${T('„mâine”?',350,140)}</svg>`,
+ cune:`<svg viewBox="0 0 400 200"><rect x="30" y="30" width="150" height="140" rx="16" fill="var(--clay)"/>${wedges(44,46,6,8,.95)}
+  <rect x="220" y="30" width="150" height="140" rx="10" fill="#e9dcb2"/>
+  <g transform="translate(255,70)"><path d="M-18,0 l6,-6 l6,6 l6,-6 l6,6 l6,-6" fill="none" stroke="var(--per)" stroke-width="3"/></g>
+  <g transform="translate(330,70)"><ellipse rx="16" ry="7" fill="var(--mes)"/></g>
+  <g transform="translate(255,128)"><path d="M0,20 C-10,8 -8,-12 0,-20 C8,-12 10,8 0,20Z" fill="#5a9a3a"/></g>
+  <g transform="translate(330,128)"><path d="M-16,0 Q0,-12 16,0 Q0,10 -16,0Z" fill="none" stroke="var(--ink)" stroke-width="3"/><circle r="5" fill="var(--ink)"/></g>
+  ${T('cuneiformă, pe lut',105,192)}${T('hieroglife, pe papirus',295,192)}</svg>`,
+ compar:`<svg viewBox="0 0 400 220"><rect x="10" y="20" width="185" height="170" rx="12" fill="var(--soft)"/>${wedges(22,34,8,11,.72)}
+  <rect x="205" y="20" width="185" height="170" rx="12" fill="color-mix(in srgb,var(--per) 14%,var(--bg))"/>
+  ${'Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ'.split(' ').map((l,i)=>`<text x="${228+(i%6)*28}" y="${56+Math.floor(i/6)*34}" text-anchor="middle" style="font:600 20px Inter;fill:var(--ink)">${l}</text>`).join('')}
+  ${T('sute de semne',102,212)}${T('puține litere, una pe sunet',298,212)}</svg>`,
+ materiale:`<svg viewBox="0 0 400 190"><rect x="30" y="40" width="90" height="100" rx="14" fill="var(--clay)"/>${wedges(42,56,4,5,.9)}
+  <rect x="155" y="40" width="90" height="100" fill="#e9dcb2"/>${[0,1,2,3,4].map(i=>`<path d="M${162+i*18},40 L${162+i*18},140" stroke="#cbb98a" stroke-width="2"/>`).join('')}${[0,1,2,3].map(i=>`<path d="M155,${55+i*24} L245,${55+i*24}" stroke="#cbb98a" stroke-width="2"/>`).join('')}
+  <rect x="285" y="48" width="80" height="86" fill="#f1e4c8"/><rect x="278" y="40" width="94" height="14" rx="7" fill="#d8c49a"/><rect x="278" y="128" width="94" height="14" rx="7" fill="#d8c49a"/>
+  ${T('tăbliță de lut',75,170)}${T('papirus',200,170)}${T('pergament',325,170)}</svg>`
+};
+
+/* ---------- benzi desenate ---------- */
+const S=(inner,sky)=>`<svg viewBox="0 0 200 120" aria-hidden="true"><rect width="200" height="120" fill="${sky||'var(--sky)'}"/>${inner}</svg>`;
+const G='<rect y="100" width="200" height="20" fill="var(--land)"/>';
+const P=(x,c,o={})=>{const s=o.s||1;return `<g transform="translate(${x},0) translate(0,100) scale(${o.f?-s:s},${s}) translate(0,-100)">
+<path d="M-9,100 L-6,73 Q0,69 6,73 L9,100Z" fill="${c}"/>${o.hair?'<circle cy="60" r="11" fill="#4a3220"/>':''}<circle cy="62" r="7" fill="var(--skin)"/>
+${o.beard?'<path d="M-5,64 Q0,76 5,64Z" fill="#3a2614"/>':''}${o.crown?'<path d="M-6,56 L-6,49 L-3,52 L0,48 L3,52 L6,49 L6,56Z" fill="#d9a400"/>':''}${o.hat?'<path d="M-11,57 L11,57 L7,51 L-7,51Z" fill="#7a5a2e"/>':''}</g>`};
+const SUN=(x,y)=>`<circle cx="${x}" cy="${y}" r="10" fill="#f2b705"/>`;
+const SACK=x=>`<path d="M${x-7},100 Q${x-9},86 ${x},84 Q${x+9},86 ${x+7},100Z" fill="#a07a4a"/>`;
+const TAB=(x,y,s=1)=>`<rect x="${x}" y="${y}" width="${26*s}" height="${32*s}" rx="${4*s}" fill="var(--clay)"/>${wedges(x+4*s,y+5*s,3,3,.5*s)}`;
+const PYR=(x,s)=>`<path d="M${x-30*s},100 L${x},${100-36*s} L${x+30*s},100Z" fill="#dcbc74"/><path d="M${x},${100-36*s} L${x+30*s},100 L${x+6*s},100Z" fill="#b8924a"/>`;
+const SHEEP=(x,y=96)=>`<ellipse cx="${x}" cy="${y}" rx="9" ry="6" fill="#f4f1ea" stroke="#999"/><circle cx="${x+9}" cy="${y-3}" r="3.5" fill="#555"/>`;
+const STELE=(x,h=60)=>`<rect x="${x-10}" y="${100-h}" width="20" height="${h}" rx="8" fill="var(--stone)"/>${[0,1,2,3].map(i=>`<path d="M${x-6},${100-h+22+i*8} L${x+6},${100-h+22+i*8}" stroke="#aaa" stroke-width="1.5"/>`).join('')}`;
+const TEMPLE=x=>`<rect x="${x-30}" y="60" width="60" height="40" fill="#efe6d2" stroke="#b9a77d"/><path d="M${x-34},60 L${x+34},60 L${x+28},52 L${x-28},52Z" fill="#d9caa4"/><rect x="${x-8}" y="74" width="16" height="26" fill="#8a6a3a"/>`;
+const WHEAT=x=>`<path d="M${x},100 L${x},80" stroke="#8a7a2a" stroke-width="2"/><ellipse cx="${x}" cy="78" rx="3" ry="6" fill="#d9a400"/>`;
+const OX=x=>`<ellipse cx="${x}" cy="88" rx="16" ry="9" fill="#8a5a2a"/><circle cx="${x+17}" cy="82" r="6" fill="#8a5a2a"/><path d="M${x+14},76 L${x+12},70 M${x+20},76 L${x+23},70" stroke="#ddd" stroke-width="2"/>${[-10,-4,6,12].map(d=>`<path d="M${x+d},96 L${x+d},100" stroke="#8a5a2a" stroke-width="3"/>`).join('')}`;
+const SHIP=`<rect y="84" width="200" height="36" fill="var(--sea)"/><path d="M50,84 L150,84 L136,100 L64,100Z" fill="#8a5a2a"/><path d="M100,84 L100,34" stroke="#5a4026" stroke-width="3"/><path d="M102,38 L140,62 L102,76Z" fill="#f4f1ea"/>`;
+
+/* ---------- dosarele ---------- */
+const D=[
+{id:'fir',zi:1,c:'lapis',nume:'Firul roșu',sub:'De ce au apărut orașele lângă râuri',steps:[
+ {t:'slide',h:'Unde apar primele orașe?',pic:MAP({hl:[],names:false}),p:['Acum mai bine de 5000 de ani, oamenii din Neolitic erau deja sedentari: cultivau pământul și trăiau în sate. Unele sate au crescut și au devenit primele orașe.','Uită-te pe hartă: toate au apărut lângă ape mari. Ținuturile acestea, la est de Marea Mediterană, se numesc <b>Orientul antic</b>.']},
+ {t:'chain',h:'Firul roșu',p:'Atinge „Următorul pas”. Fiecare pas îl face posibil pe următorul.',items:[['Râul','aduce apă'],['Apa','udă câmpurile'],['Agricultura','dă recolte mari'],['Surplusul de hrană','mai multă hrană decât e nevoie'],['Comerțul și orașele','nu mai trebuie să fie toți agricultori: apar meșteșugari, negustori, scribi, regi'],['Scrierea și legile','ca să ții socoteli și să faci ordine între mulți oameni']]},
+ {t:'time',h:'Axa timpului',p:'î.Hr. = înainte de Hristos. Anii se numără <b>înapoi</b>: 3000 î.Hr. e mai demult decât 500 î.Hr. Distanțele de pe axă sunt pe măsura timpului.',ev:[[3200,'Primele scrieri: cuneiforma și hieroglifele','mes'],[2500,'Marea Piramidă de la Gizeh','egi'],[1750,'Hammurabi scrie legile','mes'],[1000,'Alfabetul fenicienilor','per'],[950,'Templul din Ierusalim','evr'],[550,'Începe Imperiul Persan','per']]},
+ {t:'slide',h:'Cum lucrează un detectiv al istoriei',pic:PIC.izvoare,p:['Un istoric nu inventează: caută dovezi. Dovezile se numesc <b>izvoare istorice</b>.','Pot fi obiecte (vase, unelte), construcții (temple, piramide) sau texte scrise (tăblițe, papirusuri). La fiecare popor vei găsi pagina „De unde știm?”.']},
+ {t:'quiz',qs:[
+  {k:'ord',q:'Pune firul roșu în ordine, de la râu la scriere.',items:['Râul aduce apă','Apa face posibilă agricultura','Agricultura dă surplus de hrană','Surplusul aduce comerț și orașe','Orașele au nevoie de scriere și legi'],exp:'Regula e: fiecare pas îl face posibil pe următorul. Fără apă nu ai recoltă, fără hrană în plus nu ai negustori și orașe.',back:1},
+  {k:'ch',q:'Care an este mai vechi?',o:['2500 î.Hr.','550 î.Hr.'],exp:'Regula e: înainte de Hristos, numărul mai mare înseamnă mai demult.',back:2},
+  {k:'ch',q:'Ce este un izvor istoric?',o:['O dovadă rămasă din trecut, din care aflăm cum trăiau oamenii','O fântână foarte veche','O poveste inventată azi'],exp:'Regula e: izvorul istoric e o urmă din trecut: un obiect, o construcție sau un text.',back:3}]}
+]},
+{id:'mes',zi:1,c:'mes',nume:'Mesopotamienii',sub:'Între Tigru și Eufrat',steps:[
+ {t:'slide',h:'Țara dintre râuri',pic:MAP({hl:['mes'],names:true}),p:[`Mesopotamienii trăiau între două râuri mari: Tigru și ${W('Eufrat','Eu-frat')}. De aici vine și numele: ${W('Mesopotamia','Me-so-po-ta-mi-a')} înseamnă, în greacă, „țara dintre râuri”.`,'Azi, acolo se află Irakul.']},
+ {t:'slide',h:'Cu ce se ocupau',pic:PIC.ocup,p:['<b>Agricultura</b>: au săpat canale care duceau apa râurilor la câmpuri.','<b>Comerțul</b>: aveau grâne din belșug, dar le lipseau lemnul, piatra și metalele. Le schimbau cu vecinii.','<b>Olăritul</b>: făceau vase din lut, pentru că lutul era peste tot.']},
+ {t:'slide',h:'De ce au inventat scrierea',pic:PIC.tablet,p:['Templele și negustorii adunau saci de grâne și turme de animale. Trebuia ținut minte cine a dat, cât și cui. Memoria nu mai ajungea.',`Așa au apărut semne scrise pe tăblițe de lut moale. Pentru că arată ca niște cuie, scrierea se numește ${W('cuneiformă','cu-ne-i-for-mă')} (în latină, <i>cuneus</i> = cui).`]},
+ {t:'slide',h:'Roata olarului și cele 360 de grade',pic:PIC.roata,p:['Pe roata olarului vasul se învârte, iese rotund și se face repede. Așa se puteau face multe vase, și pentru comerț.','Mesopotamienii numărau în grupe de 60. De la ei avem azi 60 de minute într-o oră și 360 de grade într-un cerc.']},
+ {t:'bd',h:'Cum a apărut tăblița',panels:[
+  [S(G+P(60,'#7a5a3a',{beard:1})+SACK(90)+SACK(104)+P(150,'var(--mes)')),'<span class="bub">— Ți-am dat 5 saci de orz.</span><span class="bub">— Și cine își mai amintește peste o lună?</span>'],
+  [S(G+P(70,'var(--mes)')+TAB(100,62,1.2)+'<path d="M150,40 L118,72" stroke="#8a6a3a" stroke-width="4" stroke-linecap="round"/>'),'Scribul apasă o trestie ascuțită în lutul moale. Semnele arată ca niște cuie.'],
+  [S(G+SUN(160,24)+TAB(80,56,1.4)),'Tăblița se usucă la soare și devine tare ca piatra.'],
+  [S(G+P(60,'#7a8a5a',{hat:1})+TAB(110,84,.7)+'<circle cx="122" cy="88" r="14" fill="none" stroke="var(--ink)" stroke-width="3"/>'),'Peste mii de ani, arheologii o găsesc și o pot citi.']]},
+ {t:'src',h:'De unde știm?',pic:PIC.tablet,p:['Arheologii au găsit zeci de mii de tăblițe de lut: socoteli, scrisori, legi, povești. Lutul uscat sau ars rezistă mii de ani.','De aceea știm atât de multe despre mesopotamieni. O tăbliță e un <b>izvor scris</b>.']},
+ {t:'mind',c:'Mesopotamienii',br:[['Unde','între Tigru și Eufrat'],['Cu ce se ocupau','agricultură, comerț, olărit'],['Ce au lăsat','scrierea cuneiformă, roata olarului, unghiul de 360°'],['De unde știm','tăblițele de lut']]},
+ {t:'quiz',qs:[
+  {k:'ch',q:'Între ce râuri se află Mesopotamia?',o:['Tigru și Eufrat','Nil și Tigru','Nil și Eufrat'],exp:'Regula e: Mesopotamia = „țara dintre râuri”, Tigru și Eufrat. Nilul e râul Egiptului.',back:0},
+  {k:'ch',q:'De ce au inventat mesopotamienii scrierea?',o:['Ca să țină socoteala grânelor și a comerțului','Ca să scrie povești pentru copii','Ca să-și decoreze casele'],exp:'Regula e: scrierea a apărut din nevoie: cine a dat, cât și cui.',back:2},
+  {k:'sp',q:'Scrie numele „țării dintre râuri”.',ans:'Mesopotamia',hint:'Me-so-po-ta-mi-a: după „p” vine „o”.',exp:'Regula e: Me-so-po-ta-mi-a.',back:0}]}
+]},
+{id:'egi',zi:1,c:'egi',nume:'Egiptenii',sub:'Valea Nilului',steps:[
+ {t:'slide',h:'Darul Nilului',pic:MAP({hl:['egi'],names:true}),p:['Egiptul este aproape tot deșert. Viața se petrecea pe o fâșie verde, de-a lungul Nilului.','Fără Nil n-ar fi existat Egiptul. Istoricul grec Herodot l-a numit „darul Nilului”.']},
+ {t:'slide',h:'Inundația și geometria',pic:PIC.nil,p:['În fiecare an, vara, Nilul ieșea din matcă și acoperea câmpurile. Când apa se retrăgea, lăsa în urmă mâl negru: un pământ foarte fertil.','Dar apa ștergea hotarele dintre câmpuri. Fiecare câmp trebuia măsurat din nou. Așa s-a dezvoltat <b>geometria</b>, cuvânt care înseamnă „măsurarea pământului”.']},
+ {t:'slide',h:'Piramidele',pic:PIC.pyr,p:['Regele Egiptului se numea <b>faraon</b>. Piramida era <b>mormântul</b> lui.','Cea mai mare, Marea Piramidă de la Gizeh, a fost ridicată pentru faraonul Keops, în jurul anului 2500 î.Hr.','A fost construită de mii de muncitori organizați, hrăniți și plătiți, adesea cu pâine și bere. Nu de sclavi, cum se credea demult.','Egiptenii se ocupau cu agricultura, meșteșugurile și construcțiile.']},
+ {t:'slide',h:'Hieroglifele',pic:PIC.hiero,p:[`${W('Hieroglifele','hi-e-ro-gli-fe-le')} sunt semne care desenează ființe și obiecte.`,'Egiptenii le sculptau pe pereții templelor și le scriau pe papirus, o foaie făcută din planta papirus, care creștea pe malul Nilului.']},
+ {t:'bd',h:'Un an pe malul Nilului',panels:[
+  [S('<rect y="100" width="200" height="20" fill="var(--land)"/><path d="M150,100 Q175,70 200,74 L200,100Z" fill="var(--land)"/><rect y="76" width="200" height="44" fill="var(--sea)" opacity=".9"/>'+P(180,'#f4f1ea',{s:.8})),'Vara: Nilul iese din matcă și acoperă câmpurile.'],
+  [S('<rect y="96" width="200" height="24" fill="#4a3b2a"/>'+P(100,'#f4f1ea')),'<span class="bub">— Unde se termina câmpul meu?</span>Apa a plecat. A rămas mâlul negru.'],
+  [S('<rect y="96" width="200" height="24" fill="#4a3b2a"/>'+P(40,'#f4f1ea')+P(160,'#f4f1ea',{f:1})+'<path d="M50,84 L150,84" stroke="#d9b56a" stroke-width="2.5"/>'+[70,90,110,130].map(x=>`<circle cx="${x}" cy="84" r="3" fill="#d9b56a"/>`).join('')),'Măsurătorii refac hotarele cu o frânghie cu noduri. Așa a crescut geometria.'],
+  [S(G+PYR(160,1.4)+[20,32,44,56,68,80,92].map(WHEAT).join('')),'Pe mâlul fertil cresc multe grâne. Din acest surplus, faraonul hrănește și plătește muncitorii de la piramidă.']]},
+ {t:'src',h:'De unde știm?',pic:PIC.rosetta,p:['Piramidele și templele stau și azi în picioare. Pe pereții lor și pe papirusuri sunt hieroglife.','Multă vreme nimeni nu le mai știa citi. În 1799 s-a găsit <b>Piatra de la Rosetta</b>: același text scris de trei ori, o dată în greacă. Comparând textele, francezul <b>Champollion</b> a descifrat hieroglifele în 1822.']},
+ {t:'mind',c:'Egiptenii',br:[['Unde','valea Nilului'],['Cu ce se ocupau','agricultură, meșteșuguri, construcții'],['Ce au lăsat','hieroglifele, geometria, piramidele'],['De unde știm','piramide, temple, papirusuri, Piatra de la Rosetta']]},
+ {t:'quiz',qs:[
+  {k:'ch',q:'De ce au avut egiptenii nevoie de geometrie?',o:['Inundațiile Nilului ștergeau hotarele câmpurilor','Ca să numere stelele','Ca să scrie hieroglife'],exp:'Regula e: după fiecare inundație, câmpurile se măsurau din nou. Geometrie = „măsurarea pământului”.',back:1},
+  {k:'ch',q:'Ce era piramida?',o:['Mormântul faraonului','Locuința zeului','Palatul în care locuia faraonul'],exp:'Regula e: piramida = mormânt. Locuința zeului este templul.',back:2},
+  {k:'ch',q:'Cine a descifrat hieroglifele?',o:['Champollion','Hammurabi','Ghilgameș'],exp:'Regula e: francezul Champollion, în 1822, cu ajutorul Pietrei de la Rosetta.',back:5}]}
+]},
+{id:'per',zi:1,c:'per',nume:'Perșii',sub:'Podișul Iranului',steps:[
+ {t:'slide',h:'Podișul Iranului',pic:MAP({hl:['per'],names:true}),p:['Perșii trăiau pe podișul Iranului. Un <b>podiș</b> este un ținut înalt și întins.','Aici verile sunt fierbinți și plouă puțin. Apa era o problemă de rezolvat.']},
+ {t:'slide',h:'Canalele subterane',pic:PIC.qanat,p:['Perșii au săpat canale pe sub pământ, de la munte până la câmpuri și sate. Din loc în loc săpau puțuri, ca să poată coborî să le curețe.','De ce pe sub pământ? Acolo nu ajunge soarele, deci apa nu se evaporă. Unele canale duc apă și astăzi.']},
+ {t:'slide',h:'Un imperiu uriaș',pic:PIC.imperiu,p:['Din jurul anului 550 î.Hr., perșii au cucerit multe popoare, printre care Mesopotamia și Egiptul.','Un imperiu atât de mare nu poate fi condus de un singur om. De aceea au avut o <b>administrație</b> bună: provincii cu guvernatori, drumuri, curieri și taxe. Și o <b>armată</b> puternică.','Perșii se ocupau cu agricultura, armata și administrația.']},
+ {t:'bd',h:'Cum conduci un imperiu',panels:[
+  [S(G+P(60,'var(--per)',{crown:1,beard:1})+'<path d="M100,40 C110,20 170,20 185,45 C195,70 160,85 130,80 C105,82 92,62 100,40Z" fill="var(--per)" fill-opacity=".3" stroke="var(--per)" stroke-width="2"/>'),'<span class="bub">— Imperiul meu e prea mare ca să-l conduc singur!</span>'],
+  [S(G+P(50,'var(--per)',{s:.8})+P(100,'var(--per)',{s:.8})+P(150,'var(--per)',{s:.8})+'<path d="M75,30 L75,100 M125,30 L125,100" stroke="var(--per)" stroke-dasharray="4 4"/>'),'Îl împarte în provincii. Fiecare are un guvernator.'],
+  [S(G+'<path d="M0,104 L200,104" stroke="#8a7650" stroke-width="4"/>'+P(110,'#b04a2a')+'<path d="M70,74 L90,74 M64,84 L88,84 M72,94 L92,94" stroke="var(--mut)" stroke-width="2"/>'),'Curierii duc ordinele regelui pe drumuri lungi.'],
+  [S(G+'<path d="M0,96 L70,96" stroke="var(--sea)" stroke-width="8"/><rect x="70" y="92" width="130" height="8" fill="#6ea64a"/>'+P(140,'#f4f1ea')),'<span class="bub">— Apa vine de la munte, pe sub pământ, rece și curată.</span>']]},
+ {t:'src',h:'De unde știm?',pic:PIC.imperiu,p:['Din ruinele palatului regilor perși de la <b>Persepolis</b> și din inscripțiile săpate de regi în stâncă.','Din ce au scris istoricii greci despre ei. Și din canalele subterane, care duc apă și azi.']},
+ {t:'mind',c:'Perșii',br:[['Unde','podișul Iranului'],['Cu ce se ocupau','agricultură, armată, administrație'],['Ce au lăsat','canalele subterane, un imperiu bine organizat'],['De unde știm','Persepolis, inscripții, canalele de azi']]},
+ {t:'quiz',qs:[
+  {k:'ch',q:'De ce săpau perșii canalele pe sub pământ?',o:['Ca apa să nu se evapore la soare','Ca să se ascundă de dușmani','Ca să facă drumuri pentru curieri'],exp:'Regula e: pe podișul uscat, soarele ar fi evaporat apa. Sub pământ, apa nu se pierde.',back:1},
+  {k:'ch',q:'De ce aveau perșii nevoie de o administrație bună?',o:['Imperiul lor era foarte mare','Aveau foarte puțini oameni','Nu aveau deloc armată'],exp:'Regula e: un imperiu uriaș are nevoie de provincii, guvernatori, drumuri și curieri.',back:2},
+  {k:'cl',q:'Cine sunt eu?',clues:['Trăiesc pe un podiș înalt și uscat.','Am o armată puternică și un imperiu uriaș.','Aduc apa pe sub pământ.'],o:['Perșii','Egiptenii','Mesopotamienii'],exp:'Regula e: podișul Iranului + canale subterane = perșii.',back:0}]}
+]},
+{id:'evr',zi:1,c:'evr',nume:'Evreii',sub:'Canaan',steps:[
+ {t:'slide',h:'Canaan',pic:MAP({hl:['evr'],names:true}),p:['Evreii trăiau în <b>Canaan</b>, o fâșie de pământ între Marea Mediterană și deșert.','Canaan era la mijloc, pe drumul dintre Egipt și Mesopotamia.']},
+ {t:'slide',h:'Cu ce se ocupau',pic:PIC.ocupEvr,p:['Mulți erau <b>păstori</b>: creșteau oi și capre pe dealuri.','Pe la ei treceau drumurile negustorilor, așa că făceau <b>comerț</b>. Erau și <b>meșteșugari</b>.']},
+ {t:'slide',h:'Un singur Dumnezeu',pic:PIC.templu,p:['Aproape toate popoarele vremii credeau în mulți zei. Evreii credeau într-un <b>singur Dumnezeu</b>.','Scrierile lor sfinte formează <b>Vechiul Testament</b>.','Regele Solomon a construit <b>Templul din Ierusalim</b>, în jurul anului 950 î.Hr.','Credința într-un singur Dumnezeu a fost preluată apoi de creștinism și de islam.']},
+ {t:'bd',h:'Viața în Canaan',panels:[
+  [S('<path d="M0,100 Q60,80 120,96 Q170,84 200,96 L200,120 L0,120Z" fill="#9cc27a"/>'+P(40,'var(--evr)')+SHEEP(80)+SHEEP(104,100)+SHEEP(130)),'Păstorii își duc oile pe dealurile Canaanului.'],
+  [S(G+P(50,'#b04a2a')+P(90,'var(--evr)')+'<rect x="120" y="78" width="40" height="22" rx="4" fill="#a07a4a"/>'+P(175,'#7a5a3a',{f:1})),'Pe aici trec negustori între Egipt și Mesopotamia. Se fac schimburi.'],
+  [S(G+P(60,'var(--evr)',{beard:1})+P(110,'#f4f1ea',{s:.7})+P(135,'#d9a400',{s:.7})+'<rect x="158" y="70" width="26" height="20" fill="#f1e4c8"/><rect x="154" y="66" width="34" height="6" rx="3" fill="#d8c49a"/><rect x="154" y="88" width="34" height="6" rx="3" fill="#d8c49a"/>'),'Poveștile și învățăturile lor sunt scrise pe suluri. Ele formează Vechiul Testament.'],
+  [S(G+TEMPLE(110)+P(40,'var(--evr)',{crown:1,beard:1})),'Regele Solomon construiește Templul din Ierusalim.']]},
+ {t:'src',h:'De unde știm?',pic:PIC.templu,p:['Din textele Vechiului Testament, copiate cu grijă de mii de ani.','Din săpăturile arheologice din Ierusalim și din Canaan. Și din inscripțiile vecinilor, de exemplu ale egiptenilor, care îi pomenesc.']},
+ {t:'mind',c:'Evreii',br:[['Unde','Canaan'],['Cu ce se ocupau','păstori, comerț, meșteșuguri'],['Ce au lăsat','credința într-un singur Dumnezeu, Vechiul Testament, Templul din Ierusalim'],['De unde știm','textele vechi, arheologia']]},
+ {t:'quiz',qs:[
+  {k:'ch',q:'Ce îi deosebea pe evrei de aproape toate popoarele vremii?',o:['Credeau într-un singur Dumnezeu','Construiau piramide','Aveau cea mai mare armată'],exp:'Regula e: aproape toți credeau în mulți zei; evreii, într-un singur Dumnezeu.',back:2},
+  {k:'ch',q:'Unde trăiau evreii?',o:['În Canaan','În valea Nilului','Pe podișul Iranului'],exp:'Regula e: Canaan e fâșia dintre Marea Mediterană și deșert.',back:0},
+  {k:'ch',q:'Ce a construit regele Solomon la Ierusalim?',o:['Un templu','O piramidă','Un stâlp cu legi'],exp:'Regula e: Templul din Ierusalim, construit de regele Solomon.',back:2}]}
+]},
+{id:'rec1',zi:1,c:'lapis',nume:'Harta mare',sub:'Toate cele patru popoare',steps:[
+ {t:'big'},
+ {t:'quiz',qs:[
+  {k:'lb',q:'Cine trăia în fiecare loc? Alege un popor pentru fiecare număr.',ans:['egi','evr','mes','per'],exp:'Regula e: Nil = egiptenii, Canaan = evreii, între Tigru și Eufrat = mesopotamienii, podișul Iranului = perșii.',back:0},
+  {k:'mt',q:'Potrivește fiecare popor cu ce a lăsat.',pairs:[['Mesopotamienii','scrierea cuneiformă'],['Egiptenii','piramidele'],['Perșii','canalele subterane'],['Evreii','credința într-un singur Dumnezeu']],exp:'Regula e: fiecare popor are moștenirea lui; vezi harta mare.',back:0},
+  {k:'cl',q:'Cine sunt eu?',clues:['Trăiesc lângă un râu care iese din matcă în fiecare an.','Am nevoie de geometrie ca să-mi refac câmpurile.','Îmi îngrop regii în piramide.'],o:['Egiptenii','Perșii','Evreii'],exp:'Regula e: Nil + geometrie + piramide = egiptenii.',back:0}]}
+]},
+{id:'rec2',zi:2,c:'lapis',nume:'Recapitulare de 2 minute',sub:'Ce ții minte din ziua 1',steps:[
+ {t:'cards',h:'Întoarce cartonașele',p:'Spune-ți întâi răspunsul în gând, apoi atinge cartonașul.',cards:[['mes','Mesopotamienii','între Tigru și Eufrat\nscrierea cuneiformă'],['egi','Egiptenii','valea Nilului\npiramidele și geometria'],['per','Perșii','podișul Iranului\ncanalele subterane'],['evr','Evreii','Canaan\nun singur Dumnezeu']]},
+ {t:'quiz',qs:[
+  {k:'ch',q:'Ce popor trăia în valea Nilului?',o:['Egiptenii','Perșii','Mesopotamienii'],exp:'Regula e: Nil = Egipt.',back:0},
+  {k:'ch',q:'Ce popor scria pe tăblițe de lut, cu semne ca niște cuie?',o:['Mesopotamienii','Evreii','Egiptenii'],exp:'Regula e: tăblițe de lut + scriere cuneiformă = Mesopotamia.',back:0}]}
+]},
+{id:'ghi',zi:2,c:'mes',nume:'Epopeea lui Ghilgameș',sub:'Cea mai veche poveste',steps:[
+ {t:'slide',h:'Una dintre cele mai vechi povești',pic:PIC.tablet,p:[`Epopeea lui ${W('Ghilgameș','Ghil-ga-meș')} este una dintre cele mai vechi povești scrise din lume. Vine din Mesopotamia și a fost scrisă pe tăblițe de lut, în scriere cuneiformă.`,'<b>Epopee</b> = o poveste lungă despre faptele unor eroi. Ghilgameș a fost regele orașului <b>Uruk</b>.']},
+ {t:'bd',h:'Partea 1: doi prieteni',panels:[
+  [S(G+P(100,'var(--mes)',{crown:1,beard:1,s:1.15})+P(40,'#f4f1ea',{s:.8})+P(160,'#f4f1ea',{s:.8,f:1})),'Ghilgameș, regele din Uruk, e foarte puternic, dar trufaș. Oamenii se plâng zeilor.'],
+  [S('<rect y="100" width="200" height="20" fill="#6ea64a"/>'+P(100,'#7a5a3a',{hair:1,s:1.15})),'Zeii îl fac pe Enkidu, un om sălbatic, la fel de puternic.'],
+  [S(G+P(75,'var(--mes)',{crown:1,beard:1})+P(125,'#7a5a3a',{hair:1,f:1})+'<path d="M92,70 L108,70" stroke="var(--ink)" stroke-width="3"/>'),'Se luptă. Niciunul nu-l poate învinge pe celălalt.'],
+  [S(G+P(85,'var(--mes)',{crown:1,beard:1})+P(115,'#7a5a3a',{hair:1})),'Devin cei mai buni prieteni și pleacă împreună în aventuri.']]},
+ {t:'bd',h:'Partea 2: marea întrebare',panels:[
+  [S(G+'<rect x="90" y="92" width="60" height="8" rx="4" fill="#7a5a3a"/><circle cx="150" cy="92" r="6" fill="var(--skin)"/>'+P(60,'var(--mes)',{crown:1,beard:1})),'Enkidu moare. Ghilgameș e îndurerat și începe să se teamă de moarte.'],
+  [S('<rect width="200" height="120" fill="var(--sea)"/><path d="M100,110 L100,80" stroke="#3f8a3a" stroke-width="3"/><ellipse cx="94" cy="84" rx="6" ry="3" fill="#5ab04a"/><ellipse cx="106" cy="90" rx="6" ry="3" fill="#5ab04a"/>'+P(60,'var(--mes)',{crown:1,beard:1})),'Pleacă să caute viața veșnică. Găsește o plantă a tinereții…'],
+  [S(G+'<path d="M60,98 C70,90 80,104 90,96 C100,88 110,104 120,96" stroke="#3f8a3a" stroke-width="5" fill="none"/><path d="M122,96 L132,86" stroke="#3f8a3a" stroke-width="2"/>'+P(170,'var(--mes)',{crown:1,beard:1,f:1})),'…dar un șarpe i-o fură.'],
+  [S(G+'<rect x="20" y="60" width="160" height="40" fill="#c9a77a"/>'+[0,1,2,3,4,5,6,7].map(i=>`<rect x="${22+i*20}" y="52" width="12" height="10" fill="#c9a77a"/>`).join('')+P(100,'var(--mes)',{crown:1,beard:1})),'Se întoarce acasă și înțelege: oamenii sunt muritori. Rămân faptele lor, ca zidurile orașului Uruk.']]},
+ {t:'slide',h:'Ce ne învață povestea',p:['<b>Prietenia</b>: Ghilgameș se schimbă datorită lui Enkidu.','<b>Oamenii sunt muritori</b>: nimeni nu poate trăi veșnic, nici un rege puternic. Ce rămâne după noi sunt faptele noastre.'],rule:'Cum caracterizezi un personaj: <b>trăsătură + pentru că + o faptă din poveste</b>.<br>Exemplu: Ghilgameș devine înțelept la final, pentru că acceptă că oamenii sunt muritori.'},
+ {t:'src',h:'De unde știm?',pic:PIC.tablet,p:['Tăblițele cu povestea au fost găsite în ruinele unei biblioteci regale din orașul Ninive, în Mesopotamia.','Au putut fi citite abia în secolul al XIX-lea, după ce învățații au descifrat scrierea cuneiformă.']},
+ {t:'mind',c:'Epopeea lui Ghilgameș',br:[['Unde','orașul Uruk, Mesopotamia'],['Personaje','Ghilgameș și Enkidu'],['Ce ne învață','prietenia; oamenii sunt muritori'],['Scrisă pe','tăblițe de lut, în scriere cuneiformă']]},
+ {t:'quiz',qs:[
+  {k:'ch',q:'Cine este Enkidu?',o:['Un om sălbatic, la fel de puternic, care devine prietenul lui Ghilgameș','Un zeu care conduce orașul Uruk','Un scrib din Babilon'],exp:'Regula e: Enkidu e făcut de zei, se luptă cu Ghilgameș, apoi devin prieteni.',back:1},
+  {k:'ch',q:'Ce înțelege Ghilgameș la sfârșit?',o:['Oamenii sunt muritori; rămân faptele lor','Poate trăi veșnic dacă e puternic','Prietenia nu contează'],exp:'Regula e: planta se pierde, iar Ghilgameș acceptă că oamenii sunt muritori.',back:2},
+  {k:'op',q:'Cum este Ghilgameș la începutul poveștii? Scrie o trăsătură și motivul, cu „pentru că”.',model:'Ghilgameș este trufaș la început, pentru că își asuprea oamenii din Uruk și se credea mai presus de toți.',check:'Are răspunsul tău o trăsătură și un motiv luat din poveste?'}]}
+]},
+{id:'ham',zi:2,c:'mes',nume:'Codul lui Hammurabi',sub:'Legi scrise în piatră',steps:[
+ {t:'slide',h:'Regele și stâlpul de piatră',pic:PIC.stalp,p:[`${W('Hammurabi','Ham-mu-ra-bi')} a fost rege al <b>Babilonului</b>, un oraș din Mesopotamia, în jurul anului 1750 î.Hr.`,'A pus să fie scrise aproape 300 de legi pe un stâlp mare de piatră neagră, înalt de peste 2 metri, ca să le vadă toată lumea. Azi stâlpul se află la muzeul <b>Luvru</b>, din Paris.','De ce legi scrise? Într-un oraș mare apar multe certuri. Cu legile scrise, regula e aceeași pentru toți judecătorii și nu se schimbă după chef.']},
+ {t:'slide',h:'Legea talionului',pic:PIC.talion,p:['„Ochi pentru ochi, dinte pentru dinte.” Pedeapsa era <b>la fel cu fapta</b>: cine scotea cuiva un ochi pierdea și el un ochi.']},
+ {t:'slide',h:'Dar nu pentru toți la fel',pic:PIC.inegal,p:['Pedeapsa depindea de cine erai.','Dacă un om liber scotea ochiul altui om liber, își pierdea și el ochiul.','Dacă scotea ochiul unui sclav, plătea doar jumătate din prețul sclavului.'],rule:'Gândește-te: e drept așa? Vei avea nevoie de răspuns la verificare.'},
+ {t:'bd',h:'La judecată',panels:[
+  [S(G+P(50,'#7a5a3a',{beard:1})+OX(100)+P(160,'#b04a2a',{f:1})),'<span class="bub">— E boul meu!</span><span class="bub">— Ba e al meu!</span>'],
+  [S(G+P(100,'var(--mes)',{beard:1,s:1.1})),'<span class="bub">— Nu hotărăsc după cum am chef. Citim legea.</span>'],
+  [S(G+STELE(110,80)+P(60,'var(--mes)')),'Scribul citește legea de pe stâlp. Toți află aceeași regulă.'],
+  [S('<rect y="100" width="200" height="20" fill="#d6d2c8"/>'+STELE(100,80)+P(40,'#3a6ab0',{s:.8})+P(160,'#b04a2a',{s:.8,f:1}),'#eceae4'),'Azi stâlpul e la muzeul Luvru, din Paris.']]},
+ {t:'src',h:'De unde știm?',pic:PIC.stalp,p:['Izvorul e chiar stâlpul: un izvor scris pe piatră.','A fost găsit în 1901 la Susa, în Iran, nu la Babilon. Fusese dus acolo ca pradă de război, cu sute de ani după Hammurabi.']},
+ {t:'mind',c:'Codul lui Hammurabi',br:[['Cine','Hammurabi, rege al Babilonului'],['Ce este','o culegere de legi pe un stâlp de piatră'],['Ideea','legea talionului: ochi pentru ochi'],['Azi','la muzeul Luvru, Paris']]},
+ {t:'quiz',qs:[
+  {k:'ch',q:'Ce înseamnă legea talionului?',o:['Pedeapsa este la fel cu fapta','Vinovatul este iertat','Pedeapsa este mereu o amendă'],exp:'Regula e: „ochi pentru ochi” = pedeapsa e la fel cu fapta.',back:1},
+  {k:'ch',q:'Unde se află azi stâlpul cu legile lui Hammurabi?',o:['La muzeul Luvru, în Paris','În Marea Piramidă','În Templul din Ierusalim'],exp:'Regula e: stâlpul e la Luvru, în Paris.',back:0},
+  {k:'op',q:'Ce lege a lui Hammurabi ți se pare nedreaptă? Scrie de ce, cu „pentru că”.',model:'Mi se pare nedreaptă legea despre ochiul sclavului, pentru că un sclav simte aceeași durere ca un om liber, dar vinovatul plătea doar bani.',check:'Ai spus ce lege și ai dat un motiv?'}]}
+]},
+{id:'scr',zi:2,c:'egi',nume:'Drumul scrierii',sub:'De la desene la alfabet',steps:[
+ {t:'slide',h:'La început: desene',pic:PIC.picto,p:['Prima scriere a fost <b>pictografică</b>: desenai lucrul despre care vorbeai. Un soare, un pește, un bou.','Problema: cum desenezi „mâine”, „prietenie” sau un nume?']},
+ {t:'slide',h:'Cuneiforma și hieroglifele',pic:PIC.cune,p:['Semnele s-au simplificat. În Mesopotamia au devenit semne ca niște cuie, pe lut: scrierea <b>cuneiformă</b>. În Egipt au apărut <b>hieroglifele</b>.','Amândouă aveau sute de semne. Ca să devii scrib, învățai ani de zile.']},
+ {t:'slide',h:'Scriere sau alfabet?',pic:PIC.compar,p:['<b>Scrierea</b> = orice sistem de semne cu care notezi ce spui.','<b>Alfabetul</b> = un fel special de scriere: puține semne, iar fiecare semn înseamnă un sunet.','Fenicienii, un popor de negustori, au făcut un alfabet de 22 de semne, toate consoane. Grecii l-au preluat și au adăugat vocalele. În desen: literele grecești.'],rule:'Orice alfabet este o scriere, dar nu orice scriere este un alfabet. Scrierea cuneiformă <b>nu</b> este alfabet: e scriere.'},
+ {t:'slide',h:'Pe ce se scria',pic:PIC.materiale,p:['<b>Tăblițe de lut</b>: în Mesopotamia.','<b>Papirus</b>: în Egipt, din planta de pe malul Nilului.','<b>Pergament</b>: piele de animal prelucrată, subțire și rezistentă.']},
+ {t:'bd',h:'Negustorul grăbit',panels:[
+  [S(SHIP+P(80,'#7a3a8a',{s:.8,y:-10})),'<span class="bub">— Fac comerț pe mare. N-am timp să învăț sute de semne!</span>'],
+  [S('<rect width="200" height="120" fill="var(--soft)"/><text x="100" y="70" text-anchor="middle" style="font:700 30px Spectral,serif;fill:var(--ink)">22 de semne</text>'),'Fenicienii folosesc doar 22 de semne. Fiecare semn = un sunet.'],
+  [S('<rect width="200" height="120" fill="var(--sky)"/><text x="100" y="72" text-anchor="middle" style="font:600 34px Inter;fill:var(--per)">Α Ε Ι Ο Υ</text>'),'Grecii preiau alfabetul și adaugă vocalele.'],
+  [S('<rect width="200" height="120" fill="var(--card)"/><text x="100" y="72" text-anchor="middle" style="font:600 34px Inter;fill:var(--ink)">A B C D</text>'),'Din alfabetul grecilor se trage și alfabetul pe care îl folosești tu.']]},
+ {t:'mind',c:'Drumul scrierii',br:[['1. Pictografică','desenul lucrului'],['2. Cuneiformă și hieroglifică','sute de semne'],['3. Alfabetul fenicienilor','22 de semne, toate consoane'],['4. Alfabetul grecilor','adaugă vocalele'],['Pe ce','tăblițe de lut, papirus, pergament']]},
+ {t:'quiz',qs:[
+  {k:'ord',q:'Pune în ordine, de la primele desene la alfabetul cu vocale.',items:['Scrierea pictografică (desene)','Cuneiforma și hieroglifele','Alfabetul fenicienilor (22 de consoane)','Alfabetul grecilor (cu vocale)'],exp:'Regula e: semnele devin tot mai simple și tot mai puține.',back:0},
+  {k:'ch',q:'Scrierea cuneiformă este un alfabet?',o:['Nu: are sute de semne, iar un alfabet are puține litere, câte una pentru fiecare sunet','Da, pentru că are semne','Da, pentru că a fost inventată de fenicieni'],exp:'Regula e: orice alfabet este o scriere, dar nu orice scriere este un alfabet.',back:2},
+  {k:'ch',q:'Din ce se făcea pergamentul?',o:['Din piele de animal prelucrată','Din lut','Din planta papirus'],exp:'Regula e: lutul = tăblițe, planta = papirus, pielea = pergament.',back:3}]}
+]},
+{id:'fin',zi:2,c:'lapis',nume:'Ancheta finală',sub:'Șase întrebări, toate dosarele',steps:[
+ {t:'quiz',qs:[
+  {k:'tb',q:'Completează tabelul anchetatorului. Atinge un „?” și alege.',exp:'Regula e: fiecare popor are locul, ocupațiile și moștenirea lui.',back:['rec1',0]},
+  {k:'lb',q:'Cine trăia în fiecare loc?',ans:['egi','evr','mes','per'],exp:'Regula e: Nil = egiptenii, Canaan = evreii, între Tigru și Eufrat = mesopotamienii, podișul = perșii.',back:['rec1',0]},
+  {k:'mt',q:'Potrivește fiecare nume cu ce a făcut.',pairs:[['Hammurabi','a scris legi pe un stâlp de piatră'],['Ghilgameș','a fost regele orașului Uruk'],['Fenicienii','au făcut un alfabet de 22 de semne'],['Champollion','a descifrat hieroglifele']],exp:'Regula e: fiecare nume are un singur fapt principal.',back:['ham',0]},
+  {k:'ch',q:'De ce au apărut primele civilizații lângă râuri?',o:['Apa făcea posibilă agricultura și surplusul de hrană','Pentru că oamenilor le plăcea să înoate','Pentru că râurile îi apărau de frig'],exp:'Regula e: firul roșu: râu → apă → agricultură → surplus → orașe.',back:['fir',1]},
+  {k:'sp',q:'Scrie numele regelui Babilonului care a scris legile.',ans:'Hammurabi',hint:'Ham-mu-ra-bi: doi de „m”.',exp:'Regula e: Ham-mu-ra-bi.',back:['ham',0]},
+  {k:'ch',q:'Care dintre acestea este un alfabet?',o:['Scrierea fenicienilor, cu 22 de semne','Scrierea cuneiformă','Hieroglifele'],exp:'Regula e: alfabetul are puține semne, câte unul pentru fiecare sunet.',back:['scr',2]}]}
+]},
+{id:'greu',zi:2,c:'evr',greu:1,nume:'Dosar greu',sub:'Opțional. Aici nu se numără nimic.',steps:[
+ {t:'quiz',qs:[
+  {k:'ch',q:'Un arheolog găsește o tăbliță de lut cu semne ca niște cuie. De la ce popor vine, cel mai probabil?',o:['Mesopotamienii','Egiptenii','Evreii'],exp:'Lutul și semnele-cui sunt „amprenta” Mesopotamiei.',back:['mes',2]},
+  {k:'ch',q:'Stâlpul lui Hammurabi a fost găsit la Susa, în Iran, nu la Babilon. Cum a ajuns acolo?',o:['Un rege dușman l-a luat ca pradă de război','L-au mutat arheologii','Hammurabi locuia la Susa'],exp:'Cu vreo 600 de ani după Hammurabi, un rege din ținutul Susei a atacat Babilonul și a dus stâlpul acasă.',back:['ham',4]},
+  {k:'ord',q:'Pune în ordine, de la cel mai vechi.',items:['Primele scrieri','Marea Piramidă','Codul lui Hammurabi','Imperiul Persan'],exp:'Vezi axa timpului: 3200, 2500, 1750, 550 î.Hr.',back:['fir',2]},
+  {k:'ch',q:'Ce s-ar fi întâmplat cu Egiptul fără inundațiile Nilului?',o:['Pământul n-ar fi fost fertil și n-ar fi existat surplus de hrană','Ar fi avut mai multe piramide','Nu s-ar fi schimbat nimic'],exp:'Fără mâl nu e recoltă bogată, deci nici surplus, nici orașe mari.',back:['egi',1]},
+  {k:'op',q:'Perșii au cucerit și Mesopotamia, și Egiptul. Ce greutăți crezi că a avut regele cu un imperiu atât de mare?',model:'Afla greu ce se întâmplă departe, pentru că mesajele mergeau încet. De aceea a făcut drumuri, a trimis curieri și a pus guvernatori.',check:'Ai dat o greutate și un motiv?'}]}
+]}
+];
+const BY={};D.forEach(d=>BY[d.id]=d);
+const TB={cols:['mes','egi','per','evr'],rows:['Unde','Cu ce se ocupau','Ce au lăsat'],cells:{mes:['între Tigru și Eufrat','agricultură, comerț, olărit','scrierea cuneiformă'],egi:['valea Nilului','agricultură, meșteșuguri, construcții','piramidele, geometria'],per:['podișul Iranului','agricultură, armată, administrație','canalele subterane'],evr:['Canaan','păstori, comerț, meșteșuguri','un singur Dumnezeu']},blanks:[['mes',2],['egi',0],['per',2],['evr',1]]};
+const KIND={slide:'Prezentare',chain:'Prezentare',time:'Prezentare',bd:'Bandă desenată',src:'De unde știm?',mind:'Harta mentală',quiz:'Verificare',cards:'Recapitulare',big:'Harta mare'};
+const SYM={fir:'<path d="M6,40 C16,20 32,44 42,10" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="6" cy="40" r="4" fill="currentColor"/><circle cx="42" cy="10" r="4" fill="currentColor"/>',mes:'<rect x="11" y="6" width="26" height="36" rx="5" fill="currentColor"/><path d="M16,14 l6,2 l-6,2z M26,14 l6,2 l-6,2z M16,24 l6,2 l-6,2z M26,24 l6,2 l-6,2z M16,34 l6,2 l-6,2z" fill="#fff"/>',egi:'<path d="M4,42 L24,8 L44,42Z" fill="currentColor"/><path d="M24,8 L44,42 L28,42Z" fill="#000" opacity=".2"/>',per:'<rect x="18" y="10" width="12" height="30" fill="currentColor"/><rect x="12" y="6" width="24" height="6" fill="currentColor"/><rect x="12" y="38" width="24" height="5" fill="currentColor"/>',evr:'<rect x="12" y="12" width="24" height="24" fill="currentColor"/><rect x="8" y="8" width="32" height="7" rx="3.5" fill="currentColor"/><rect x="8" y="33" width="32" height="7" rx="3.5" fill="currentColor"/>',rec1:'<circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="4"/><path d="M14,30 L22,14 L34,24" fill="none" stroke="currentColor" stroke-width="3"/>',rec2:'<rect x="6" y="12" width="22" height="28" rx="4" fill="currentColor" opacity=".5"/><rect x="18" y="8" width="22" height="28" rx="4" fill="currentColor"/>',ghi:'<circle cx="16" cy="14" r="6" fill="currentColor"/><circle cx="32" cy="14" r="6" fill="currentColor"/><path d="M8,42 L10,24 L22,24 L24,42Z M24,42 L26,24 L38,24 L40,42Z" fill="currentColor"/>',ham:'<rect x="15" y="4" width="18" height="40" rx="8" fill="currentColor"/><path d="M19,22 L29,22 M19,28 L29,28 M19,34 L29,34" stroke="#fff" stroke-width="2"/>',scr:'<path d="M10,40 L34,8 L40,12 L16,44Z" fill="currentColor"/><path d="M10,40 L8,46 L16,44Z" fill="currentColor"/>',fin:'<circle cx="20" cy="20" r="13" fill="none" stroke="currentColor" stroke-width="4"/><path d="M30,30 L42,42" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>',greu:'<path d="M24,4 L29,18 L44,18 L32,27 L37,42 L24,33 L11,42 L16,27 L4,18 L19,18Z" fill="currentColor"/>'};
+
+/* ---------- stare ---------- */
+const KEY='arhiva-orient-v1';
+let st={done:{},pos:{},qi:{},seen:{}};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)st=Object.assign(st,s);}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}};
+let cur=null,step=0,rev=0,qs=null,lastMiss=false,ret=null,ov=false,endView=false,flip={},bye=false;
+const app=document.getElementById('app');
+const shuf=a=>{const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
+const norm=s=>s.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const status=d=>st.done[d.id]?'<span class="chip d">închis ✓</span>':(st.pos[d.id]?'<span class="chip w">în lucru</span>':'<span class="chip">de deschis</span>');
+
+function home(){
+  const day=z=>{const ds=D.filter(d=>d.zi===z);const n=ds.filter(d=>st.done[d.id]&&!d.greu).length,t=ds.filter(d=>!d.greu).length;
+   return `<div><div class="dayh"><h2>Ziua ${z}</h2><span>${n} din ${t} dosare închise</span></div>${ds.map(d=>`<button class="folder" style="--c:var(--${d.c})" data-a="open" data-id="${d.id}"><svg class="sym" viewBox="0 0 48 48">${SYM[d.id]}</svg><span><b>${d.nume}</b><small>${d.sub}</small></span>${status(d)}</button>`).join('')}
+   <p class="note">${z===1?'Firul roșu, axa timpului și cele patru popoare.':'Începe cu recapitularea. Fă ziua 2 înainte de testul din hub despre Ghilgameș și Hammurabi.'}</p></div>`;};
+  app.innerHTML=`<header class="band hero"><div class="heroin"><div><a class="hubl" href="./">← înapoi în hub</a><h1>Arhiva Orientului antic</h1><p>Ești anchetator. Fiecare popor e un dosar: îl deschizi, afli povestea, cauți dovezile, apoi închizi dosarul cu câteva întrebări.</p><p>Progresul se păstrează pe acest dispozitiv.</p></div><div class="mapcard">${MAP({names:true})}</div></div></header>
+  <section class="band"><div class="days">${day(1)}${day(2)}</div></section>`;
+}
+
+function body(d,s){
+  if(s.t==='slide'||s.t==='src') return `<h2>${s.h}</h2>${s.pic?`<div class="pic">${s.pic}</div>`:''}${s.p.map(x=>`<p>${x}</p>`).join('')}${s.rule?`<div class="rule">${s.rule}</div>`:''}`;
+  if(s.t==='bd') return `<h2>${s.h}</h2><div class="bd">${s.panels.map(p=>`<div class="pan">${p[0]}<div class="cap">${p[1]}</div></div>`).join('')}</div>`;
+  if(s.t==='mind'){const n=st.seen[d.id+step]?s.br.length:rev;return `<h2>Harta mentală</h2><p>Atinge „Următoarea ramură” până se umple harta.</p><div class="mm"><div class="mmc">${s.c}</div><div class="mmg">${s.br.map((b,i)=>i<n?`<div class="br"><b>${b[0]}</b>${b[1]}</div>`:`<div class="br hid"><b>${b[0]}</b>…</div>`).join('')}</div></div>${n<s.br.length?`<div class="row"><button class="btn q" data-a="rev">Următoarea ramură</button></div>`:''}`;}
+  if(s.t==='chain'){const n=st.seen[d.id+step]?s.items.length:Math.max(rev,1);return `<h2>${s.h}</h2><p>${s.p}</p><div class="chain">${s.items.slice(0,n).map((it,i)=>`<div class="ch"><span>${i+1}</span><div><b>${it[0]}</b><small>${it[1]}</small></div></div>`).join('')}</div>${n<s.items.length?`<button class="btn q" data-a="rev">Următorul pas</button>`:'<div class="rule">Firul roșu: <b>râu → apă → agricultură → surplus → comerț și orașe → scriere și legi</b>. Îl vei regăsi la fiecare popor.</div>'}`;}
+  if(s.t==='time'){let prev=null;return `<h2>${s.h}</h2><p>${s.p}</p><div class="tl">${s.ev.map(e=>{const gap=prev===null?0:Math.round((prev-e[0])/100*9);prev=e[0];return `<div class="ev" style="--e:var(--${e[2]});margin-top:${gap}px"><b>în jur de ${e[0]} î.Hr.</b><br>${e[1]}</div>`;}).join('')}</div><p class="note">Anii sunt aproximativi, cum îi dau și istoricii.</p>`;}
+  if(s.t==='cards') return `<h2>${s.h}</h2><p>${s.p}</p><div class="cards">${s.cards.map((c,i)=>`<button class="fc ${flip[i]?'f':''}" style="--e:var(--${c[0]})" data-a="flip" data-i="${i}">${flip[i]?c[2]:c[1]+'\n\n(atinge)'}</button>`).join('')}</div>`;
+  if(s.t==='big') return `<h2>Harta mare: patru popoare</h2><div class="pic">${MAP({names:true})}</div><div class="big">${P_.map(k=>{const m=BY[k].steps.find(x=>x.t==='mind');return `<div class="bc" style="--e:var(--${k})"><h3>${NUME[k]}</h3><dl>${m.br.map(b=>`<dt>${b[0]}</dt><dd>${b[1]}</dd>`).join('')}</dl></div>`;}).join('')}</div>`;
+  if(s.t==='quiz') return quiz(d,s);
+  return '';
+}
+
+function initQ(d,q,key){
+  qs={key,miss:false,done:false,wrong:false,tried:[],order:q.o?shuf(q.o.map((_,i)=>i)):null};
+  if(q.k==='mt'){qs.right=shuf(q.pairs.map((_,i)=>i));qs.locked=[];qs.sel=null;}
+  if(q.k==='ord'){qs.pool=shuf(q.items.map((_,i)=>i));qs.seq=[];}
+  if(q.k==='cl')qs.shown=1;
+  if(q.k==='lb'){qs.pick=[null,null,null,null];qs.bad=[];}
+  if(q.k==='tb'){qs.solved=[];qs.act=null;qs.opts=shuf(TB.blanks.map((_,i)=>i));}
+}
+function quiz(d,s){
+  const qi=st.qi[d.id]||0,q=s.qs[qi],key=d.id+':'+qi;
+  if(!qs||qs.key!==key)initQ(d,q,key);
+  let h=`<div class="qn">Întrebarea ${qi+1} din ${s.qs.length}${d.greu?' · dosar greu, nu se numără':''}</div><div class="qq">${q.q}</div>`;
+  const opts=(list,okIdx)=>`<div class="opts">${qs.order.map(i=>{const ok=qs.done&&i===okIdx,no=qs.tried.includes(i);return `<button class="opt ${ok?'ok':''} ${no?'no':''}" data-a="opt" data-i="${i}" ${qs.done||no?'disabled':''}>${list[i]}${no?'<span class="tag">Încă nu</span>':''}${ok?'<span class="tag">✓</span>':''}</button>`;}).join('')}</div>`;
+  if(q.k==='ch')h+=opts(q.o,0);
+  if(q.k==='cl')h+=`<div class="opts" style="margin-bottom:12px">${q.clues.slice(0,qs.shown).map((c,i)=>`<div class="rule" style="margin:0">Indiciul ${i+1}: ${c}</div>`).join('')}</div>${qs.shown<q.clues.length&&!qs.done?`<div class="row" style="margin:0 0 12px"><button class="btn q" data-a="clue">Încă un indiciu</button></div>`:''}${opts(q.o,0)}`;
+  if(q.k==='sp')h+=`<input class="tx" id="sp" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(qs.val||'')}" ${qs.done?'disabled':''}><div class="row">${qs.done?'':'<button class="btn p" data-a="spchk">Verifică</button>'}</div>`;
+  if(q.k==='mt')h+=`<p class="note" style="margin-top:0">Atinge un popor sau un nume în stânga, apoi perechea lui în dreapta.</p><div class="mg"><div class="opts">${q.pairs.map((p,i)=>`<button class="opt ${qs.locked.includes(i)?'ok':''} ${qs.sel===i?'sel':''}" data-a="ml" data-i="${i}" ${qs.locked.includes(i)?'disabled':''}>${p[0]}</button>`).join('')}</div><div class="opts">${qs.right.map(i=>`<button class="opt ${qs.locked.includes(i)?'ok':''}" data-a="mr" data-i="${i}" ${qs.locked.includes(i)?'disabled':''}>${q.pairs[i][1]}${qs.bad===i?'<span class="tag">Încă nu</span>':''}</button>`).join('')}</div></div>`;
+  if(q.k==='ord')h+=`<div class="seq">${qs.seq.map((i,n)=>`<div>${n+1}. ${q.items[i]}</div>`).join('')}</div><div class="opts">${qs.pool.filter(i=>!qs.seq.includes(i)).map(i=>`<button class="opt" data-a="ord" data-i="${i}">${q.items[i]}</button>`).join('')}</div>${qs.wrong?'<div class="row"><button class="btn" data-a="ordreset">Reia ordinea</button></div>':''}`;
+  if(q.k==='op')h+=`<textarea id="op" ${qs.done?'disabled':''} placeholder="Scrie aici…">${esc(qs.val||'')}</textarea><div class="row">${qs.done?'':'<button class="btn p" data-a="opdone">Gata</button>'}</div>${qs.done?`<div class="fb y"><b>Un model de răspuns:</b><br>${q.model}<br><br>${q.check}</div>`:''}`;
+  if(q.k==='lb')h+=`<div class="pic">${MAP({names:false,marks:true})}</div>${q.ans.map((a,r)=>`<div class="lbr"><span class="n">${r+1}</span><div class="pills">${P_.map(k=>`<button class="pill ${qs.pick[r]===k?'on':''} ${qs.bad.includes(r)&&qs.pick[r]===k?'no':''}" data-a="lb" data-r="${r}" data-k="${k}" ${qs.done?'disabled':''}>${NUME[k]}${qs.bad.includes(r)&&qs.pick[r]===k?' · încă nu':''}</button>`).join('')}</div></div>`).join('')}${qs.done?'':`<div class="row"><button class="btn p" data-a="lbchk" ${qs.pick.includes(null)?'disabled':''}>Verifică</button></div>`}`;
+  if(q.k==='tb'){const bi=(k,r)=>TB.blanks.findIndex(b=>b[0]===k&&b[1]===r);
+   h+=`<div class="scroll"><table><thead><tr><th></th>${TB.cols.map(k=>`<th style="color:var(--${k})">${NUME[k]}</th>`).join('')}</tr></thead><tbody>${TB.rows.map((rw,r)=>`<tr><th>${rw}</th>${TB.cols.map(k=>{const b=bi(k,r);if(b<0||qs.solved.includes(b))return `<td>${TB.cells[k][r]}</td>`;return `<td><button class="pill ${qs.act===b?'on':''}" data-a="tb" data-i="${b}">?</button></td>`;}).join('')}</tr>`).join('')}</tbody></table></div>
+   ${qs.act!==null?`<p class="note">Ce scrii în căsuța aleasă?</p><div class="pills">${qs.opts.filter(o=>!qs.solved.includes(o)).map(o=>{const[k,r]=TB.blanks[o];return `<button class="pill ${qs.tbBad===o?'no':''}" data-a="tbo" data-i="${o}">${TB.cells[k][r]}${qs.tbBad===o?' · încă nu':''}</button>`;}).join('')}</div>`:''}`;}
+  if(qs.wrong&&!qs.done&&q.k!=='op')h+=`<div class="fb"><b>Încă nu.</b> ${q.exp}${q.k==='sp'?'<br>'+q.hint:''}<br><button class="btn q" data-a="back">Arată-mi din nou partea asta</button></div>`;
+  if(qs.done&&q.k!=='op')h+=`<div class="fb y"><b>Da.</b> ${q.exp}</div>`;
+  if(qs.done)h+=`<div class="nav"><span></span><button class="btn p" data-a="qnext">${qi+1<s.qs.length?'Mai departe':'Închide dosarul'}</button></div>`;
+  return h;
+}
+
+function view(){
+  if(!cur){home();return;}
+  const d=BY[cur],c=`--c:var(--${d.c})`;
+  if(endView){
+    const nx=D[D.indexOf(d)+1];
+    app.innerHTML=`<div class="view" style="${c}"><div class="card end"><svg viewBox="0 0 48 48" style="color:var(--${d.c})">${SYM[d.id]}</svg><h2>${d.id==='fin'?'Ai deschis toate dosarele.':'Dosar închis.'}</h2><p style="margin:0 auto 16px">${d.id==='fin'?'Mâine le mai trecem o dată prin minte, ca să rămână.':d.greu?'Ai încercat întrebările grele. Sunt de nivel mai mare, deci contează doar că le-ai gândit.':'Ai trecut prin toți pașii lui. Mâine îl mai treci o dată prin minte, ca să rămână.'}</p><div class="row" style="justify-content:center"><button class="btn" data-a="again">Mai arată-mi o dată</button><button class="btn" data-a="home">Înapoi în arhivă</button>${nx&&nx.zi===d.zi?`<button class="btn p" data-a="open" data-id="${nx.id}">Dosarul următor: ${nx.nume}</button>`:''}</div></div></div>`;return;}
+  const s=d.steps[step],last=step===d.steps.length-1;
+  const full=(s.t==='mind'&&(st.seen[d.id+step]||rev>=s.br.length))||(s.t==='chain'&&(st.seen[d.id+step]||rev>=s.items.length));
+  const canNext=!last&&s.t!=='quiz'&&(!['mind','chain'].includes(s.t)||full);
+  app.innerHTML=`<div class="view" style="${c}">
+  <div class="top"><button class="btn" data-a="home">← Arhivă</button><span class="tt">${d.nume}</span>${d.steps.length>1?'<button class="btn q" data-a="again">Mai arată-mi o dată</button>':''}</div>
+  ${d.steps.length>1?`<ol class="dots">${d.steps.map((x,i)=>`<li><button class="${i===step?'on':''} ${i<step?'seen':''}" data-a="go" data-i="${i}">${KIND[x.t]}</button></li>`).join('')}</ol>`:''}
+  <div class="card"><div class="kind">${KIND[s.t]}</div>${body(d,s)}
+  ${s.t!=='quiz'?`<div class="nav"><button class="btn" data-a="prev" ${step===0?'disabled':''}>Înapoi</button><button class="btn p" data-a="next" ${canNext?'':'disabled'}>Mai departe</button></div>`:''}</div></div>
+  ${ret&&!(ret.d===cur&&ret.s===step)?'<button class="btn p ret" data-a="ret">↩ Înapoi la întrebare</button>':''}
+  ${ov?`<div class="ov"><div class="ovb"><h3>Două întrebări la rând n-au ieșit încă</h3><p style="margin-top:10px">Poți continua sau te poți opri aici. Tot ce ai făcut rămâne salvat.</p><div class="row"><button class="btn p" data-a="stay">Continui</button><button class="btn" data-a="stop">Ajunge pe azi</button></div></div></div>`:''}
+  ${bye?'':''}`;
+}
+function go(id,s){cur=id;step=s;rev=0;endView=false;flip={};if(id){st.pos[id]=s;save();}view();window.scrollTo(0,0);}
+function markSeen(){const d=BY[cur],s=d.steps[step];if(s&&['mind','chain'].includes(s.t)){st.seen[cur+step]=1;save();}}
+function miss(){if(qs.miss)return;qs.miss=true;const d=BY[cur];if(d.greu)return;if(lastMiss){ov=true;}}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
+  const d=cur?BY[cur]:null,s=d?d.steps[step]:null,q=s&&s.t==='quiz'?s.qs[st.qi[cur]||0]:null,I=+b.dataset.i;
+  if(a==='home'){ret=null;go(null,0);return;}
+  if(a==='open'){const id=b.dataset.id;ret=null;go(id,st.done[id]?0:(st.pos[id]||0));return;}
+  if(a==='again'){st.qi[cur]=0;qs=null;go(cur,0);return;}
+  if(a==='go'){markSeen();go(cur,I);return;}
+  if(a==='prev'){go(cur,step-1);return;}
+  if(a==='next'){markSeen();go(cur,step+1);return;}
+  if(a==='rev'){rev=Math.max(rev,s.t==='chain'?1:0)+1;view();return;}
+  if(a==='flip'){flip[I]=!flip[I];view();return;}
+  if(a==='back'){ret={d:cur,s:step};const t=q.back;if(Array.isArray(t))go(t[0],t[1]);else go(cur,t);return;}
+  if(a==='ret'){const r=ret;ret=null;go(r.d,r.s);return;}
+  if(a==='stay'){ov=false;lastMiss=false;view();return;}
+  if(a==='stop'){ov=false;lastMiss=false;save();go(null,0);return;}
+  if(!q)return;
+  const done=()=>{qs.done=true;qs.wrong=false;if(!d.greu)lastMiss=qs.miss;view();};
+  const wrong=()=>{qs.wrong=true;miss();view();};
+  if(a==='opt'){if(I===0)done();else{qs.tried.push(I);wrong();}return;}
+  if(a==='clue'){qs.shown++;view();return;}
+  if(a==='spchk'){const v=document.getElementById('sp').value;qs.val=v;if(norm(v)===norm(q.ans))done();else wrong();return;}
+  if(a==='ml'){qs.sel=I;qs.bad=null;view();return;}
+  if(a==='mr'){if(qs.sel===null)return;if(I===qs.sel){qs.locked.push(I);qs.sel=null;qs.bad=null;qs.wrong=false;if(qs.locked.length===q.pairs.length)done();else view();}else{qs.bad=I;wrong();}return;}
+  if(a==='ord'){qs.seq.push(I);if(qs.seq.length===q.items.length){if(qs.seq.every((x,n)=>x===n))done();else wrong();}else view();return;}
+  if(a==='ordreset'){qs.seq=[];qs.wrong=false;view();return;}
+  if(a==='opdone'){qs.val=document.getElementById('op').value;qs.done=true;view();return;}
+  if(a==='lb'){qs.pick[+b.dataset.r]=b.dataset.k;qs.bad=qs.bad.filter(r=>r!==+b.dataset.r);view();return;}
+  if(a==='lbchk'){qs.bad=q.ans.map((k,r)=>qs.pick[r]===k?-1:r).filter(r=>r>=0);if(!qs.bad.length)done();else wrong();return;}
+  if(a==='tb'){qs.act=I;qs.tbBad=null;view();return;}
+  if(a==='tbo'){if(I===qs.act){qs.solved.push(I);qs.act=null;qs.tbBad=null;qs.wrong=false;if(qs.solved.length===TB.blanks.length)done();else view();}else{qs.tbBad=I;wrong();}return;}
+  if(a==='qnext'){const qi=(st.qi[cur]||0)+1;qs=null;if(qi<s.qs.length){st.qi[cur]=qi;save();view();window.scrollTo(0,0);}else{st.qi[cur]=0;st.done[cur]=true;st.pos[cur]=0;save();endView=true;view();window.scrollTo(0,0);}return;}
+});
+document.addEventListener('input',e=>{if(qs&&(e.target.id==='sp'||e.target.id==='op'))qs.val=e.target.value;});
+view();
+}
+</script>
+</body>
+</html>
